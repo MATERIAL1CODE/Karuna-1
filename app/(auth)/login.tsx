@@ -40,11 +40,12 @@ export default function Login() {
     setError(null);
     
     try {
-      console.log('Attempting to sign in with:', email);
+      console.log('🔄 Attempting to sign in with:', email);
       await signIn(email, password);
-      console.log('Sign in completed, navigation will be handled by auth context');
+      console.log('✅ Sign in completed, navigation will be handled by auth context');
+      // Don't set loading to false here - let the auth context handle it
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
       setLoading(false);
     }
@@ -117,6 +118,15 @@ export default function Login() {
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Button>
+
+                {loading && (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color="#4F46E5" />
+                    <Text variant="bodySmall" style={styles.loadingText}>
+                      Authenticating...
+                    </Text>
+                  </View>
+                )}
               </Card.Content>
             </Card>
 
@@ -209,6 +219,16 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: 8,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    gap: 8,
+  },
+  loadingText: {
+    color: '#6B7280',
   },
   footer: {
     marginTop: 32,

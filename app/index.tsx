@@ -8,26 +8,27 @@ export default function Index() {
   const { session, profile, loading } = useAuth();
 
   useEffect(() => {
-    console.log('Index useEffect - Loading:', loading, 'Session:', !!session, 'Profile:', profile?.role);
+    console.log('📱 Index useEffect - Loading:', loading, 'Session:', !!session, 'Profile:', profile?.role);
     
+    // Only proceed with navigation when not loading
     if (!loading) {
       if (!session) {
-        console.log('No session, redirecting to login');
+        console.log('🔄 No session, redirecting to login');
         router.replace('/(auth)/login');
-      } else if (profile) {
+      } else if (session && profile) {
         if (profile.role === 'citizen') {
-          console.log('Citizen user, redirecting to citizen dashboard');
+          console.log('🏠 Citizen user, redirecting to citizen dashboard');
           router.replace('/(citizen)');
         } else if (profile.role === 'facilitator') {
-          console.log('Facilitator user, redirecting to facilitator dashboard');
+          console.log('🚀 Facilitator user, redirecting to facilitator dashboard');
           router.replace('/(facilitator)');
         } else {
-          console.log('Unknown role, redirecting to login');
+          console.log('❓ Unknown role, redirecting to login');
           router.replace('/(auth)/login');
         }
-      } else {
-        console.log('No profile found, redirecting to login');
-        router.replace('/(auth)/login');
+      } else if (session && !profile) {
+        console.log('⚠️ Session exists but no profile, waiting for profile creation...');
+        // Don't redirect yet, wait for profile to be created/fetched
       }
     }
   }, [session, profile, loading]);
@@ -37,7 +38,10 @@ export default function Index() {
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#4F46E5" />
       <Text variant="bodyMedium" style={styles.loadingText}>
-        Loading...
+        {loading ? 'Loading...' : 'Redirecting...'}
+      </Text>
+      <Text variant="bodySmall" style={styles.debugText}>
+        Session: {session ? '✅' : '❌'} | Profile: {profile ? '✅' : '❌'} | Loading: {loading ? '🔄' : '✅'}
       </Text>
     </View>
   );
@@ -53,5 +57,11 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: '#6B7280',
+    fontWeight: '500',
+  },
+  debugText: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
