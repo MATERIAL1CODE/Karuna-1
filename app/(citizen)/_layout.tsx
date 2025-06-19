@@ -1,14 +1,9 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Chrome as Home, History, User } from 'lucide-react-native';
-import HomeScreen from './home';
-import ActivityScreen from './activity';
-import ProfileScreen from './profile';
-
-const Tab = createBottomTabNavigator();
+import { Tabs } from 'expo-router';
+import { Home, History, User } from 'lucide-react-native';
 
 export default function CitizenLayout() {
   return (
-    <Tab.Navigator
+    <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -29,27 +24,27 @@ export default function CitizenLayout() {
         tabBarInactiveTintColor: '#6B7280',
       }}
     >
-      <Tab.Screen
-        name="home"
-        component={HomeScreen}
+      <Tabs.Screen
+        name="index"
         options={{
+          title: 'Home',
           tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
         }}
       />
-      <Tab.Screen
+      <Tabs.Screen
         name="activity"
-        component={ActivityScreen}
         options={{
+          title: 'Activity',
           tabBarIcon: ({ size, color }) => <History size={size} color={color} />,
         }}
       />
-      <Tab.Screen
+      <Tabs.Screen
         name="profile"
-        component={ProfileScreen}
         options={{
+          title: 'Profile',
           tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
-    </Tab.Navigator>
+    </Tabs>
   );
 }

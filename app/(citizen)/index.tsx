@@ -1,71 +1,124 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
-import { Text, Card } from 'react-native-paper';
-import { router } from 'expo-router';
-import { Heart, Gift, MapPin, Users } from 'lucide-react-native';
+import {
+  Text,
+  Appbar,
+  Card,
+} from 'react-native-paper';
+import { Bell, MapPin, Gift } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
+import ReportNeedModal from '@/components/ReportNeedModal';
+import MakeDonationModal from '@/components/MakeDonationModal';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring,
+} from 'react-native-reanimated';
 
-export default function CitizenDashboard() {
+const AnimatedCard = Animated.createAnimatedComponent(Card);
+
+export default function HomeScreen() {
   const { profile } = useAuth();
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [donationModalVisible, setDonationModalVisible] = useState(false);
 
-  const handleReportNeed = () => {
-    router.push('/(citizen)/report');
+  const reportCardScale = useSharedValue(1);
+  const donationCardScale = useSharedValue(1);
+
+  const reportCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: reportCardScale.value }],
+  }));
+
+  const donationCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: donationCardScale.value }],
+  }));
+
+  const handleReportPress = () => {
+    reportCardScale.value = withSpring(0.95, {}, () => {
+      reportCardScale.value = withSpring(1);
+    });
+    setReportModalVisible(true);
   };
 
-  const handleMakeDonation = () => {
-    router.push('/(citizen)/donate');
+  const handleDonationPress = () => {
+    donationCardScale.value = withSpring(0.95, {}, () => {
+      donationCardScale.value = withSpring(1);
+    });
+    setDonationModalVisible(true);
+  };
+
+  const getUserName = () => {
+    if (profile?.full_name) {
+      return profile.full_name.split(' ')[0];
+    }
+    if (profile?.email) {
+      return profile.email.split('@')[0];
+    }
+    return 'Friend';
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <Appbar.Header style={styles.header} elevated={false}>
+        <View style={styles.headerContent}>
+          <Text variant="headlineSmall" style={styles.welcomeText}>
+            Hello, {getUserName()}! 👋
+          </Text>
+        </View>
+        <Appbar.Action 
+          icon={() => <Bell size={24} color="#6B7280" />} 
+          onPress={() => {}} 
+        />
+      </Appbar.Header>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text variant="headlineMedium" style={styles.greeting}>
-            Welcome back
+        <View style={styles.titleSection}>
+          <Text variant="headlineMedium" style={styles.mainTitle}>
+            How would you like to help today?
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
-            Ready to make a difference today?
+            Every small act of kindness makes a big difference
           </Text>
         </View>
 
         <View style={styles.actionCards}>
-          <TouchableOpacity onPress={handleReportNeed} activeOpacity={0.7}>
-            <Card style={[styles.actionCard, styles.reportCard]} mode="elevated">
+          <Pressable onPress={handleReportPress}>
+            <AnimatedCard style={[styles.actionCard, styles.reportCard, reportCardAnimatedStyle]} mode="elevated">
               <Card.Content style={styles.cardContent}>
-                <View style={styles.cardIcon}>
-                  <MapPin size={32} color="#FFFFFF" />
+                <View style={styles.iconContainer}>
+                  <MapPin size={40} color="#FFFFFF" />
                 </View>
                 <Text variant="headlineSmall" style={styles.cardTitle}>
                   Report a Need
                 </Text>
-                <Text variant="bodyMedium" style={styles.cardSubtitle}>
-                  Help us locate people or families who need assistance
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  See someone who needs help? Let us know their location.
                 </Text>
               </Card.Content>
-            </Card>
-          </TouchableOpacity>
+            </AnimatedCard>
+          </Pressable>
 
-          <TouchableOpacity onPress={handleMakeDonation} activeOpacity={0.7}>
-            <Card style={[styles.actionCard, styles.donateCard]} mode="elevated">
+          <Pressable onPress={handleDonationPress}>
+            <AnimatedCard style={[styles.actionCard, styles.donationCard, donationCardAnimatedStyle]} mode="elevated">
               <Card.Content style={styles.cardContent}>
-                <View style={styles.cardIcon}>
-                  <Gift size={32} color="#FFFFFF" />
+                <View style={styles.iconContainer}>
+                  <Gift size={40} color="#FFFFFF" />
                 </View>
                 <Text variant="headlineSmall" style={styles.cardTitle}>
                   Make a Donation
                 </Text>
-                <Text variant="bodyMedium" style={styles.cardSubtitle}>
-                  Share surplus food or resources with those in need
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  Have surplus food or resources? Connect with those who need it.
                 </Text>
               </Card.Content>
-            </Card>
-          </TouchableOpacity>
+            </AnimatedCard>
+          </Pressable>
         </View>
 
         <View style={styles.statsSection}>
@@ -76,8 +129,7 @@ export default function CitizenDashboard() {
           <View style={styles.statsGrid}>
             <Card style={styles.statCard} mode="contained">
               <Card.Content style={styles.statContent}>
-                <Heart size={24} color="#2563EB" />
-                <Text variant="headlineSmall" style={styles.statNumber}>
+                <Text variant="headlineMedium" style={styles.statNumber}>
                   1,247
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
@@ -88,8 +140,7 @@ export default function CitizenDashboard() {
 
             <Card style={styles.statCard} mode="contained">
               <Card.Content style={styles.statContent}>
-                <Users size={24} color="#06B6D4" />
-                <Text variant="headlineSmall" style={styles.statNumber}>
+                <Text variant="headlineMedium" style={styles.statNumber}>
                   89
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
@@ -100,6 +151,16 @@ export default function CitizenDashboard() {
           </View>
         </View>
       </ScrollView>
+
+      <ReportNeedModal 
+        visible={reportModalVisible}
+        onDismiss={() => setReportModalVisible(false)}
+      />
+
+      <MakeDonationModal 
+        visible={donationModalVisible}
+        onDismiss={() => setDonationModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -107,53 +168,75 @@ export default function CitizenDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    backgroundColor: '#F8F9FA',
+    elevation: 0,
+    paddingHorizontal: 8,
+  },
+  headerContent: {
+    flex: 1,
+    paddingLeft: 16,
+  },
+  welcomeText: {
+    fontWeight: '700',
+    color: '#1F2937',
   },
   scrollContent: {
     padding: 24,
   },
-  header: {
+  titleSection: {
     marginBottom: 32,
-  },
-  greeting: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: '#64748B',
-  },
-  actionCards: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  actionCard: {
-    borderRadius: 16,
-    elevation: 4,
-  },
-  reportCard: {
-    backgroundColor: '#2563EB',
-  },
-  donateCard: {
-    backgroundColor: '#06B6D4',
-  },
-  cardContent: {
-    padding: 24,
     alignItems: 'center',
   },
-  cardIcon: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  mainTitle: {
+    fontWeight: '800',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 36,
+  },
+  subtitle: {
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  actionCards: {
+    gap: 20,
+    marginBottom: 40,
+  },
+  actionCard: {
     borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  reportCard: {
+    backgroundColor: '#4F46E5',
+  },
+  donationCard: {
+    backgroundColor: '#10B981',
+  },
+  cardContent: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
   },
   cardTitle: {
     color: '#FFFFFF',
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  cardSubtitle: {
+  cardDescription: {
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 22,
@@ -162,9 +245,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   sectionTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -173,19 +257,20 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    borderRadius: 16,
   },
   statContent: {
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
   statNumber: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginTop: 8,
-    marginBottom: 4,
+    fontWeight: '800',
+    color: '#4F46E5',
+    marginBottom: 8,
   },
   statLabel: {
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
+    fontWeight: '500',
   },
 });
