@@ -11,7 +11,8 @@ import {
   Card,
   Chip,
 } from 'react-native-paper';
-import { MapPin, Gift } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { MapPin, Gift, ArrowLeft } from 'lucide-react-native';
 
 interface ActivityItem {
   id: string;
@@ -20,6 +21,7 @@ interface ActivityItem {
   subtitle: string;
   status: 'pending' | 'in_progress' | 'completed';
   date: string;
+  peopleHelped?: number;
 }
 
 const mockActivities: ActivityItem[] = [
@@ -30,6 +32,7 @@ const mockActivities: ActivityItem[] = [
     subtitle: 'Location: Nehru Place Metro Station',
     status: 'in_progress',
     date: '2 hours ago',
+    peopleHelped: 3,
   },
   {
     id: '2',
@@ -38,6 +41,7 @@ const mockActivities: ActivityItem[] = [
     subtitle: 'Item: 15 Cooked Meals',
     status: 'completed',
     date: '1 day ago',
+    peopleHelped: 15,
   },
   {
     id: '3',
@@ -46,6 +50,7 @@ const mockActivities: ActivityItem[] = [
     subtitle: 'Location: Lajpat Nagar Market',
     status: 'completed',
     date: '2 days ago',
+    peopleHelped: 5,
   },
   {
     id: '4',
@@ -62,6 +67,7 @@ const mockActivities: ActivityItem[] = [
     subtitle: 'Location: Saket District Centre',
     status: 'completed',
     date: '1 week ago',
+    peopleHelped: 2,
   },
 ];
 
@@ -77,7 +83,7 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
       case 'in_progress':
         return '#F59E0B';
       default:
-        return '#6B7280';
+        return '#64748B';
     }
   };
 
@@ -103,25 +109,34 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
             <IconComponent size={24} color={iconColor} />
           </View>
           <View style={styles.activityInfo}>
-            <Text variant="titleMedium" style={styles.activityTitle}>
-              {item.title}
-            </Text>
+            <View style={styles.titleRow}>
+              <Text variant="titleMedium" style={styles.activityTitle}>
+                {item.title}
+              </Text>
+              <Chip
+                style={[
+                  styles.statusChip,
+                  { backgroundColor: getStatusColor(item.status) },
+                ]}
+                textStyle={styles.statusText}
+              >
+                {getStatusText(item.status)}
+              </Chip>
+            </View>
             <Text variant="bodyMedium" style={styles.activitySubtitle}>
               {item.subtitle}
             </Text>
-            <Text variant="bodySmall" style={styles.activityDate}>
-              {item.date}
-            </Text>
+            <View style={styles.bottomRow}>
+              <Text variant="bodySmall" style={styles.activityDate}>
+                {item.date}
+              </Text>
+              {item.peopleHelped && item.status === 'completed' && (
+                <Text variant="bodySmall" style={styles.helpedText}>
+                  {item.peopleHelped} people helped
+                </Text>
+              )}
+            </View>
           </View>
-          <Chip
-            style={[
-              styles.statusChip,
-              { backgroundColor: getStatusColor(item.status) },
-            ]}
-            textStyle={styles.statusText}
-          >
-            {getStatusText(item.status)}
-          </Chip>
         </View>
       </Card.Content>
     </Card>
@@ -133,16 +148,29 @@ export default function ActivityScreen() {
     <ActivityItemCard item={item} />
   );
 
+  const totalPeopleHelped = mockActivities
+    .filter(item => item.status === 'completed' && item.peopleHelped)
+    .reduce((sum, item) => sum + (item.peopleHelped || 0), 0);
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Action 
+          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          onPress={() => router.back()} 
+        />
         <Appbar.Content title="My Activity" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
       <View style={styles.content}>
-        <Text variant="bodyLarge" style={styles.subtitle}>
-          Track your contributions to the community
-        </Text>
+        <View style={styles.summaryCard}>
+          <Text variant="titleMedium" style={styles.summaryTitle}>
+            Your Impact
+          </Text>
+          <Text variant="bodyMedium" style={styles.summaryText}>
+            You've helped {totalPeopleHelped} people through your contributions
+          </Text>
+        </View>
 
         <FlatList
           data={mockActivities}
@@ -152,7 +180,7 @@ export default function ActivityScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MapPin size={48} color="#6B7280" />
+              <MapPin size={48} color="#64748B" />
               <Text variant="titleMedium" style={styles.emptyTitle}>
                 No activity yet
               </Text>
@@ -170,24 +198,38 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
     elevation: 0,
   },
   headerTitle: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
   },
-  subtitle: {
-    color: '#6B7280',
+  summaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 24,
-    textAlign: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  summaryTitle: {
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  summaryText: {
+    color: '#64748B',
   },
   listContent: {
     paddingBottom: 24,
@@ -203,35 +245,51 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 16,
   },
   iconContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F1F5F9',
     borderRadius: 12,
     padding: 12,
   },
   activityInfo: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
   activityTitle: {
     fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 4,
+    color: '#1E293B',
+    flex: 1,
+    marginRight: 8,
   },
   activitySubtitle: {
-    color: '#6B7280',
-    marginBottom: 4,
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   activityDate: {
     color: '#9CA3AF',
+  },
+  helpedText: {
+    color: '#10B981',
+    fontWeight: '600',
   },
   statusChip: {
     alignSelf: 'flex-start',
   },
   statusText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
   },
   emptyContainer: {
@@ -240,13 +298,13 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyTitle: {
-    color: '#1F2937',
+    color: '#1E293B',
     marginTop: 16,
     marginBottom: 8,
     fontWeight: '600',
   },
   emptySubtitle: {
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
   },
 });

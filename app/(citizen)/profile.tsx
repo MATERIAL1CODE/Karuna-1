@@ -43,25 +43,42 @@ export default function ProfileScreen() {
         <Card style={styles.statsCard} mode="elevated">
           <Card.Content>
             <Text variant="titleMedium" style={styles.statsTitle}>
-              Your Impact
+              Your Impact This Month
             </Text>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Heart size={20} color="#4F46E5" />
-                <Text variant="labelLarge" style={styles.statNumber}>12</Text>
+                <View style={styles.statIconContainer}>
+                  <Heart size={20} color="#4F46E5" />
+                </View>
+                <Text variant="titleMedium" style={styles.statNumber}>12</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
               </View>
               <View style={styles.statItem}>
-                <Heart size={20} color="#10B981" />
-                <Text variant="labelLarge" style={styles.statNumber}>8</Text>
+                <View style={styles.statIconContainer}>
+                  <Heart size={20} color="#10B981" />
+                </View>
+                <Text variant="titleMedium" style={styles.statNumber}>8</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
               </View>
               <View style={styles.statItem}>
-                <Heart size={20} color="#F59E0B" />
-                <Text variant="labelLarge" style={styles.statNumber}>45</Text>
+                <View style={styles.statIconContainer}>
+                  <Heart size={20} color="#F59E0B" />
+                </View>
+                <Text variant="titleMedium" style={styles.statNumber}>45</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
               </View>
             </View>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.impactCard} mode="elevated">
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.impactTitle}>
+              Community Impact
+            </Text>
+            <Text variant="bodyMedium" style={styles.impactText}>
+              Thank you for being an active member of our community! Your reports and donations have made a real difference in people's lives.
+            </Text>
           </Card.Content>
         </Card>
 
@@ -69,26 +86,42 @@ export default function ProfileScreen() {
           <List.Section>
             <List.Item
               title="Account Settings"
-              left={() => <Settings size={20} color="#6B7280" />}
+              description="Update your profile and preferences"
+              left={() => <Settings size={20} color="#64748B" />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
+              descriptionStyle={styles.menuItemDescription}
+            />
+            <Divider />
+            <List.Item
+              title="My Activity"
+              description="View your reports and donations"
+              left={() => <List.Icon icon="history" />}
+              right={() => <List.Icon icon="chevron-right" />}
+              onPress={() => router.push('/(citizen)/activity')}
+              titleStyle={styles.menuItemTitle}
+              descriptionStyle={styles.menuItemDescription}
             />
             <Divider />
             <List.Item
               title="Help & Support"
-              left={() => <HelpCircle size={20} color="#6B7280" />}
+              description="Get help or contact support"
+              left={() => <HelpCircle size={20} color="#64748B" />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
+              descriptionStyle={styles.menuItemDescription}
             />
             <Divider />
             <List.Item
               title="About Impact"
-              left={() => <Info size={20} color="#6B7280" />}
+              description="Learn more about our mission"
+              left={() => <Info size={20} color="#64748B" />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
+              descriptionStyle={styles.menuItemDescription}
             />
           </List.Section>
         </Card>
@@ -100,7 +133,7 @@ export default function ProfileScreen() {
           contentStyle={styles.buttonContent}
           textColor="#4F46E5"
         >
-          Switch Role
+          Switch to Facilitator Mode
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -110,15 +143,15 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
     elevation: 0,
   },
   headerTitle: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
   },
   scrollContent: {
     padding: 24,
@@ -135,7 +168,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
     marginBottom: 4,
   },
   role: {
@@ -150,7 +183,7 @@ const styles = StyleSheet.create({
   },
   statsTitle: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
     marginBottom: 20,
   },
   statsRow: {
@@ -161,13 +194,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  statIconContainer: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 8,
+  },
   statNumber: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
   },
   statLabel: {
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
+  },
+  impactCard: {
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+    borderRadius: 16,
+    elevation: 2,
+  },
+  impactTitle: {
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 12,
+  },
+  impactText: {
+    color: '#64748B',
+    lineHeight: 20,
   },
   menuCard: {
     backgroundColor: '#FFFFFF',
@@ -176,8 +229,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   menuItemTitle: {
-    color: '#1F2937',
-    fontWeight: '500',
+    color: '#1E293B',
+    fontWeight: '600',
+  },
+  menuItemDescription: {
+    color: '#64748B',
+    fontSize: 12,
   },
   switchRoleButton: {
     borderColor: '#4F46E5',
