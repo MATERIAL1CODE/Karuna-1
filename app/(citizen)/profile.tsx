@@ -15,7 +15,7 @@ import {
   Appbar,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Heart, Settings, LogOut, HelpCircle, Info } from 'lucide-react-native';
+import { User, Heart, Settings, LogOut, CircleHelp as HelpCircle, Info } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileScreen() {
