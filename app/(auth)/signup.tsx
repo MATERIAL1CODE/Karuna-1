@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Platform } from 'react';
 import {
   View,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
 import {
@@ -15,21 +14,54 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 import { Link, router } from 'expo-router';
-import { Heart, CircleCheck as CheckCircle } from 'lucide-react-native';
+import { Heart, CircleCheck as CheckCircle, Smartphone, Mail } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/supabase';
 
+// Import OTP verification only for mobile platforms
+let useOtpVerify: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    const otpVerify = require('react-native-otp-verify');
+    useOtpVerify = otpVerify.useOtpVerify;
+  } catch (error) {
+    console.log('OTP verification not available on this platform');
+  }
+}
+
 export default function Signup() {
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [role, setRole] = useState<UserRole>('citizen');
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, sendOtp, verifyOtp } = useAuth();
 
-  const validateForm = () => {
+  // Auto-fill OTP on mobile platforms
+  useEffect(() => {
+    if (Platform.OS !== 'web' && useOtpVerify && otpSent) {
+      const { hash, otp: autoOtp, message, timeoutError, stopListener, startListener } = useOtpVerify({
+        numberOfDigits: 6,
+      });
+
+      if (autoOtp) {
+        setOtp(autoOtp);
+      }
+
+      return () => {
+        stopListener();
+      };
+    }
+  }, [otpSent]);
+
+  const validateEmailForm = () => {
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return false;
@@ -53,8 +85,24 @@ export default function Signup() {
     return true;
   };
 
-  const handleSignup = async () => {
-    if (!validateForm()) {
+  const validatePhoneForm = () => {
+    if (!phoneNumber) {
+      setError('Please enter your phone number');
+      return false;
+    }
+
+    // Basic Indian phone number validation
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phoneNumber.replace(/\D/g, '').slice(-10))) {
+      setError('Please enter a valid 10-digit Indian phone number');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleEmailSignup = async () => {
+    if (!validateEmailForm()) {
       return;
     }
 
@@ -70,9 +118,8 @@ export default function Signup() {
         router.replace('/(auth)/login');
       }, 2000);
     } catch (error: any) {
-      console.error('Signup error:', error);
+      console.error('Email signup error:', error);
       
-      // Handle specific error cases
       if (error.message?.includes('User already registered')) {
         setError('An account with this email already exists. Please sign in instead.');
       } else if (error.message?.includes('Password should be at least')) {
@@ -82,6 +129,50 @@ export default function Signup() {
       } else {
         setError(error.message || 'Signup failed. Please try again.');
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!validatePhoneForm()) {
+      return;
+    }
+
+    setOtpLoading(true);
+    setError(null);
+    
+    try {
+      await sendOtp(phoneNumber);
+      setOtpSent(true);
+    } catch (error: any) {
+      console.error('OTP send error:', error);
+      setError(error.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length !== 6) {
+      setError('Please enter the 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await verifyOtp(phoneNumber, otp, role);
+      setSuccess(true);
+      
+      // Redirect to main app
+      setTimeout(() => {
+        router.replace('/');
+      }, 2000);
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+      setError(error.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -98,11 +189,11 @@ export default function Signup() {
             Account Created Successfully!
           </Text>
           <Text variant="bodyLarge" style={styles.successText}>
-            Welcome to Impact! Your account is ready to use. You can now sign in and start making a difference in your community.
+            Welcome to Impact! Your account is ready to use. You can now start making a difference in your community.
           </Text>
           <View style={styles.successNote}>
             <Text variant="bodySmall" style={styles.successNoteText}>
-              🚀 Prototype Mode: No email confirmation required
+              🚀 {authMethod === 'phone' ? 'Phone verified successfully' : 'Prototype Mode: No email confirmation required'}
             </Text>
           </View>
         </View>
@@ -130,7 +221,7 @@ export default function Signup() {
               </Text>
               <View style={styles.prototypeBadge}>
                 <Text variant="bodySmall" style={styles.prototypeBadgeText}>
-                  🚀 Prototype Mode - Instant Access
+                  🚀 Multiple Signup Options Available
                 </Text>
               </View>
             </View>
@@ -165,62 +256,179 @@ export default function Signup() {
                     },
                   ]}
                   style={styles.segmentedButtons}
-                  disabled={loading}
+                  disabled={loading || otpLoading}
                 />
 
-                <TextInput
-                  label="Email address"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
+                <Text variant="labelLarge" style={styles.authMethodLabel}>
+                  Signup method:
+                </Text>
+                <SegmentedButtons
+                  value={authMethod}
+                  onValueChange={(value) => {
+                    setAuthMethod(value as 'email' | 'phone');
                     setError(null);
+                    setOtpSent(false);
+                    setOtp('');
                   }}
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  style={styles.input}
-                  disabled={loading}
+                  buttons={[
+                    {
+                      value: 'email',
+                      label: 'Email',
+                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'email' ? styles.selectedSegment : undefined,
+                    },
+                    {
+                      value: 'phone',
+                      label: 'Phone',
+                      icon: () => <Smartphone size={16} color={authMethod === 'phone' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'phone' ? styles.selectedSegment : undefined,
+                    },
+                  ]}
+                  style={styles.segmentedButtons}
+                  disabled={loading || otpLoading}
                 />
 
-                <TextInput
-                  label="Password"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    setError(null);
-                  }}
-                  mode="outlined"
-                  secureTextEntry
-                  autoComplete="password-new"
-                  style={styles.input}
-                  disabled={loading}
-                />
+                {authMethod === 'email' ? (
+                  <>
+                    <TextInput
+                      label="Email address"
+                      value={email}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      style={styles.input}
+                      disabled={loading}
+                    />
 
-                <TextInput
-                  label="Confirm Password"
-                  value={confirmPassword}
-                  onChangeText={(text) => {
-                    setConfirmPassword(text);
-                    setError(null);
-                  }}
-                  mode="outlined"
-                  secureTextEntry
-                  autoComplete="password-new"
-                  style={styles.input}
-                  disabled={loading}
-                />
+                    <TextInput
+                      label="Password"
+                      value={password}
+                      onChangeText={(text) => {
+                        setPassword(text);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      secureTextEntry
+                      autoComplete="password-new"
+                      style={styles.input}
+                      disabled={loading}
+                    />
 
-                <Button
-                  mode="contained"
-                  onPress={handleSignup}
-                  loading={loading}
-                  disabled={loading || !email || !password || !confirmPassword}
-                  style={styles.button}
-                  contentStyle={styles.buttonContent}
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
+                    <TextInput
+                      label="Confirm Password"
+                      value={confirmPassword}
+                      onChangeText={(text) => {
+                        setConfirmPassword(text);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      secureTextEntry
+                      autoComplete="password-new"
+                      style={styles.input}
+                      disabled={loading}
+                    />
+
+                    <Button
+                      mode="contained"
+                      onPress={handleEmailSignup}
+                      loading={loading}
+                      disabled={loading || !email || !password || !confirmPassword}
+                      style={styles.button}
+                      contentStyle={styles.buttonContent}
+                    >
+                      {loading ? 'Creating Account...' : 'Create Account'}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <TextInput
+                      label="Phone number"
+                      value={phoneNumber}
+                      onChangeText={(text) => {
+                        // Remove non-numeric characters and limit to 10 digits
+                        const cleaned = text.replace(/\D/g, '').slice(0, 10);
+                        setPhoneNumber(cleaned);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      placeholder="9876543210"
+                      style={styles.input}
+                      disabled={loading || otpLoading || otpSent}
+                      left={<TextInput.Affix text="+91 " />}
+                    />
+
+                    {!otpSent ? (
+                      <Button
+                        mode="contained"
+                        onPress={handleSendOtp}
+                        loading={otpLoading}
+                        disabled={otpLoading || !phoneNumber}
+                        style={styles.button}
+                        contentStyle={styles.buttonContent}
+                      >
+                        {otpLoading ? 'Sending OTP...' : 'Send OTP'}
+                      </Button>
+                    ) : (
+                      <>
+                        <TextInput
+                          label="Enter OTP"
+                          value={otp}
+                          onChangeText={(text) => {
+                            // Only allow numeric input and limit to 6 digits
+                            const cleaned = text.replace(/\D/g, '').slice(0, 6);
+                            setOtp(cleaned);
+                            setError(null);
+                          }}
+                          mode="outlined"
+                          keyboardType="number-pad"
+                          placeholder="123456"
+                          style={styles.input}
+                          disabled={loading}
+                          maxLength={6}
+                        />
+
+                        <View style={styles.otpActions}>
+                          <Button
+                            mode="outlined"
+                            onPress={() => {
+                              setOtpSent(false);
+                              setOtp('');
+                              setError(null);
+                            }}
+                            disabled={loading}
+                            style={styles.resendButton}
+                          >
+                            Change Number
+                          </Button>
+
+                          <Button
+                            mode="contained"
+                            onPress={handleVerifyOtp}
+                            loading={loading}
+                            disabled={loading || otp.length !== 6}
+                            style={styles.verifyButton}
+                            contentStyle={styles.buttonContent}
+                          >
+                            {loading ? 'Verifying...' : 'Verify & Create Account'}
+                          </Button>
+                        </View>
+
+                        <Text variant="bodySmall" style={styles.otpNote}>
+                          {Platform.OS !== 'web' ? 
+                            'OTP will be auto-filled when received' : 
+                            'Enter the 6-digit code sent to your phone'
+                          }
+                        </Text>
+                      </>
+                    )}
+                  </>
+                )}
               </Card.Content>
             </Card>
 
@@ -316,6 +524,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontWeight: '600',
   },
+  authMethodLabel: {
+    color: '#1E293B',
+    marginBottom: 12,
+    marginTop: 16,
+    fontWeight: '600',
+  },
   segmentedButtons: {
     marginBottom: 24,
   },
@@ -331,6 +545,26 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: 8,
+  },
+  otpActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  resendButton: {
+    flex: 1,
+    borderColor: '#64748B',
+    borderRadius: 12,
+  },
+  verifyButton: {
+    flex: 2,
+    borderRadius: 12,
+  },
+  otpNote: {
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
   },
   footer: {
     marginTop: 32,

@@ -12,20 +12,25 @@ import {
   TextInput,
   Button,
   Card,
+  SegmentedButtons,
 } from 'react-native-paper';
 import { Link } from 'expo-router';
-import { Heart } from 'lucide-react-native';
+import { Heart, Smartphone, Mail } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const { signIn, sendOtp, verifyOtp } = useAuth();
 
-  const handleLogin = async () => {
-    // Prevent multiple submissions
+  const handleEmailLogin = async () => {
     if (loading) {
       console.log('⚠️ Login: Already in progress, ignoring');
       return;
@@ -48,10 +53,56 @@ export default function Login() {
     try {
       await signIn(email, password);
       console.log('✅ Login: Sign in completed successfully');
-      // Navigation will be handled by index.tsx
     } catch (error: any) {
       console.error('❌ Login: Error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!phoneNumber) {
+      setError('Please enter your phone number');
+      return;
+    }
+
+    // Basic Indian phone number validation
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phoneNumber.replace(/\D/g, '').slice(-10))) {
+      setError('Please enter a valid 10-digit Indian phone number');
+      return;
+    }
+
+    setOtpLoading(true);
+    setError(null);
+    
+    try {
+      await sendOtp(phoneNumber);
+      setOtpSent(true);
+    } catch (error: any) {
+      console.error('OTP send error:', error);
+      setError(error.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length !== 6) {
+      setError('Please enter the 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await verifyOtp(phoneNumber, otp);
+      console.log('✅ Login: OTP verification successful');
+    } catch (error: any) {
+      console.error('❌ Login: OTP verification error:', error);
+      setError(error.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -85,45 +136,153 @@ export default function Login() {
                   </View>
                 )}
 
-                <TextInput
-                  label="Email address"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
+                <Text variant="labelLarge" style={styles.authMethodLabel}>
+                  Sign in with:
+                </Text>
+                <SegmentedButtons
+                  value={authMethod}
+                  onValueChange={(value) => {
+                    setAuthMethod(value as 'email' | 'phone');
                     setError(null);
+                    setOtpSent(false);
+                    setOtp('');
                   }}
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  style={styles.input}
-                  disabled={loading}
+                  buttons={[
+                    {
+                      value: 'email',
+                      label: 'Email',
+                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'email' ? styles.selectedSegment : undefined,
+                    },
+                    {
+                      value: 'phone',
+                      label: 'Phone',
+                      icon: () => <Smartphone size={16} color={authMethod === 'phone' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'phone' ? styles.selectedSegment : undefined,
+                    },
+                  ]}
+                  style={styles.segmentedButtons}
+                  disabled={loading || otpLoading}
                 />
 
-                <TextInput
-                  label="Password"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    setError(null);
-                  }}
-                  mode="outlined"
-                  secureTextEntry
-                  autoComplete="password"
-                  style={styles.input}
-                  disabled={loading}
-                />
+                {authMethod === 'email' ? (
+                  <>
+                    <TextInput
+                      label="Email address"
+                      value={email}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      style={styles.input}
+                      disabled={loading}
+                    />
 
-                <Button
-                  mode="contained"
-                  onPress={handleLogin}
-                  loading={loading}
-                  disabled={loading || !email || !password}
-                  style={styles.button}
-                  contentStyle={styles.buttonContent}
-                >
-                  {loading ? 'Signing In...' : 'Sign In'}
-                </Button>
+                    <TextInput
+                      label="Password"
+                      value={password}
+                      onChangeText={(text) => {
+                        setPassword(text);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      secureTextEntry
+                      autoComplete="password"
+                      style={styles.input}
+                      disabled={loading}
+                    />
+
+                    <Button
+                      mode="contained"
+                      onPress={handleEmailLogin}
+                      loading={loading}
+                      disabled={loading || !email || !password}
+                      style={styles.button}
+                      contentStyle={styles.buttonContent}
+                    >
+                      {loading ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <TextInput
+                      label="Phone number"
+                      value={phoneNumber}
+                      onChangeText={(text) => {
+                        const cleaned = text.replace(/\D/g, '').slice(0, 10);
+                        setPhoneNumber(cleaned);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      placeholder="9876543210"
+                      style={styles.input}
+                      disabled={loading || otpLoading || otpSent}
+                      left={<TextInput.Affix text="+91 " />}
+                    />
+
+                    {!otpSent ? (
+                      <Button
+                        mode="contained"
+                        onPress={handleSendOtp}
+                        loading={otpLoading}
+                        disabled={otpLoading || !phoneNumber}
+                        style={styles.button}
+                        contentStyle={styles.buttonContent}
+                      >
+                        {otpLoading ? 'Sending OTP...' : 'Send OTP'}
+                      </Button>
+                    ) : (
+                      <>
+                        <TextInput
+                          label="Enter OTP"
+                          value={otp}
+                          onChangeText={(text) => {
+                            const cleaned = text.replace(/\D/g, '').slice(0, 6);
+                            setOtp(cleaned);
+                            setError(null);
+                          }}
+                          mode="outlined"
+                          keyboardType="number-pad"
+                          placeholder="123456"
+                          style={styles.input}
+                          disabled={loading}
+                          maxLength={6}
+                        />
+
+                        <View style={styles.otpActions}>
+                          <Button
+                            mode="outlined"
+                            onPress={() => {
+                              setOtpSent(false);
+                              setOtp('');
+                              setError(null);
+                            }}
+                            disabled={loading}
+                            style={styles.resendButton}
+                          >
+                            Change Number
+                          </Button>
+
+                          <Button
+                            mode="contained"
+                            onPress={handleVerifyOtp}
+                            loading={loading}
+                            disabled={loading || otp.length !== 6}
+                            style={styles.verifyButton}
+                            contentStyle={styles.buttonContent}
+                          >
+                            {loading ? 'Verifying...' : 'Verify & Sign In'}
+                          </Button>
+                        </View>
+                      </>
+                    )}
+                  </>
+                )}
               </Card.Content>
             </Card>
 
@@ -207,6 +366,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  authMethodLabel: {
+    color: '#1F2937',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  segmentedButtons: {
+    marginBottom: 24,
+  },
+  selectedSegment: {
+    backgroundColor: '#4F46E5',
+  },
   input: {
     marginBottom: 16,
   },
@@ -216,6 +386,20 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: 8,
+  },
+  otpActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  resendButton: {
+    flex: 1,
+    borderColor: '#64748B',
+    borderRadius: 12,
+  },
+  verifyButton: {
+    flex: 2,
+    borderRadius: 12,
   },
   footer: {
     marginTop: 32,

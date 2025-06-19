@@ -16,9 +16,9 @@ export type UserRole = 'citizen' | 'facilitator';
 export interface UserProfile {
   id: string;
   email: string;
+  phone?: string;
   role: UserRole;
   full_name?: string;
-  phone?: string;
   created_at: string;
   updated_at: string;
 }

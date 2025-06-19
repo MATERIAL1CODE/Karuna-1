@@ -14,6 +14,9 @@ config.resolver.alias = {
 };
 
 // Ensure proper module resolution
-config.resolver.sourceExts = [...config.resolver.sourceExts, 'jsx', 'js', 'ts', 'tsx'];
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'jsx', 'js', 'ts', 'tsx', 'cjs'];
+
+// Firebase/Supabase compatibility fixes for Expo SDK 53
+config.resolver.unstable_enablePackageExports = false;
 
 module.exports = config;

@@ -9,6 +9,8 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, role: UserRole) => Promise<void>;
+  sendOtp: (phoneNumber: string) => Promise<void>;
+  verifyOtp: (phoneNumber: string, otp: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -51,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(session?.user ?? null);
 
     if (session?.user) {
-      console.log('🔄 AuthProvider: Fetching profile for:', session.user.email);
+      console.log('🔄 AuthProvider: Fetching profile for:', session.user.email || session.user.phone);
       await fetchProfile(session.user);
     } else {
       console.log('🔄 AuthProvider: No session, clearing profile');
@@ -76,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data) {
-        console.log('✅ AuthProvider: Profile found:', data.email, data.role);
+        console.log('✅ AuthProvider: Profile found:', data.email || data.phone, data.role);
         setProfile(data);
       } else {
         console.log('🔄 AuthProvider: No profile found, creating one...');
@@ -103,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const newProfile = {
         id: user.id,
         email: user.email || '',
+        phone: user.phone || '',
         role: (user.user_metadata?.role as UserRole) || 'citizen',
       };
 
@@ -127,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const fallbackProfile: UserProfile = {
         id: user.id,
         email: user.email || '',
+        phone: user.phone || '',
         role: 'citizen',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -170,6 +174,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('✅ AuthProvider: Sign up successful');
   };
 
+  const sendOtp = async (phoneNumber: string) => {
+    console.log('🔄 AuthProvider: Sending OTP to:', phoneNumber);
+    
+    // Format phone number to E.164 format if not already
+    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+    
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone,
+    });
+
+    if (error) {
+      console.error('❌ AuthProvider: OTP send error:', error);
+      throw error;
+    }
+
+    console.log('✅ AuthProvider: OTP sent successfully');
+  };
+
+  const verifyOtp = async (phoneNumber: string, otp: string, role: UserRole = 'citizen') => {
+    console.log('🔄 AuthProvider: Verifying OTP for:', phoneNumber);
+    
+    // Format phone number to E.164 format if not already
+    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+    
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: formattedPhone,
+      token: otp,
+      type: 'sms',
+      options: {
+        data: { role },
+      },
+    });
+
+    if (error) {
+      console.error('❌ AuthProvider: OTP verification error:', error);
+      throw error;
+    }
+
+    console.log('✅ AuthProvider: OTP verification successful');
+    return data;
+  };
+
   const signOut = async () => {
     console.log('🔄 AuthProvider: Sign out attempt');
     
@@ -189,6 +235,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signIn,
     signUp,
+    sendOtp,
+    verifyOtp,
     signOut,
   };
 
@@ -197,6 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     hasProfile: !!profile,
     loading,
     userEmail: user?.email,
+    userPhone: user?.phone,
     profileRole: profile?.role,
   });
 
