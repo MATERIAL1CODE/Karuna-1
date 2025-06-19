@@ -176,17 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Sign up successful:', data.user?.email);
       
-      // In prototype mode, user should be immediately available
-      if (data.user) {
-        // Wait a moment for the trigger to create the profile
-        setTimeout(async () => {
-          try {
-            await fetchProfile(data.user!.id);
-          } catch (profileError) {
-            console.error('Error creating profile after signup:', profileError);
-          }
-        }, 1000);
-      }
+      // The onAuthStateChange listener will automatically handle profile creation
+      // No need for setTimeout - let the auth flow handle it naturally
       
     } catch (error) {
       console.error('Sign up error:', error);
