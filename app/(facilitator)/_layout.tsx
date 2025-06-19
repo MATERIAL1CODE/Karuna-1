@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { MapPin, CheckCircle, User } from 'lucide-react-native';
+import { MapPin, CircleCheck as CheckCircle, User } from 'lucide-react-native';
 
 export default function FacilitatorLayout() {
   return (
