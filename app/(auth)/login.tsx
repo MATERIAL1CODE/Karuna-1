@@ -20,10 +20,17 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, loading } = useAuth();
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
+    // Prevent multiple submissions
+    if (loading) {
+      console.log('⚠️ Login: Already in progress, ignoring');
+      return;
+    }
+
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
@@ -34,16 +41,19 @@ export default function Login() {
       return;
     }
 
+    console.log('🔄 Login: Starting login process...');
+    setLoading(true);
     setError(null);
     
     try {
-      console.log('🔄 Starting login process...');
       await signIn(email, password);
-      console.log('✅ Login completed successfully');
-      // Navigation will be handled automatically by index.tsx
+      console.log('✅ Login: Sign in completed successfully');
+      // Navigation will be handled by index.tsx
     } catch (error: any) {
-      console.error('❌ Login error:', error);
+      console.error('❌ Login: Error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 

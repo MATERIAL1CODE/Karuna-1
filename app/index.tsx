@@ -8,31 +8,32 @@ export default function Index() {
   const { session, profile, loading } = useAuth();
 
   useEffect(() => {
-    // Only navigate when we have complete auth state (not loading)
+    console.log('🔄 Index: Auth state check', {
+      loading,
+      hasSession: !!session,
+      hasProfile: !!profile,
+      profileRole: profile?.role,
+    });
+
+    // Only navigate when we're not loading
     if (!loading) {
-      console.log('📱 Navigation check - Session:', !!session, 'Profile:', profile?.role);
-      
       if (session && profile) {
-        // We have both session and profile - navigate to appropriate dashboard
+        console.log('✅ Index: User authenticated, navigating to dashboard');
         if (profile.role === 'citizen') {
-          console.log('🏠 Navigating to citizen dashboard');
           router.replace('/(citizen)');
         } else if (profile.role === 'facilitator') {
-          console.log('🚀 Navigating to facilitator dashboard');
           router.replace('/(facilitator)');
         } else {
-          console.log('❓ Unknown role, going to login');
+          console.log('❓ Index: Unknown role, going to login');
           router.replace('/(auth)/login');
         }
       } else {
-        // No session or profile - go to login
-        console.log('🔄 No auth, going to login');
+        console.log('🔄 Index: No auth, going to login');
         router.replace('/(auth)/login');
       }
     }
   }, [loading, session, profile]);
 
-  // Show loading screen while determining auth state
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#4F46E5" />
