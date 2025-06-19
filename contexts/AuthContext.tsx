@@ -44,7 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && event === 'SIGNED_IN') {
+        if (session?.user) {
+          // Always fetch/create profile when user signs in
           await fetchProfile(session.user.id);
         } else {
           setProfile(null);
@@ -70,9 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error fetching profile:', error);
         
-        // If profile doesn't exist, try to create it
+        // If profile doesn't exist, create it
         if (error.code === 'PGRST116') {
           console.log('Profile not found, creating new profile...');
+          await createProfile(userId);
+        } else {
+          // For other errors, still try to create profile
+          console.log('Profile fetch error, attempting to create profile...');
           await createProfile(userId);
         }
       } else if (data) {
@@ -81,6 +86,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
+      // Even if there's an error, try to create the profile
+      try {
+        await createProfile(userId);
+      } catch (createError) {
+        console.error('Failed to create profile as fallback:', createError);
+      }
     } finally {
       setLoading(false);
     }
@@ -88,20 +99,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const createProfile = async (userId: string) => {
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) return;
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        throw new Error('No user data available');
+      }
 
       const newProfile = {
         id: userId,
-        email: user.data.user.email || '',
-        role: (user.data.user.user_metadata?.role as UserRole) || 'citizen',
+        email: userData.user.email || '',
+        role: (userData.user.user_metadata?.role as UserRole) || 'citizen',
       };
 
       console.log('Creating profile:', newProfile);
 
       const { data, error } = await supabase
         .from('profiles')
-        .insert([newProfile])
+        .upsert([newProfile], { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        })
         .select()
         .single();
 
@@ -111,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data) {
-        console.log('Profile created successfully:', data);
+        console.log('Profile created/updated successfully:', data);
         setProfile(data);
       }
     } catch (error) {
@@ -132,6 +148,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Sign in successful:', data.user?.email);
+      
+      // Profile will be fetched automatically by the auth state change listener
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -147,6 +165,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             role: role,
           },
+          // For prototype mode - no email confirmation required
+          emailRedirectTo: undefined,
         },
       });
 
@@ -156,20 +176,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Sign up successful:', data.user?.email);
       
-      // If user is immediately confirmed (no email confirmation required)
-      if (data.user && !data.user.email_confirmed_at) {
-        console.log('User created but email not confirmed');
+      // In prototype mode, user should be immediately available
+      if (data.user) {
+        // Wait a moment for the trigger to create the profile
+        setTimeout(async () => {
+          try {
+            await fetchProfile(data.user!.id);
+          } catch (profileError) {
+            console.error('Error creating profile after signup:', profileError);
+          }
+        }, 1000);
       }
       
-      // Try to create profile immediately if user is confirmed
-      if (data.user && data.user.email_confirmed_at) {
-        try {
-          await createProfile(data.user.id);
-        } catch (profileError) {
-          console.error('Error creating profile after signup:', profileError);
-          // Don't throw here, as the user was created successfully
-        }
-      }
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;

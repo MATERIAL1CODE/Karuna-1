@@ -65,10 +65,10 @@ export default function Signup() {
       await signUp(email, password, role);
       setSuccess(true);
       
-      // Auto-navigate to login after successful signup
+      // For prototype mode - redirect immediately to login
       setTimeout(() => {
         router.replace('/(auth)/login');
-      }, 3000);
+      }, 2000);
     } catch (error: any) {
       console.error('Signup error:', error);
       
@@ -98,11 +98,11 @@ export default function Signup() {
             Account Created Successfully!
           </Text>
           <Text variant="bodyLarge" style={styles.successText}>
-            Welcome to Impact! You can now sign in with your credentials and start making a difference in your community.
+            Welcome to Impact! Your account is ready to use. You can now sign in and start making a difference in your community.
           </Text>
           <View style={styles.successNote}>
             <Text variant="bodySmall" style={styles.successNoteText}>
-              Redirecting to sign in...
+              🚀 Prototype Mode: No email confirmation required
             </Text>
           </View>
         </View>
@@ -128,6 +128,11 @@ export default function Signup() {
               <Text variant="bodyLarge" style={styles.subtitle}>
                 Create your account to start making a difference
               </Text>
+              <View style={styles.prototypeBadge}>
+                <Text variant="bodySmall" style={styles.prototypeBadgeText}>
+                  🚀 Prototype Mode - Instant Access
+                </Text>
+              </View>
             </View>
 
             <Card style={styles.card} mode="elevated">
@@ -271,6 +276,19 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 24,
+    marginBottom: 12,
+  },
+  prototypeBadge: {
+    backgroundColor: '#F0F9FF',
+    borderColor: '#0EA5E9',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  prototypeBadgeText: {
+    color: '#0369A1',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#FFFFFF',
