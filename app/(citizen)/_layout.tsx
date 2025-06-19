@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, History, User } from 'lucide-react-native';
+import { Chrome as Home, History, User } from 'lucide-react-native';
 import HomeScreen from './home';
 import ActivityScreen from './activity';
 import ProfileScreen from './profile';
