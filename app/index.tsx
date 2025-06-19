@@ -27,8 +27,14 @@ export default function Index() {
           router.replace('/(auth)/login');
         }
       } else if (session && !profile) {
-        console.log('⚠️ Session exists but no profile, this should resolve automatically...');
-        // The auth context will handle profile creation
+        console.log('⚠️ Session exists but no profile, waiting for profile creation...');
+        // Give it a moment for profile creation, then redirect to login if still no profile
+        setTimeout(() => {
+          if (!profile) {
+            console.log('❌ Profile creation failed, redirecting to login');
+            router.replace('/(auth)/login');
+          }
+        }, 3000);
       }
     }
   }, [session, profile, loading]);

@@ -14,7 +14,7 @@ import {
   Card,
   ActivityIndicator,
 } from 'react-native-paper';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { Heart } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 

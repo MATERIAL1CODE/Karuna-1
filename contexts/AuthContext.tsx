@@ -24,10 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
-    const getInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
-        console.log('🔄 Getting initial session...');
+        console.log('🔄 Initializing auth...');
+        
+        // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -45,20 +46,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            await fetchProfile(session.user.id);
+            await handleUserProfile(session.user.id);
           } else {
             setLoading(false);
           }
         }
       } catch (error) {
-        console.error('❌ Error in getInitialSession:', error);
+        console.error('❌ Error in initializeAuth:', error);
         if (mounted) {
           setLoading(false);
         }
       }
     };
 
-    getInitialSession();
+    const handleUserProfile = async (userId: string) => {
+      try {
+        console.log('🔄 Handling user profile for:', userId);
+        
+        // First try to get existing profile
+        const { data: existingProfile, error: fetchError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (existingProfile && !fetchError) {
+          console.log('✅ Profile found:', existingProfile);
+          if (mounted) {
+            setProfile(existingProfile);
+            setLoading(false);
+          }
+          return;
+        }
+
+        // If no profile exists, create one
+        console.log('🔄 No profile found, creating one...');
+        const { data: userData } = await supabase.auth.getUser();
+        
+        if (!userData.user) {
+          throw new Error('No user data available');
+        }
+
+        const newProfile = {
+          id: userId,
+          email: userData.user.email || '',
+          role: (userData.user.user_metadata?.role as UserRole) || 'citizen',
+        };
+
+        const { data: createdProfile, error: createError } = await supabase
+          .from('profiles')
+          .upsert([newProfile], { 
+            onConflict: 'id',
+            ignoreDuplicates: false 
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Error creating profile:', createError);
+          throw createError;
+        }
+
+        if (createdProfile && mounted) {
+          console.log('✅ Profile created:', createdProfile);
+          setProfile(createdProfile);
+        }
+      } catch (error) {
+        console.error('❌ Error handling user profile:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Initialize auth
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -71,7 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          setLoading(true);
+          await handleUserProfile(session.user.id);
         } else {
           setProfile(null);
           setLoading(false);
@@ -84,83 +148,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      console.log('🔄 Fetching profile for user:', userId);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('❌ Error fetching profile:', error);
-        
-        if (error.code === 'PGRST116') {
-          console.log('🔄 Profile not found, creating new profile...');
-          await createProfile(userId);
-        } else {
-          console.log('🔄 Profile fetch error, attempting to create profile...');
-          await createProfile(userId);
-        }
-      } else if (data) {
-        console.log('✅ Profile fetched successfully:', data);
-        setProfile(data);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('❌ Error in fetchProfile:', error);
-      try {
-        await createProfile(userId);
-      } catch (createError) {
-        console.error('❌ Failed to create profile as fallback:', createError);
-        setLoading(false);
-      }
-    }
-  };
-
-  const createProfile = async (userId: string) => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('No user data available');
-      }
-
-      const newProfile = {
-        id: userId,
-        email: userData.user.email || '',
-        role: (userData.user.user_metadata?.role as UserRole) || 'citizen',
-      };
-
-      console.log('🔄 Creating profile:', newProfile);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .upsert([newProfile], { 
-          onConflict: 'id',
-          ignoreDuplicates: false 
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error creating profile:', error);
-        throw error;
-      }
-
-      if (data) {
-        console.log('✅ Profile created/updated successfully:', data);
-        setProfile(data);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('❌ Error in createProfile:', error);
-      setLoading(false);
-      throw error;
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
