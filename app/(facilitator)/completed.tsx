@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Text, Card, Appbar, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
-import { CheckCircle, MapPin, Clock, ArrowLeft } from 'lucide-react-native';
+import { CircleCheck as CheckCircle, MapPin, Clock, ArrowLeft } from 'lucide-react-native';
 
 const completedMissions = [
   {
