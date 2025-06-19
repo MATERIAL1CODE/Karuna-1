@@ -15,7 +15,7 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 import { Link, router } from 'expo-router';
-import { Heart } from 'lucide-react-native';
+import { Heart, CheckCircle } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/supabase';
 
@@ -68,10 +68,20 @@ export default function Signup() {
       // Auto-navigate to login after successful signup
       setTimeout(() => {
         router.replace('/(auth)/login');
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
       console.error('Signup error:', error);
-      setError(error.message || 'Signup failed. Please try again.');
+      
+      // Handle specific error cases
+      if (error.message?.includes('User already registered')) {
+        setError('An account with this email already exists. Please sign in instead.');
+      } else if (error.message?.includes('Password should be at least')) {
+        setError('Password must be at least 6 characters long');
+      } else if (error.message?.includes('Invalid email')) {
+        setError('Please enter a valid email address');
+      } else {
+        setError(error.message || 'Signup failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -81,15 +91,20 @@ export default function Signup() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.successContainer}>
-          <View style={styles.iconContainer}>
-            <Heart size={48} color="#10B981" />
+          <View style={[styles.iconContainer, styles.successIconContainer]}>
+            <CheckCircle size={48} color="#10B981" />
           </View>
           <Text variant="headlineMedium" style={styles.successTitle}>
-            Account Created!
+            Account Created Successfully!
           </Text>
           <Text variant="bodyLarge" style={styles.successText}>
-            Welcome to Impact! You can now sign in with your credentials.
+            Welcome to Impact! You can now sign in with your credentials and start making a difference in your community.
           </Text>
+          <View style={styles.successNote}>
+            <Text variant="bodySmall" style={styles.successNoteText}>
+              Redirecting to sign in...
+            </Text>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -319,6 +334,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
   },
+  successIconContainer: {
+    backgroundColor: '#ECFDF5',
+  },
   successTitle: {
     fontWeight: '700',
     color: '#1E293B',
@@ -329,5 +347,15 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 24,
+    marginBottom: 24,
+  },
+  successNote: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 8,
+    padding: 12,
+  },
+  successNoteText: {
+    color: '#0369A1',
+    textAlign: 'center',
   },
 });
