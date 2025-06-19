@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error && error.code !== 'PGRST116') {
         console.error('❌ AuthProvider: Error fetching profile:', error);
-        throw error;
+        // Don't throw here, try to create profile instead
       }
 
       if (data) {
@@ -90,15 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('❌ AuthProvider: Error in fetchProfile:', error);
       // Create a fallback profile
-      const fallbackProfile: UserProfile = {
-        id: user.id,
-        email: user.email || '',
-        phone: user.phone || '',
-        role: 'citizen',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setProfile(fallbackProfile);
+      await createFallbackProfile(user);
     } finally {
       setLoading(false);
     }
@@ -130,23 +122,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     } catch (error) {
       console.error('❌ AuthProvider: Failed to create profile:', error);
-      // Set fallback profile
-      const fallbackProfile: UserProfile = {
-        id: user.id,
-        email: user.email || '',
-        phone: user.phone || '',
-        role: 'citizen',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setProfile(fallbackProfile);
+      await createFallbackProfile(user);
     }
+  };
+
+  const createFallbackProfile = async (user: User) => {
+    console.log('🔄 AuthProvider: Creating fallback profile');
+    const fallbackProfile: UserProfile = {
+      id: user.id,
+      email: user.email || '',
+      phone: user.phone || '',
+      role: 'citizen',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setProfile(fallbackProfile);
   };
 
   const signIn = async (email: string, password: string) => {
     console.log('🔄 AuthProvider: Sign in attempt for:', email);
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     });
@@ -157,12 +153,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('✅ AuthProvider: Sign in successful');
+    
+    // The auth state change will handle profile fetching
+    return data;
   };
 
   const signUp = async (email: string, password: string, role: UserRole) => {
     console.log('🔄 AuthProvider: Sign up attempt for:', email, 'as', role);
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
@@ -176,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('✅ AuthProvider: Sign up successful');
+    return data;
   };
 
   const sendOtp = async (phoneNumber: string) => {
