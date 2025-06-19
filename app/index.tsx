@@ -8,36 +8,29 @@ export default function Index() {
   const { session, profile, loading } = useAuth();
 
   useEffect(() => {
-    console.log('📱 Index useEffect - Loading:', loading, 'Session:', !!session, 'Profile:', profile?.role);
-    
-    // Only proceed with navigation when not loading
+    // Only navigate when we have complete auth state (not loading)
     if (!loading) {
-      if (!session) {
-        console.log('🔄 No session, redirecting to login');
-        router.replace('/(auth)/login');
-      } else if (session && profile) {
+      console.log('📱 Navigation check - Session:', !!session, 'Profile:', profile?.role);
+      
+      if (session && profile) {
+        // We have both session and profile - navigate to appropriate dashboard
         if (profile.role === 'citizen') {
-          console.log('🏠 Citizen user, redirecting to citizen dashboard');
+          console.log('🏠 Navigating to citizen dashboard');
           router.replace('/(citizen)');
         } else if (profile.role === 'facilitator') {
-          console.log('🚀 Facilitator user, redirecting to facilitator dashboard');
+          console.log('🚀 Navigating to facilitator dashboard');
           router.replace('/(facilitator)');
         } else {
-          console.log('❓ Unknown role, redirecting to login');
+          console.log('❓ Unknown role, going to login');
           router.replace('/(auth)/login');
         }
-      } else if (session && !profile) {
-        console.log('⚠️ Session exists but no profile, waiting for profile creation...');
-        // Give it a moment for profile creation, then redirect to login if still no profile
-        setTimeout(() => {
-          if (!profile) {
-            console.log('❌ Profile creation failed, redirecting to login');
-            router.replace('/(auth)/login');
-          }
-        }, 3000);
+      } else {
+        // No session or profile - go to login
+        console.log('🔄 No auth, going to login');
+        router.replace('/(auth)/login');
       }
     }
-  }, [session, profile, loading]);
+  }, [loading, session, profile]);
 
   // Show loading screen while determining auth state
   return (
@@ -45,9 +38,6 @@ export default function Index() {
       <ActivityIndicator size="large" color="#4F46E5" />
       <Text variant="bodyMedium" style={styles.loadingText}>
         {loading ? 'Loading...' : 'Redirecting...'}
-      </Text>
-      <Text variant="bodySmall" style={styles.debugText}>
-        Session: {session ? '✅' : '❌'} | Profile: {profile ? `✅ (${profile.role})` : '❌'} | Loading: {loading ? '🔄' : '✅'}
       </Text>
     </View>
   );
@@ -64,10 +54,5 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B7280',
     fontWeight: '500',
-  },
-  debugText: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    textAlign: 'center',
   },
 });

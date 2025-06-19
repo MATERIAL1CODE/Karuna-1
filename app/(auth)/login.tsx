@@ -12,7 +12,6 @@ import {
   TextInput,
   Button,
   Card,
-  ActivityIndicator,
 } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { Heart } from 'lucide-react-native';
@@ -21,9 +20,8 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const { signIn, loading } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -36,19 +34,16 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
     setError(null);
     
     try {
-      console.log('🔄 Attempting to sign in with:', email);
+      console.log('🔄 Starting login process...');
       await signIn(email, password);
-      console.log('✅ Sign in completed, navigation will be handled by auth context');
-      // Don't set loading to false here - let the auth context handle it
-      // The navigation will happen automatically via the index.tsx useEffect
+      console.log('✅ Login completed successfully');
+      // Navigation will be handled automatically by index.tsx
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
-      setLoading(false);
     }
   };
 
@@ -119,15 +114,6 @@ export default function Login() {
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Button>
-
-                {loading && (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color="#4F46E5" />
-                    <Text variant="bodySmall" style={styles.loadingText}>
-                      Authenticating...
-                    </Text>
-                  </View>
-                )}
               </Card.Content>
             </Card>
 
@@ -220,16 +206,6 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     paddingVertical: 8,
-  },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    gap: 8,
-  },
-  loadingText: {
-    color: '#6B7280',
   },
   footer: {
     marginTop: 32,

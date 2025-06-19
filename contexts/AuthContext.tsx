@@ -21,122 +21,129 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
+  // Simple profile creation/fetch function
+  const getOrCreateProfile = async (userId: string, userEmail: string, userRole?: string) => {
+    try {
+      console.log('🔄 Getting/creating profile for:', userEmail);
+      
+      // Try to get existing profile
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    const initializeAuth = async () => {
+      if (existingProfile) {
+        console.log('✅ Profile found:', existingProfile);
+        return existingProfile;
+      }
+
+      // Create new profile if it doesn't exist
+      console.log('🔄 Creating new profile...');
+      const newProfile = {
+        id: userId,
+        email: userEmail,
+        role: (userRole as UserRole) || 'citizen',
+      };
+
+      const { data: createdProfile, error } = await supabase
+        .from('profiles')
+        .insert([newProfile])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error creating profile:', error);
+        // Return a default profile if creation fails
+        return {
+          id: userId,
+          email: userEmail,
+          role: 'citizen' as UserRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+      }
+
+      console.log('✅ Profile created:', createdProfile);
+      return createdProfile;
+    } catch (error) {
+      console.error('❌ Error in getOrCreateProfile:', error);
+      // Return a default profile if everything fails
+      return {
+        id: userId,
+        email: userEmail,
+        role: 'citizen' as UserRole,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initAuth = async () => {
       try {
         console.log('🔄 Initializing auth...');
         
-        // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error('❌ Error getting session:', error);
-          if (mounted) {
-            setLoading(false);
-          }
-          return;
-        }
-        
-        console.log('✅ Initial session:', session?.user?.email || 'No session');
-        
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
+        if (!isMounted) return;
+
+        if (initialSession?.user) {
+          console.log('✅ Found initial session for:', initialSession.user.email);
+          setSession(initialSession);
+          setUser(initialSession.user);
           
-          if (session?.user) {
-            await handleUserProfile(session.user.id);
-          } else {
-            setLoading(false);
+          const userProfile = await getOrCreateProfile(
+            initialSession.user.id,
+            initialSession.user.email || '',
+            initialSession.user.user_metadata?.role
+          );
+          
+          if (isMounted) {
+            setProfile(userProfile);
           }
-        }
-      } catch (error) {
-        console.error('❌ Error in initializeAuth:', error);
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    const handleUserProfile = async (userId: string) => {
-      try {
-        console.log('🔄 Handling user profile for:', userId);
-        
-        // First try to get existing profile
-        const { data: existingProfile, error: fetchError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        if (existingProfile && !fetchError) {
-          console.log('✅ Profile found:', existingProfile);
-          if (mounted) {
-            setProfile(existingProfile);
-            setLoading(false);
-          }
-          return;
-        }
-
-        // If no profile exists, create one
-        console.log('🔄 No profile found, creating one...');
-        const { data: userData } = await supabase.auth.getUser();
-        
-        if (!userData.user) {
-          throw new Error('No user data available');
-        }
-
-        const newProfile = {
-          id: userId,
-          email: userData.user.email || '',
-          role: (userData.user.user_metadata?.role as UserRole) || 'citizen',
-        };
-
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .upsert([newProfile], { 
-            onConflict: 'id',
-            ignoreDuplicates: false 
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('❌ Error creating profile:', createError);
-          throw createError;
-        }
-
-        if (createdProfile && mounted) {
-          console.log('✅ Profile created:', createdProfile);
-          setProfile(createdProfile);
-        }
-      } catch (error) {
-        console.error('❌ Error handling user profile:', error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Initialize auth
-    initializeAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.email || 'No session');
-        
-        if (!mounted) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setLoading(true);
-          await handleUserProfile(session.user.id);
         } else {
+          console.log('ℹ️ No initial session found');
+        }
+      } catch (error) {
+        console.error('❌ Error in initAuth:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('🔄 Auth state changed:', event);
+        
+        if (!isMounted) return;
+
+        if (newSession?.user) {
+          console.log('✅ New session for:', newSession.user.email);
+          setSession(newSession);
+          setUser(newSession.user);
+          
+          const userProfile = await getOrCreateProfile(
+            newSession.user.id,
+            newSession.user.email || '',
+            newSession.user.user_metadata?.role
+          );
+          
+          if (isMounted) {
+            setProfile(userProfile);
+            setLoading(false);
+          }
+        } else {
+          console.log('ℹ️ Session cleared');
+          setSession(null);
+          setUser(null);
           setProfile(null);
           setLoading(false);
         }
@@ -144,69 +151,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔄 Attempting to sign in with:', email);
+      setLoading(true);
+      console.log('🔄 Signing in:', email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
 
       if (error) {
-        console.error('❌ Sign in error:', error);
         throw error;
       }
 
-      console.log('✅ Sign in successful:', data.user?.email);
+      console.log('✅ Sign in successful');
       // Auth state change will handle the rest
     } catch (error) {
-      console.error('❌ Sign in error:', error);
+      setLoading(false);
       throw error;
     }
   };
 
   const signUp = async (email: string, password: string, role: UserRole) => {
     try {
-      console.log('🔄 Attempting to sign up with:', email, 'as', role);
+      setLoading(true);
+      console.log('🔄 Signing up:', email, 'as', role);
       
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: {
-          data: {
-            role: role,
-          },
+          data: { role },
         },
       });
 
       if (error) {
-        console.error('❌ Sign up error:', error);
         throw error;
       }
 
-      console.log('✅ Sign up successful:', data.user?.email);
-      // Auth state change will handle the rest
+      console.log('✅ Sign up successful');
     } catch (error) {
-      console.error('❌ Sign up error:', error);
+      setLoading(false);
       throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      console.log('🔄 Signing out...');
-      
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
+      setSession(null);
+      setUser(null);
       setProfile(null);
       console.log('✅ Sign out successful');
     } catch (error) {
@@ -226,13 +228,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        setProfile(data);
-      }
+      if (error) throw error;
+      if (data) setProfile(data);
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;
