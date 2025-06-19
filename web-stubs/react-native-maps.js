@@ -29,6 +29,7 @@ const Marker = (props) => {
     <View style={styles.marker} {...otherProps}>
       <View style={styles.markerPin} />
       {title && <Text style={styles.markerTitle}>{title}</Text>}
+      }
       {children}
     </View>
   );
