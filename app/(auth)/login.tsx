@@ -44,6 +44,7 @@ export default function Login() {
       await signIn(email, password);
       console.log('✅ Sign in completed, navigation will be handled by auth context');
       // Don't set loading to false here - let the auth context handle it
+      // The navigation will happen automatically via the index.tsx useEffect
     } catch (error: any) {
       console.error('❌ Login error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');

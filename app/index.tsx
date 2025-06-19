@@ -27,8 +27,8 @@ export default function Index() {
           router.replace('/(auth)/login');
         }
       } else if (session && !profile) {
-        console.log('⚠️ Session exists but no profile, waiting for profile creation...');
-        // Don't redirect yet, wait for profile to be created/fetched
+        console.log('⚠️ Session exists but no profile, this should resolve automatically...');
+        // The auth context will handle profile creation
       }
     }
   }, [session, profile, loading]);
@@ -41,7 +41,7 @@ export default function Index() {
         {loading ? 'Loading...' : 'Redirecting...'}
       </Text>
       <Text variant="bodySmall" style={styles.debugText}>
-        Session: {session ? '✅' : '❌'} | Profile: {profile ? '✅' : '❌'} | Loading: {loading ? '🔄' : '✅'}
+        Session: {session ? '✅' : '❌'} | Profile: {profile ? `✅ (${profile.role})` : '❌'} | Loading: {loading ? '🔄' : '✅'}
       </Text>
     </View>
   );

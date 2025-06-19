@@ -20,7 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -35,7 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('❌ Error getting session:', error);
           if (mounted) {
             setLoading(false);
-            setInitializing(false);
           }
           return;
         }
@@ -50,14 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await fetchProfile(session.user.id);
           } else {
             setLoading(false);
-            setInitializing(false);
           }
         }
       } catch (error) {
         console.error('❌ Error in getInitialSession:', error);
         if (mounted) {
           setLoading(false);
-          setInitializing(false);
         }
       }
     };
@@ -79,7 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setProfile(null);
           setLoading(false);
-          setInitializing(false);
         }
       }
     );
@@ -114,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Profile fetched successfully:', data);
         setProfile(data);
         setLoading(false);
-        setInitializing(false);
       }
     } catch (error) {
       console.error('❌ Error in fetchProfile:', error);
@@ -123,7 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (createError) {
         console.error('❌ Failed to create profile as fallback:', createError);
         setLoading(false);
-        setInitializing(false);
       }
     }
   };
@@ -161,12 +154,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Profile created/updated successfully:', data);
         setProfile(data);
         setLoading(false);
-        setInitializing(false);
       }
     } catch (error) {
       console.error('❌ Error in createProfile:', error);
       setLoading(false);
-      setInitializing(false);
       throw error;
     }
   };
@@ -174,7 +165,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('🔄 Attempting to sign in with:', email);
-      setLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
@@ -183,15 +173,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('❌ Sign in error:', error);
-        setLoading(false);
         throw error;
       }
 
       console.log('✅ Sign in successful:', data.user?.email);
-      // Don't set loading to false here - let the auth state change handle it
+      // Auth state change will handle the rest
     } catch (error) {
       console.error('❌ Sign in error:', error);
-      setLoading(false);
       throw error;
     }
   };
@@ -199,7 +187,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, role: UserRole) => {
     try {
       console.log('🔄 Attempting to sign up with:', email, 'as', role);
-      setLoading(true);
       
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
@@ -213,15 +200,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('❌ Sign up error:', error);
-        setLoading(false);
         throw error;
       }
 
       console.log('✅ Sign up successful:', data.user?.email);
-      // Don't set loading to false here - let the auth state change handle it
+      // Auth state change will handle the rest
     } catch (error) {
       console.error('❌ Sign up error:', error);
-      setLoading(false);
       throw error;
     }
   };
@@ -229,7 +214,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       console.log('🔄 Signing out...');
-      setLoading(true);
       
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -237,11 +221,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       setProfile(null);
-      setLoading(false);
       console.log('✅ Sign out successful');
     } catch (error) {
       console.error('❌ Sign out error:', error);
-      setLoading(false);
       throw error;
     }
   };
@@ -270,16 +252,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Show loading only during initial setup
-  const isLoading = initializing || loading;
-
   return (
     <AuthContext.Provider
       value={{
         session,
         user,
         profile,
-        loading: isLoading,
+        loading,
         signIn,
         signUp,
         signOut,
