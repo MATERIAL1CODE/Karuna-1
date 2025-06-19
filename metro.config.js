@@ -6,10 +6,12 @@ const config = getDefaultConfig(__dirname);
 // Add resolver configuration for web platform
 config.resolver.platforms = ['ios', 'android', 'native', 'web'];
 
-// Add alias for react-native-maps on web
+// Add alias for react-native-maps and native utilities on web
 config.resolver.alias = {
   ...config.resolver.alias,
   'react-native-maps': path.resolve(__dirname, 'web-stubs/react-native-maps.js'),
+  'react-native/Libraries/Utilities/codegenNativeCommands': path.resolve(__dirname, 'web-stubs/codegenNativeCommands.js'),
+  'react-native/Libraries/Utilities/codegenNativeComponent': path.resolve(__dirname, 'web-stubs/codegenNativeComponent.js'),
 };
 
 // Platform-specific resolver
