@@ -12,15 +12,13 @@ import {
   Button,
   List,
   Divider,
-  Badge,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Heart, Settings, LogOut, Award } from 'lucide-react-native';
+import { User, Heart, Settings, LogOut } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
-  const isFacilitator = profile?.role === 'facilitator';
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -54,12 +52,9 @@ export default function ProfileScreen() {
           <Text variant="headlineSmall" style={styles.name}>
             {profile?.email}
           </Text>
-          <View style={styles.roleContainer}>
-            <Text variant="bodyMedium" style={styles.role}>
-              {isFacilitator ? 'Verified Facilitator' : 'Community Member'}
-            </Text>
-            {isFacilitator && <Badge style={styles.badge}>ACTIVE</Badge>}
-          </View>
+          <Text variant="bodyMedium" style={styles.role}>
+            Community Member
+          </Text>
         </View>
 
         <Card style={styles.statsCard} mode="elevated">
@@ -68,38 +63,16 @@ export default function ProfileScreen() {
               Your Impact
             </Text>
             <View style={styles.statsRow}>
-              {isFacilitator ? (
-                <>
-                  <View style={styles.statItem}>
-                    <Award size={20} color="#2563EB" />
-                    <Text variant="labelLarge" style={styles.statNumber}>25</Text>
-                    <Text variant="bodySmall" style={styles.statLabel}>Missions</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Award size={20} color="#10B981" />
-                    <Text variant="labelLarge" style={styles.statNumber}>150</Text>
-                    <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Award size={20} color="#F59E0B" />
-                    <Text variant="labelLarge" style={styles.statNumber}>4.9</Text>
-                    <Text variant="bodySmall" style={styles.statLabel}>Rating</Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <View style={styles.statItem}>
-                    <Heart size={20} color="#2563EB" />
-                    <Text variant="labelLarge" style={styles.statNumber}>12</Text>
-                    <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Heart size={20} color="#06B6D4" />
-                    <Text variant="labelLarge" style={styles.statNumber}>8</Text>
-                    <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
-                  </View>
-                </>
-              )}
+              <View style={styles.statItem}>
+                <Heart size={20} color="#2563EB" />
+                <Text variant="labelLarge" style={styles.statNumber}>12</Text>
+                <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Heart size={20} color="#06B6D4" />
+                <Text variant="labelLarge" style={styles.statNumber}>8</Text>
+                <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
+              </View>
             </View>
           </Card.Content>
         </Card>
@@ -113,17 +86,6 @@ export default function ProfileScreen() {
               onPress={() => {}}
             />
             <Divider />
-            {isFacilitator && (
-              <>
-                <List.Item
-                  title="Mission History"
-                  left={(props) => <List.Icon {...props} icon="history" />}
-                  right={(props) => <List.Icon {...props} icon="chevron-right" />}
-                  onPress={() => {}}
-                />
-                <Divider />
-              </>
-            )}
             <List.Item
               title="Help & Support"
               left={(props) => <List.Icon {...props} icon="help-circle" />}
@@ -176,18 +138,10 @@ const styles = StyleSheet.create({
   name: {
     fontWeight: '600',
     color: '#1E293B',
-    marginBottom: 8,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    marginBottom: 4,
   },
   role: {
     color: '#64748B',
-  },
-  badge: {
-    backgroundColor: '#10B981',
   },
   statsCard: {
     backgroundColor: '#FFFFFF',

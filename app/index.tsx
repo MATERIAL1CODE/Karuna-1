@@ -14,11 +14,14 @@ export default function Index() {
       if (!session) {
         console.log('No session, redirecting to login');
         router.replace('/(auth)/login');
-      } else if (profile) {
-        console.log('User authenticated, redirecting to main app');
-        router.replace('/(tabs)');
+      } else if (profile?.role === 'citizen') {
+        console.log('Citizen user, redirecting to citizen dashboard');
+        router.replace('/(citizen)');
+      } else if (profile?.role === 'facilitator') {
+        console.log('Facilitator user, redirecting to facilitator dashboard');
+        router.replace('/(facilitator)');
       } else {
-        console.log('No profile found, redirecting to login');
+        console.log('No profile or unknown role, redirecting to login');
         router.replace('/(auth)/login');
       }
     }

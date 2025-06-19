@@ -12,6 +12,7 @@ import {
   Button,
   Appbar,
   Card,
+  Divider,
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MapPin, User, Clock } from 'lucide-react-native';
@@ -62,7 +63,7 @@ export default function MissionDetailScreen() {
                   Pickup Location
                 </Text>
                 <Text variant="bodyLarge" style={styles.detailValue}>
-                  Anna's Cafe, Saket
+                  123 Main Street, Anytown
                 </Text>
               </View>
             </View>
@@ -112,7 +113,7 @@ export default function MissionDetailScreen() {
                   Delivery Location
                 </Text>
                 <Text variant="bodyLarge" style={styles.detailValue}>
-                  Underneath Lajpat Nagar Flyover
+                  456 Oak Avenue, Anytown
                 </Text>
               </View>
             </View>

@@ -13,9 +13,9 @@ export default function RootLayout() {
     <PaperProvider theme={theme}>
       <AuthProvider>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(citizen)" />
+          <Stack.Screen name="(facilitator)" />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
