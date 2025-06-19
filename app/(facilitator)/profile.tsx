@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {
   Text,
@@ -12,46 +11,30 @@ import {
   Button,
   List,
   Divider,
+  Appbar,
   Badge,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Award, Settings, LogOut } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { User, Award, Settings, ArrowLeft, CircleHelp as HelpCircle, Info } from 'lucide-react-native';
 
 export default function FacilitatorProfileScreen() {
-  const { profile, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-              router.replace('/(auth)/login');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out');
-            }
-          },
-        },
-      ]
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
+      <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Action 
+          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          onPress={() => router.replace('/')} 
+        />
+        <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
+      </Appbar.Header>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+        <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <User size={40} color="#2563EB" />
+            <User size={40} color="#4F46E5" />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
-            {profile?.email}
+            Volunteer
           </Text>
           <View style={styles.roleContainer}>
             <Text variant="bodyMedium" style={styles.role}>
@@ -68,7 +51,7 @@ export default function FacilitatorProfileScreen() {
             </Text>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Award size={20} color="#2563EB" />
+                <Award size={20} color="#4F46E5" />
                 <Text variant="labelLarge" style={styles.statNumber}>25</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Missions</Text>
               </View>
@@ -90,43 +73,46 @@ export default function FacilitatorProfileScreen() {
           <List.Section>
             <List.Item
               title="Account Settings"
-              left={(props) => <Settings {...props} size={20} color="#64748B" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <Settings size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
             <Divider />
             <List.Item
               title="Mission History"
-              left={(props) => <List.Icon {...props} icon="history" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <List.Icon icon="history" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
             <Divider />
             <List.Item
               title="Help & Support"
-              left={(props) => <List.Icon {...props} icon="help-circle" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <HelpCircle size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
             <Divider />
             <List.Item
               title="About Impact"
-              left={(props) => <List.Icon {...props} icon="information" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <Info size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
           </List.Section>
         </Card>
 
         <Button
           mode="outlined"
-          onPress={handleSignOut}
-          style={styles.signOutButton}
-          contentStyle={styles.signOutContent}
-          icon={() => <LogOut size={20} color="#EF4444" />}
-          textColor="#EF4444"
+          onPress={() => router.replace('/')}
+          style={styles.switchRoleButton}
+          contentStyle={styles.buttonContent}
+          textColor="#4F46E5"
         >
-          Sign Out
+          Switch Role
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -136,12 +122,20 @@ export default function FacilitatorProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    backgroundColor: '#F8F9FA',
+    elevation: 0,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    color: '#1F2937',
   },
   scrollContent: {
     padding: 24,
   },
-  header: {
+  profileHeader: {
     alignItems: 'center',
     marginBottom: 32,
   },
@@ -152,8 +146,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   name: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: '#1F2937',
     marginBottom: 8,
   },
   roleContainer: {
@@ -162,7 +156,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   role: {
-    color: '#64748B',
+    color: '#6B7280',
   },
   badge: {
     backgroundColor: '#10B981',
@@ -171,11 +165,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginBottom: 16,
     borderRadius: 16,
+    elevation: 2,
   },
   statsTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 20,
   },
   statsRow: {
     flexDirection: 'row',
@@ -187,21 +182,27 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#1F2937',
   },
   statLabel: {
-    color: '#64748B',
+    color: '#6B7280',
+    textAlign: 'center',
   },
   menuCard: {
     backgroundColor: '#FFFFFF',
     marginBottom: 24,
     borderRadius: 16,
+    elevation: 2,
   },
-  signOutButton: {
-    borderColor: '#EF4444',
+  menuItemTitle: {
+    color: '#1F2937',
+    fontWeight: '500',
+  },
+  switchRoleButton: {
+    borderColor: '#4F46E5',
     borderRadius: 12,
   },
-  signOutContent: {
+  buttonContent: {
     paddingVertical: 8,
   },
 });

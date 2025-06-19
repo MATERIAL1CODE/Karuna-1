@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Text, Card, Chip } from 'react-native-paper';
+import { Text, Card, Chip, Appbar } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin, Clock, User } from 'lucide-react-native';
+import { MapPin, Clock, User, ArrowLeft } from 'lucide-react-native';
 
 // Mock data for missions
 const mockMissions = [
@@ -124,13 +124,13 @@ function MissionCard({ mission, onPress }: MissionCardProps) {
 
           <View style={styles.timeSection}>
             <View style={styles.timeItem}>
-              <Clock size={14} color="#64748B" />
+              <Clock size={14} color="#6B7280" />
               <Text variant="bodySmall" style={styles.timeText}>
                 Pickup: {mission.pickupTime}
               </Text>
             </View>
             <View style={styles.timeItem}>
-              <Clock size={14} color="#64748B" />
+              <Clock size={14} color="#6B7280" />
               <Text variant="bodySmall" style={styles.timeText}>
                 Delivery: {mission.deliveryTime}
               </Text>
@@ -156,33 +156,38 @@ export default function FacilitatorDashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Available Missions
-        </Text>
+      <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Action 
+          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          onPress={() => router.replace('/')} 
+        />
+        <Appbar.Content title="Available Missions" titleStyle={styles.headerTitle} />
+      </Appbar.Header>
+
+      <View style={styles.content}>
         <Text variant="bodyMedium" style={styles.subtitle}>
           {mockMissions.length} missions waiting for volunteers
         </Text>
-      </View>
 
-      <FlatList
-        data={mockMissions}
-        renderItem={renderMission}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MapPin size={48} color="#64748B" />
-            <Text variant="titleMedium" style={styles.emptyTitle}>
-              No available missions
-            </Text>
-            <Text variant="bodyMedium" style={styles.emptySubtitle}>
-              Check back later for new opportunities to help.
-            </Text>
-          </View>
-        }
-      />
+        <FlatList
+          data={mockMissions}
+          renderItem={renderMission}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MapPin size={48} color="#6B7280" />
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                No available missions
+              </Text>
+              <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                Check back later for new opportunities to help.
+              </Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -190,23 +195,27 @@ export default function FacilitatorDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
   },
   header: {
-    padding: 24,
-    paddingBottom: 16,
+    backgroundColor: '#F8F9FA',
+    elevation: 0,
   },
-  title: {
+  headerTitle: {
     fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 4,
+    color: '#1F2937',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
   },
   subtitle: {
-    color: '#64748B',
+    color: '#6B7280',
+    marginBottom: 24,
+    textAlign: 'center',
   },
   listContent: {
-    padding: 16,
-    paddingTop: 0,
+    paddingBottom: 24,
   },
   missionCard: {
     marginBottom: 16,
@@ -225,7 +234,7 @@ const styles = StyleSheet.create({
   },
   missionTitle: {
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#1F2937',
     flex: 1,
   },
   urgencyChip: {
@@ -249,12 +258,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationLabel: {
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '600',
     marginBottom: 2,
   },
   locationValue: {
-    color: '#1E293B',
+    color: '#1F2937',
   },
   routePreview: {
     marginBottom: 16,
@@ -264,7 +273,7 @@ const styles = StyleSheet.create({
   routeImage: {
     width: '100%',
     height: 100,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#E5E7EB',
   },
   timeSection: {
     flexDirection: 'row',
@@ -276,7 +285,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   timeText: {
-    color: '#64748B',
+    color: '#6B7280',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -284,12 +293,12 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyTitle: {
-    color: '#1E293B',
+    color: '#1F2937',
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
   },
 });

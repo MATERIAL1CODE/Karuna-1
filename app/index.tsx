@@ -1,59 +1,204 @@
-import { useEffect } from 'react';
+import React from 'react';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  Pressable,
+} from 'react-native';
+import {
+  Text,
+  Card,
+} from 'react-native-paper';
 import { router } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
-import { useAuth } from '@/contexts/AuthContext';
+import { Heart, Users, MapPin } from 'lucide-react-native';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring,
+} from 'react-native-reanimated';
 
-export default function Index() {
-  const { session, profile, loading } = useAuth();
+const AnimatedCard = Animated.createAnimatedComponent(Card);
 
-  useEffect(() => {
-    console.log('🔄 Index: Auth state check', {
-      loading,
-      hasSession: !!session,
-      hasProfile: !!profile,
-      profileRole: profile?.role,
+export default function RoleSelectionScreen() {
+  const citizenCardScale = useSharedValue(1);
+  const facilitatorCardScale = useSharedValue(1);
+
+  const citizenCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: citizenCardScale.value }],
+  }));
+
+  const facilitatorCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: facilitatorCardScale.value }],
+  }));
+
+  const handleCitizenPress = () => {
+    citizenCardScale.value = withSpring(0.95, {}, () => {
+      citizenCardScale.value = withSpring(1);
     });
+    router.replace('/(citizen)');
+  };
 
-    // Only navigate when we're not loading
-    if (!loading) {
-      if (session && profile) {
-        console.log('✅ Index: User authenticated, navigating to dashboard');
-        if (profile.role === 'citizen') {
-          router.replace('/(citizen)');
-        } else if (profile.role === 'facilitator') {
-          router.replace('/(facilitator)');
-        } else {
-          console.log('❓ Index: Unknown role, going to login');
-          router.replace('/(auth)/login');
-        }
-      } else {
-        console.log('🔄 Index: No auth, going to login');
-        router.replace('/(auth)/login');
-      }
-    }
-  }, [loading, session, profile]);
+  const handleFacilitatorPress = () => {
+    facilitatorCardScale.value = withSpring(0.95, {}, () => {
+      facilitatorCardScale.value = withSpring(1);
+    });
+    router.replace('/(facilitator)');
+  };
 
   return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color="#4F46E5" />
-      <Text variant="bodyMedium" style={styles.loadingText}>
-        {loading ? 'Loading...' : 'Redirecting...'}
-      </Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Heart size={48} color="#4F46E5" />
+          </View>
+          <Text variant="headlineLarge" style={styles.title}>
+            Welcome to Impact
+          </Text>
+          <Text variant="bodyLarge" style={styles.subtitle}>
+            Choose how you'd like to make a difference
+          </Text>
+        </View>
+
+        <View style={styles.roleCards}>
+          <Pressable onPress={handleCitizenPress}>
+            <AnimatedCard style={[styles.roleCard, styles.citizenCard, citizenCardAnimatedStyle]} mode="elevated">
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.cardIcon}>
+                  <MapPin size={40} color="#FFFFFF" />
+                </View>
+                <Text variant="headlineSmall" style={styles.cardTitle}>
+                  I'm a Citizen
+                </Text>
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  Report needs in your community and donate resources to help others
+                </Text>
+                <View style={styles.features}>
+                  <Text style={styles.feature}>• Report people in need</Text>
+                  <Text style={styles.feature}>• Donate food & resources</Text>
+                  <Text style={styles.feature}>• Track your impact</Text>
+                </View>
+              </Card.Content>
+            </AnimatedCard>
+          </Pressable>
+
+          <Pressable onPress={handleFacilitatorPress}>
+            <AnimatedCard style={[styles.roleCard, styles.facilitatorCard, facilitatorCardAnimatedStyle]} mode="elevated">
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.cardIcon}>
+                  <Users size={40} color="#FFFFFF" />
+                </View>
+                <Text variant="headlineSmall" style={styles.cardTitle}>
+                  I'm a Facilitator
+                </Text>
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  Accept missions to deliver resources and help coordinate community aid
+                </Text>
+                <View style={styles.features}>
+                  <Text style={styles.feature}>• Accept delivery missions</Text>
+                  <Text style={styles.feature}>• Coordinate aid efforts</Text>
+                  <Text style={styles.feature}>• Make direct impact</Text>
+                </View>
+              </Card.Content>
+            </AnimatedCard>
+          </Pressable>
+        </View>
+
+        <View style={styles.footer}>
+          <Text variant="bodySmall" style={styles.footerText}>
+            You can always switch roles later in settings
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F8F9FA',
-    gap: 16,
   },
-  loadingText: {
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  iconContainer: {
+    backgroundColor: '#EBF4FF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 24,
+  },
+  title: {
+    fontWeight: '800',
+    color: '#1F2937',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
     color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  roleCards: {
+    gap: 24,
+    marginBottom: 32,
+  },
+  roleCard: {
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  citizenCard: {
+    backgroundColor: '#4F46E5',
+  },
+  facilitatorCard: {
+    backgroundColor: '#10B981',
+  },
+  cardContent: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  cardIcon: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+  },
+  cardTitle: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  cardDescription: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  features: {
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  feature: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 14,
     fontWeight: '500',
+  },
+  footer: {
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#9CA3AF',
+    textAlign: 'center',
   },
 });

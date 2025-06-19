@@ -11,8 +11,8 @@ import {
   Appbar,
   Card,
 } from 'react-native-paper';
-import { Bell, MapPin, Gift } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { Bell, MapPin, Gift, ArrowLeft } from 'lucide-react-native';
+import { router } from 'expo-router';
 import ReportNeedModal from '@/components/ReportNeedModal';
 import MakeDonationModal from '@/components/MakeDonationModal';
 import Animated, { 
@@ -24,7 +24,6 @@ import Animated, {
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export default function HomeScreen() {
-  const { profile } = useAuth();
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
 
@@ -53,22 +52,16 @@ export default function HomeScreen() {
     setDonationModalVisible(true);
   };
 
-  const getUserName = () => {
-    if (profile?.full_name) {
-      return profile.full_name.split(' ')[0];
-    }
-    if (profile?.email) {
-      return profile.email.split('@')[0];
-    }
-    return 'Friend';
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Action 
+          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          onPress={() => router.replace('/')} 
+        />
         <View style={styles.headerContent}>
           <Text variant="headlineSmall" style={styles.welcomeText}>
-            Hello, {getUserName()}! 👋
+            Hello, Friend! 👋
           </Text>
         </View>
         <Appbar.Action 

@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {
   Text,
@@ -15,47 +14,16 @@ import {
   Appbar,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Heart, Settings, LogOut, CircleHelp as HelpCircle, Info } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { User, Heart, Settings, ArrowLeft, CircleHelp as HelpCircle, Info } from 'lucide-react-native';
 
 export default function ProfileScreen() {
-  const { profile, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-              router.replace('/(auth)/login');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const getUserName = () => {
-    if (profile?.full_name) {
-      return profile.full_name;
-    }
-    if (profile?.email) {
-      return profile.email.split('@')[0];
-    }
-    return 'User';
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Action 
+          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          onPress={() => router.replace('/')} 
+        />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
@@ -65,13 +33,10 @@ export default function ProfileScreen() {
             <User size={40} color="#4F46E5" />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
-            {getUserName()}
-          </Text>
-          <Text variant="bodyMedium" style={styles.email}>
-            {profile?.email}
+            Community Member
           </Text>
           <Text variant="bodyMedium" style={styles.role}>
-            Community Member
+            Citizen
           </Text>
         </View>
 
@@ -130,13 +95,12 @@ export default function ProfileScreen() {
 
         <Button
           mode="outlined"
-          onPress={handleSignOut}
-          style={styles.signOutButton}
-          contentStyle={styles.signOutContent}
-          icon={() => <LogOut size={20} color="#EF4444" />}
-          textColor="#EF4444"
+          onPress={() => router.replace('/')}
+          style={styles.switchRoleButton}
+          contentStyle={styles.buttonContent}
+          textColor="#4F46E5"
         >
-          Sign Out
+          Switch Role
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -172,10 +136,6 @@ const styles = StyleSheet.create({
   name: {
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 4,
-  },
-  email: {
-    color: '#6B7280',
     marginBottom: 4,
   },
   role: {
@@ -219,11 +179,11 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     fontWeight: '500',
   },
-  signOutButton: {
-    borderColor: '#EF4444',
+  switchRoleButton: {
+    borderColor: '#4F46E5',
     borderRadius: 12,
   },
-  signOutContent: {
+  buttonContent: {
     paddingVertical: 8,
   },
 });
