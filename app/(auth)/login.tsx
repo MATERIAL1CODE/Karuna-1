@@ -14,7 +14,7 @@ import {
   Card,
   SegmentedButtons,
 } from 'react-native-paper';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { Heart, Smartphone, Mail } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -53,6 +53,7 @@ export default function Login() {
     try {
       await signIn(email, password);
       console.log('✅ Login: Sign in completed successfully');
+      // Navigation will be handled by the auth context and index.tsx
     } catch (error: any) {
       console.error('❌ Login: Error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
@@ -100,6 +101,7 @@ export default function Login() {
     try {
       await verifyOtp(phoneNumber, otp);
       console.log('✅ Login: OTP verification successful');
+      // Navigation will be handled by the auth context and index.tsx
     } catch (error: any) {
       console.error('❌ Login: OTP verification error:', error);
       setError(error.message || 'Invalid OTP. Please try again.');
@@ -121,10 +123,10 @@ export default function Login() {
                 <Heart size={48} color="#4F46E5" />
               </View>
               <Text variant="headlineLarge" style={styles.title}>
-                Welcome Back
+                Welcome to Impact
               </Text>
               <Text variant="bodyLarge" style={styles.subtitle}>
-                Sign in to continue making a difference
+                Sign in to start making a difference in your community
               </Text>
             </View>
 
