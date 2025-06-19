@@ -6,6 +6,7 @@ export default function FacilitatorLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: true,
         tabBarActiveTintColor: '#2563EB',
         tabBarInactiveTintColor: '#64748B',
         tabBarStyle: {
@@ -13,7 +14,16 @@ export default function FacilitatorLayout() {
           borderTopColor: '#E2E8F0',
           paddingBottom: 8,
           paddingTop: 8,
-          height: 60,
+          height: 70,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
         },
       }}
     >

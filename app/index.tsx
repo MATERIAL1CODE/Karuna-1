@@ -35,14 +35,14 @@ export default function RoleSelectionScreen() {
     citizenCardScale.value = withSpring(0.95, {}, () => {
       citizenCardScale.value = withSpring(1);
     });
-    router.replace('/(citizen)');
+    router.push('/(citizen)');
   };
 
   const handleFacilitatorPress = () => {
     facilitatorCardScale.value = withSpring(0.95, {}, () => {
       facilitatorCardScale.value = withSpring(1);
     });
-    router.replace('/(facilitator)');
+    router.push('/(facilitator)');
   };
 
   return (
@@ -56,7 +56,7 @@ export default function RoleSelectionScreen() {
             Welcome to Impact
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
-            Choose how you'd like to make a difference
+            Choose how you'd like to make a difference in your community
           </Text>
         </View>
 
@@ -71,7 +71,7 @@ export default function RoleSelectionScreen() {
                   I'm a Citizen
                 </Text>
                 <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Report needs in your community and donate resources to help others
+                  Report people in need and donate surplus resources to help your community
                 </Text>
                 <View style={styles.features}>
                   <Text style={styles.feature}>• Report people in need</Text>
@@ -92,7 +92,7 @@ export default function RoleSelectionScreen() {
                   I'm a Facilitator
                 </Text>
                 <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Accept missions to deliver resources and help coordinate community aid
+                  Accept delivery missions and coordinate aid efforts to help those in need
                 </Text>
                 <View style={styles.features}>
                   <Text style={styles.feature}>• Accept delivery missions</Text>
@@ -106,7 +106,7 @@ export default function RoleSelectionScreen() {
 
         <View style={styles.footer}>
           <Text variant="bodySmall" style={styles.footerText}>
-            You can always switch roles later in settings
+            You can switch roles anytime in the app settings
           </Text>
         </View>
       </View>
@@ -117,7 +117,7 @@ export default function RoleSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   content: {
     flex: 1,
@@ -136,14 +136,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '800',
-    color: '#1F2937',
-    marginBottom: 8,
+    color: '#1E293B',
+    marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 24,
+    paddingHorizontal: 16,
   },
   roleCards: {
     gap: 24,

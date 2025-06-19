@@ -23,7 +23,7 @@ import Animated, {
 
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
-export default function HomeScreen() {
+export default function CitizenDashboard() {
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
 
@@ -91,7 +91,7 @@ export default function HomeScreen() {
                   Report a Need
                 </Text>
                 <Text variant="bodyMedium" style={styles.cardDescription}>
-                  See someone who needs help? Let us know their location.
+                  See someone who needs help? Let us know their location and we'll coordinate assistance.
                 </Text>
               </Card.Content>
             </AnimatedCard>
@@ -107,7 +107,7 @@ export default function HomeScreen() {
                   Make a Donation
                 </Text>
                 <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Have surplus food or resources? Connect with those who need it.
+                  Have surplus food or resources? Connect with those who need it most.
                 </Text>
               </Card.Content>
             </AnimatedCard>
@@ -161,10 +161,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
     elevation: 0,
     paddingHorizontal: 8,
   },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
   },
   scrollContent: {
     padding: 24,
@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     fontWeight: '800',
-    color: '#1F2937',
+    color: '#1E293B',
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: 36,
   },
   subtitle: {
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#1E293B',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statLabel: {
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     fontWeight: '500',
   },

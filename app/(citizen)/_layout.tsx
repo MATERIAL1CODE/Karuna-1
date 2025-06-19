@@ -1,12 +1,12 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, History, User } from 'lucide-react-native';
+import { Home, History, User } from 'lucide-react-native';
 
 export default function CitizenLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#E5E7EB',
@@ -22,6 +22,10 @@ export default function CitizenLayout() {
         },
         tabBarActiveTintColor: '#4F46E5',
         tabBarInactiveTintColor: '#6B7280',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}
     >
       <Tabs.Screen
