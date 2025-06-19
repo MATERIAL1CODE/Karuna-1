@@ -15,7 +15,7 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 import { Link, router } from 'expo-router';
-import { Heart, CheckCircle } from 'lucide-react-native';
+import { Heart, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/supabase';
 
