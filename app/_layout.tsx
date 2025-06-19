@@ -15,6 +15,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(citizen)" />
+          <Stack.Screen name="(facilitator)" />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

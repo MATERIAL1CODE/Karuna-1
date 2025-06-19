@@ -40,12 +40,12 @@ export default function Login() {
     setError(null);
     
     try {
+      console.log('Attempting to sign in with:', email);
       await signIn(email, password);
-      // Navigation will be handled by the auth context and index.tsx
+      console.log('Sign in completed, navigation will be handled by auth context');
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
-    } finally {
       setLoading(false);
     }
   };
@@ -60,7 +60,7 @@ export default function Login() {
           <View style={styles.content}>
             <View style={styles.header}>
               <View style={styles.iconContainer}>
-                <Heart size={48} color="#2563EB" />
+                <Heart size={48} color="#4F46E5" />
               </View>
               <Text variant="headlineLarge" style={styles.title}>
                 Welcome Back
@@ -144,7 +144,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
   },
   keyboardView: {
     flex: 1,
@@ -170,12 +170,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#1F2937',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -216,22 +216,22 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 18,
   },
   linkText: {
-    color: '#2563EB',
+    color: '#4F46E5',
   },
   signupContainer: {
     flexDirection: 'row',
     marginTop: 24,
   },
   signupText: {
-    color: '#64748B',
+    color: '#6B7280',
   },
   signupLink: {
-    color: '#2563EB',
+    color: '#4F46E5',
     fontWeight: '600',
   },
 });
