@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  Alert,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import {
   Text,
@@ -22,20 +22,29 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
       return;
     }
 
     setLoading(true);
+    setError(null);
+    
     try {
       await signIn(email, password);
-      // Navigation will be handled by the auth context
+      // Navigation will be handled by the auth context and index.tsx
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Login failed');
+      console.error('Login error:', error);
+      setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -47,66 +56,86 @@ export default function Login() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Heart size={48} color="#2563EB" />
-            <Text variant="headlineLarge" style={styles.title}>
-              Welcome to Impact
-            </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
-              Connect, Share, Make a Difference.
-            </Text>
-          </View>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <Heart size={48} color="#2563EB" />
+              </View>
+              <Text variant="headlineLarge" style={styles.title}>
+                Welcome Back
+              </Text>
+              <Text variant="bodyLarge" style={styles.subtitle}>
+                Sign in to continue making a difference
+              </Text>
+            </View>
 
-          <Card style={styles.card} mode="elevated">
-            <Card.Content style={styles.cardContent}>
-              <TextInput
-                label="Email address"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
-              />
+            <Card style={styles.card} mode="elevated">
+              <Card.Content style={styles.cardContent}>
+                {error && (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                )}
 
-              <TextInput
-                label="Password"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                style={styles.input}
-              />
+                <TextInput
+                  label="Email address"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    setError(null);
+                  }}
+                  mode="outlined"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  style={styles.input}
+                  disabled={loading}
+                />
 
-              <Button
-                mode="contained"
-                onPress={handleLogin}
-                loading={loading}
-                disabled={loading}
-                style={styles.button}
-                contentStyle={styles.buttonContent}
-              >
-                Continue
-              </Button>
-            </Card.Content>
-          </Card>
+                <TextInput
+                  label="Password"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError(null);
+                  }}
+                  mode="outlined"
+                  secureTextEntry
+                  autoComplete="password"
+                  style={styles.input}
+                  disabled={loading}
+                />
 
-          <View style={styles.footer}>
-            <Text style={styles.termsText}>
-              By continuing, you agree to our{' '}
-              <Text style={styles.linkText}>Terms of Service</Text> and{' '}
-              <Text style={styles.linkText}>Privacy Policy</Text>.
-            </Text>
+                <Button
+                  mode="contained"
+                  onPress={handleLogin}
+                  loading={loading}
+                  disabled={loading || !email || !password}
+                  style={styles.button}
+                  contentStyle={styles.buttonContent}
+                >
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </Button>
+              </Card.Content>
+            </Card>
 
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don't have an account? </Text>
-              <Link href="/(auth)/signup" asChild>
-                <Text style={styles.signupLink}>Sign up</Text>
-              </Link>
+            <View style={styles.footer}>
+              <Text style={styles.termsText}>
+                By continuing, you agree to our{' '}
+                <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+                <Text style={styles.linkText}>Privacy Policy</Text>.
+              </Text>
+
+              <View style={styles.signupContainer}>
+                <Text style={styles.signupText}>Don't have an account? </Text>
+                <Link href="/(auth)/signup" asChild>
+                  <Text style={styles.signupLink}>Sign up</Text>
+                </Link>
+              </View>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -120,32 +149,56 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+    minHeight: '100%',
   },
   header: {
     alignItems: 'center',
     marginBottom: 48,
   },
+  iconContainer: {
+    backgroundColor: '#EBF4FF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 24,
+  },
   title: {
     fontWeight: '700',
     color: '#1E293B',
-    marginTop: 24,
+    marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     color: '#64748B',
-    marginTop: 8,
     textAlign: 'center',
+    lineHeight: 24,
   },
   card: {
     backgroundColor: '#FFFFFF',
     elevation: 2,
+    borderRadius: 16,
   },
   cardContent: {
     padding: 32,
+  },
+  errorContainer: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    textAlign: 'center',
   },
   input: {
     marginBottom: 16,

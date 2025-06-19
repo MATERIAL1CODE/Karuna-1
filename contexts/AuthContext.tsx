@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, role: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,7 +23,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+      }
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -35,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -52,84 +57,143 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist, create default
-        const newProfile: Partial<UserProfile> = {
-          id: userId,
-          email: user?.email || '',
-          role: 'citizen',
-        };
-
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert([newProfile])
-          .select()
-          .single();
-
-        if (!createError && createdProfile) {
-          setProfile(createdProfile);
-        }
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // If profile doesn't exist, it will be created by the trigger
+        // Let's wait a moment and try again
+        setTimeout(async () => {
+          const { data: retryData, error: retryError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          
+          if (!retryError && retryData) {
+            setProfile(retryData);
+          }
+          setLoading(false);
+        }, 1000);
       } else if (data) {
         setProfile(data);
+        setLoading(false);
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
-    } finally {
+      console.error('Error in fetchProfile:', error);
       setLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      console.log('Sign in successful:', data.user?.email);
+    } catch (error) {
+      console.error('Sign in error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, role: UserRole) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    // Create profile with role
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            email,
-            role,
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            role: role,
           },
-        ]);
+        },
+      });
 
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
+      if (error) {
+        throw error;
       }
+
+      console.log('Sign up successful:', data.user?.email);
+      
+      // The profile will be created automatically by the database trigger
+      // But let's also create it manually to ensure it exists
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert([
+            {
+              id: data.user.id,
+              email: email.trim().toLowerCase(),
+              role,
+            },
+          ]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
+      }
+    } catch (error) {
+      console.error('Sign up error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      setProfile(null);
+      console.log('Sign out successful');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!user) throw new Error('No user logged in');
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
       throw error;
     }
-    setProfile(null);
   };
 
   return (
@@ -142,6 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
+        updateProfile,
       }}
     >
       {children}
