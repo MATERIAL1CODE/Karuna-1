@@ -1,4 +1,7 @@
 // Empty stub for native-only codegenNativeCommands on web
-module.exports = function codegenNativeCommands() {
+function codegenNativeCommands() {
   return {};
-};
+}
+
+module.exports = codegenNativeCommands;
+module.exports.default = codegenNativeCommands;

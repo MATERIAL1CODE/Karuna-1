@@ -1,6 +1,9 @@
 // Empty stub for native-only codegenNativeComponent on web
-module.exports = function codegenNativeComponent() {
+function codegenNativeComponent() {
   return function() {
     return null;
   };
-};
+}
+
+module.exports = codegenNativeComponent;
+module.exports.default = codegenNativeComponent;
