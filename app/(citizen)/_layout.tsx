@@ -1,50 +1,55 @@
-import { Tabs } from 'expo-router';
-import { Home, Heart, User, Settings } from 'lucide-react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Home, History, User } from 'lucide-react-native';
+import HomeScreen from './home';
+import ActivityScreen from './activity';
+import ProfileScreen from './profile';
+
+const Tab = createBottomTabNavigator();
 
 export default function CitizenLayout() {
   return (
-    <Tabs
+    <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#64748B',
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#E2E8F0',
+          borderTopColor: '#E5E7EB',
+          borderTopWidth: 1,
           paddingBottom: 8,
           paddingTop: 8,
-          height: 60,
+          height: 70,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
+        tabBarActiveTintColor: '#4F46E5',
+        tabBarInactiveTintColor: '#6B7280',
       }}
     >
-      <Tabs.Screen
-        name="index"
+      <Tab.Screen
+        name="home"
+        component={HomeScreen}
         options={{
-          title: 'Home',
           tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="report"
+      <Tab.Screen
+        name="activity"
+        component={ActivityScreen}
         options={{
-          title: 'Report',
-          tabBarIcon: ({ size, color }) => <Heart size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => <History size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="donate"
-        options={{
-          title: 'Donate',
-          tabBarIcon: ({ size, color }) => <Heart size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
+      <Tab.Screen
         name="profile"
+        component={ProfileScreen}
         options={{
-          title: 'Profile',
           tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
-    </Tabs>
+    </Tab.Navigator>
   );
 }

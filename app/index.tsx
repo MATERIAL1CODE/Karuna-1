@@ -19,7 +19,8 @@ export default function Index() {
         router.replace('/(citizen)');
       } else if (profile?.role === 'facilitator') {
         console.log('Facilitator user, redirecting to facilitator dashboard');
-        router.replace('/(facilitator)');
+        // For now, redirect to citizen until we build facilitator interface
+        router.replace('/(citizen)');
       } else {
         console.log('No profile or unknown role, redirecting to login');
         router.replace('/(auth)/login');
@@ -29,7 +30,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#2563EB" />
+      <ActivityIndicator size="large" color="#4F46E5" />
       <Text variant="bodyMedium" style={styles.loadingText}>
         Loading...
       </Text>
@@ -42,10 +43,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
     gap: 16,
   },
   loadingText: {
-    color: '#64748B',
+    color: '#6B7280',
   },
 });

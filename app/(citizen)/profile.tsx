@@ -12,9 +12,10 @@ import {
   Button,
   List,
   Divider,
+  Appbar,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Heart, Settings, LogOut } from 'lucide-react-native';
+import { User, Heart, Settings, LogOut, HelpCircle, Info } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileScreen() {
@@ -42,14 +43,31 @@ export default function ProfileScreen() {
     );
   };
 
+  const getUserName = () => {
+    if (profile?.full_name) {
+      return profile.full_name;
+    }
+    if (profile?.email) {
+      return profile.email.split('@')[0];
+    }
+    return 'User';
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <Appbar.Header style={styles.header} elevated={false}>
+        <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
+      </Appbar.Header>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+        <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <User size={40} color="#2563EB" />
+            <User size={40} color="#4F46E5" />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
+            {getUserName()}
+          </Text>
+          <Text variant="bodyMedium" style={styles.email}>
             {profile?.email}
           </Text>
           <Text variant="bodyMedium" style={styles.role}>
@@ -64,14 +82,19 @@ export default function ProfileScreen() {
             </Text>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Heart size={20} color="#2563EB" />
+                <Heart size={20} color="#4F46E5" />
                 <Text variant="labelLarge" style={styles.statNumber}>12</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
               </View>
               <View style={styles.statItem}>
-                <Heart size={20} color="#06B6D4" />
+                <Heart size={20} color="#10B981" />
                 <Text variant="labelLarge" style={styles.statNumber}>8</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Heart size={20} color="#F59E0B" />
+                <Text variant="labelLarge" style={styles.statNumber}>45</Text>
+                <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
               </View>
             </View>
           </Card.Content>
@@ -81,23 +104,26 @@ export default function ProfileScreen() {
           <List.Section>
             <List.Item
               title="Account Settings"
-              left={(props) => <Settings {...props} size={20} color="#64748B" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <Settings size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
             <Divider />
             <List.Item
               title="Help & Support"
-              left={(props) => <List.Icon {...props} icon="help-circle" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <HelpCircle size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
             <Divider />
             <List.Item
               title="About Impact"
-              left={(props) => <List.Icon {...props} icon="information" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              left={() => <Info size={20} color="#6B7280" />}
+              right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
+              titleStyle={styles.menuItemTitle}
             />
           </List.Section>
         </Card>
@@ -120,12 +146,20 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    backgroundColor: '#F8F9FA',
+    elevation: 0,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    color: '#1F2937',
   },
   scrollContent: {
     padding: 24,
   },
-  header: {
+  profileHeader: {
     alignItems: 'center',
     marginBottom: 32,
   },
@@ -136,22 +170,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   name: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  email: {
+    color: '#6B7280',
     marginBottom: 4,
   },
   role: {
-    color: '#64748B',
+    color: '#4F46E5',
+    fontWeight: '500',
   },
   statsCard: {
     backgroundColor: '#FFFFFF',
     marginBottom: 16,
     borderRadius: 16,
+    elevation: 2,
   },
   statsTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 20,
   },
   statsRow: {
     flexDirection: 'row',
@@ -163,15 +203,21 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#1F2937',
   },
   statLabel: {
-    color: '#64748B',
+    color: '#6B7280',
+    textAlign: 'center',
   },
   menuCard: {
     backgroundColor: '#FFFFFF',
     marginBottom: 24,
     borderRadius: 16,
+    elevation: 2,
+  },
+  menuItemTitle: {
+    color: '#1F2937',
+    fontWeight: '500',
   },
   signOutButton: {
     borderColor: '#EF4444',

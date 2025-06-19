@@ -45,7 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Always fetch/create profile when user signs in
           await fetchProfile(session.user.id);
         } else {
           setProfile(null);
@@ -71,12 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error fetching profile:', error);
         
-        // If profile doesn't exist, create it
         if (error.code === 'PGRST116') {
           console.log('Profile not found, creating new profile...');
           await createProfile(userId);
         } else {
-          // For other errors, still try to create profile
           console.log('Profile fetch error, attempting to create profile...');
           await createProfile(userId);
         }
@@ -86,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
-      // Even if there's an error, try to create the profile
       try {
         await createProfile(userId);
       } catch (createError) {
@@ -148,8 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Sign in successful:', data.user?.email);
-      
-      // Profile will be fetched automatically by the auth state change listener
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -165,8 +159,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             role: role,
           },
-          // For prototype mode - no email confirmation required
-          emailRedirectTo: undefined,
         },
       });
 
@@ -175,10 +167,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Sign up successful:', data.user?.email);
-      
-      // The onAuthStateChange listener will automatically handle profile creation
-      // No need for setTimeout - let the auth flow handle it naturally
-      
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
