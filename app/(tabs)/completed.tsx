@@ -6,7 +6,7 @@ import {
   FlatList,
 } from 'react-native';
 import { Text, Card } from 'react-native-paper';
-import { CheckCircle, MapPin } from 'lucide-react-native';
+import { CircleCheck as CheckCircle, MapPin } from 'lucide-react-native';
 
 const completedMissions = [
   {

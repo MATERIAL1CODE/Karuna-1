@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Heart, MapPin, User, CheckCircle } from 'lucide-react-native';
+import { Chrome as Home, Heart, MapPin, User, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
