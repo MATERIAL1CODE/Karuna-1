@@ -70,6 +70,16 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
+      console.log('🔄 Starting sign-up process...');
+      
+      // Check if signUp is already complete (to prevent "verification_already_verified" error)
+      if (signUp?.status === 'complete') {
+        console.log('✅ Sign-up already complete, setting active session');
+        await setActive({ session: signUp.createdSessionId });
+        router.replace('/(home)');
+        return;
+      }
+
       // Start sign-up process using email/phone and password provided
       const signUpData: any = {
         password,
@@ -84,22 +94,40 @@ export default function SignUpScreen() {
         signUpData.phoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
       }
 
-      await signUp.create(signUpData);
+      console.log('📝 Creating sign-up with data:', { 
+        method: authMethod, 
+        identifier: authMethod === 'email' ? emailAddress : phoneNumber,
+        role 
+      });
 
-      // Send user verification code
-      if (authMethod === 'email') {
-        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      } else {
-        await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
+      const result = await signUp.create(signUpData);
+      console.log('📋 Sign-up creation result:', result.status);
+
+      // Check if verification is needed
+      if (result.status === 'missing_requirements') {
+        console.log('⚠️ Missing requirements:', result.missingFields);
+        
+        // Send verification code
+        if (authMethod === 'email') {
+          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+          console.log('📧 Email verification code sent');
+        } else {
+          await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
+          console.log('📱 Phone verification code sent');
+        }
+
+        setPendingVerification(true);
+      } else if (result.status === 'complete') {
+        console.log('✅ Sign-up complete immediately');
+        await setActive({ session: result.createdSessionId });
+        router.replace('/(home)');
       }
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true);
     } catch (err: any) {
-      console.error('Sign up error:', JSON.stringify(err, null, 2));
+      console.error('❌ Sign up error:', JSON.stringify(err, null, 2));
       
-      if (err.errors?.[0]?.message) {
+      if (err.errors?.[0]?.code === 'form_identifier_exists') {
+        setError('An account with this email/phone already exists. Please sign in instead.');
+      } else if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
       } else {
         setError('Failed to create account. Please try again.');
@@ -122,24 +150,47 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
+      console.log('🔄 Attempting verification with code:', code);
+      
+      // Check if already verified to prevent "verification_already_verified" error
+      if (signUp?.status === 'complete') {
+        console.log('✅ Already verified, setting active session');
+        await setActive({ session: signUp.createdSessionId });
+        router.replace('/(home)');
+        return;
+      }
+
       // Use the code the user provided to attempt verification
       const signUpAttempt = authMethod === 'email' 
         ? await signUp.attemptEmailAddressVerification({ code })
         : await signUp.attemptPhoneNumberVerification({ code });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
+      console.log('📋 Verification attempt result:', signUpAttempt.status);
+
+      // If verification was completed, set the session to active and redirect
       if (signUpAttempt.status === 'complete') {
+        console.log('✅ Verification complete, setting active session');
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace('/(home)');
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error('Verification incomplete:', JSON.stringify(signUpAttempt, null, 2));
+        console.error('⚠️ Verification incomplete:', JSON.stringify(signUpAttempt, null, 2));
         setError('Verification failed. Please try again.');
       }
     } catch (err: any) {
-      console.error('Verification error:', JSON.stringify(err, null, 2));
+      console.error('❌ Verification error:', JSON.stringify(err, null, 2));
+      
+      if (err.errors?.[0]?.code === 'verification_already_verified') {
+        console.log('⚠️ Already verified, attempting to complete sign-up');
+        try {
+          if (signUp?.status === 'complete') {
+            await setActive({ session: signUp.createdSessionId });
+            router.replace('/(home)');
+            return;
+          }
+        } catch (completeErr) {
+          console.error('❌ Error completing already verified sign-up:', completeErr);
+        }
+      }
       
       if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);

@@ -50,27 +50,40 @@ export default function SignInScreen() {
     setError(null);
 
     try {
+      console.log('🔄 Starting sign-in process...');
+      console.log('📝 Sign-in data:', { 
+        method: authMethod, 
+        identifier: authMethod === 'email' ? emailAddress : phoneNumber 
+      });
+
       // Start the sign-in process using the email/phone and password provided
       const signInAttempt = await signIn.create({
         identifier: authMethod === 'email' ? emailAddress : (phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`),
         password,
       });
 
+      console.log('📋 Sign-in attempt result:', signInAttempt.status);
+
       // If sign-in process is complete, set the created session as active
       // and redirect the user
       if (signInAttempt.status === 'complete') {
+        console.log('✅ Sign-in complete, setting active session');
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/(home)');
       } else {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
-        console.error('Sign in incomplete:', JSON.stringify(signInAttempt, null, 2));
+        console.error('⚠️ Sign in incomplete:', JSON.stringify(signInAttempt, null, 2));
         setError('Sign in failed. Please check your credentials.');
       }
     } catch (err: any) {
-      console.error('Sign in error:', JSON.stringify(err, null, 2));
+      console.error('❌ Sign in error:', JSON.stringify(err, null, 2));
       
-      if (err.errors?.[0]?.message) {
+      if (err.errors?.[0]?.code === 'form_identifier_not_found') {
+        setError("Couldn't find your account. Please check your email/phone or sign up.");
+      } else if (err.errors?.[0]?.code === 'form_password_incorrect') {
+        setError('Incorrect password. Please try again.');
+      } else if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
       } else {
         setError('Invalid credentials. Please try again.');
