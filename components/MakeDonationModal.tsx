@@ -16,6 +16,8 @@ import {
   Menu,
 } from 'react-native-paper';
 import { X, ChevronDown } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface MakeDonationModalProps {
   visible: boolean;
@@ -33,10 +35,12 @@ const resourceTypes = [
 ];
 
 export default function MakeDonationModal({ visible, onDismiss }: MakeDonationModalProps) {
+  const { profile } = useAuth();
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
   const [pickupTime, setPickupTime] = useState('');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -45,6 +49,7 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
     setQuantity('');
     setPickupAddress('');
     setPickupTime('');
+    setNotes('');
   };
 
   const handleSubmit = async () => {
@@ -53,15 +58,31 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
       return;
     }
 
+    if (!profile) {
+      Alert.alert('Error', 'Please sign in to make a donation');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Here you would submit to your backend
-      console.log('Submitting donation:', {
-        resourceType,
-        quantity,
-        pickupAddress,
-        pickupTime,
-      });
+      const { error } = await supabase
+        .from('donations')
+        .insert([
+          {
+            user_id: profile.id,
+            resource_type: resourceType,
+            quantity,
+            pickup_location: pickupAddress,
+            notes,
+            status: 'available',
+          },
+        ]);
+
+      if (error) {
+        console.error('Error creating donation:', error);
+        Alert.alert('Error', 'Failed to log donation. Please try again.');
+        return;
+      }
 
       Alert.alert(
         'Donation Logged',
@@ -72,6 +93,7 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
         }}]
       );
     } catch (error) {
+      console.error('Error submitting donation:', error);
       Alert.alert('Error', 'Failed to log donation. Please try again.');
     } finally {
       setLoading(false);
@@ -172,6 +194,19 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
                   onChangeText={setPickupTime}
                   mode="outlined"
                   placeholder="e.g., Today, 8-9 PM"
+                  style={styles.input}
+                />
+
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Additional Notes (Optional)
+                </Text>
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  mode="outlined"
+                  multiline
+                  numberOfLines={3}
+                  placeholder="e.g., perishable items, best time for pickup"
                   style={styles.input}
                 />
 

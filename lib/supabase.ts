@@ -1,4 +1,11 @@
-// Placeholder for future Supabase integration
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Types
 export type UserRole = 'citizen' | 'facilitator';
 
 export interface UserProfile {
