@@ -33,121 +33,90 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       console.log('🔄 Loading user profile for user ID:', user.id);
       
-      // First try to find existing profile by ID
-      const { data: existingProfile, error: findError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      const maxAttempts = 10;
+      const retryDelay = 1000; // 1 second
+      let attempt = 0;
+      let foundProfile = null;
 
-      if (existingProfile && !findError) {
-        console.log('✅ Found existing profile by ID');
-        setProfile(existingProfile);
-        return;
-      }
+      // Retry mechanism to wait for Supabase trigger to create profile
+      while (attempt < maxAttempts && !foundProfile) {
+        attempt++;
+        console.log(`🔄 Profile loading attempt ${attempt}/${maxAttempts}`);
 
-      // If not found by ID, try to find by email or phone
-      const email = user.emailAddresses?.[0]?.emailAddress;
-      const phone = user.phoneNumbers?.[0]?.phoneNumber;
-      
-      let profileByContact = null;
-      
-      // Try to find by email
-      if (email) {
-        const { data, error } = await supabase
+        // First try to find existing profile by ID
+        const { data: existingProfile, error: findError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('email', email)
+          .eq('id', user.id)
           .single();
-        
-        if (!error && data) {
-          profileByContact = data;
+
+        if (existingProfile && !findError) {
+          console.log('✅ Found existing profile by ID');
+          foundProfile = existingProfile;
+          break;
         }
-      }
-      
-      // If not found by email, try by phone
-      if (!profileByContact && phone) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('phone', phone)
-          .single();
+
+        // If not found by ID, try to find by email or phone
+        const email = user.emailAddresses?.[0]?.emailAddress;
+        const phone = user.phoneNumbers?.[0]?.phoneNumber;
         
-        if (!error && data) {
-          profileByContact = data;
-        }
-      }
-
-      if (profileByContact) {
-        console.log('✅ Found existing profile by contact info');
-        setProfile(profileByContact);
-      } else {
-        console.log('🔄 No existing profile found, creating new one...');
-        await createNewProfile();
-      }
-    } catch (error) {
-      console.error('❌ Error in loadUserProfile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createNewProfile = async () => {
-    if (!user) return;
-
-    try {
-      console.log('🔄 Creating new profile with user ID:', user.id);
-      
-      const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
-      const email = user.emailAddresses?.[0]?.emailAddress || '';
-      const phone = user.phoneNumbers?.[0]?.phoneNumber || '';
-      const fullName = user.firstName && user.lastName 
-        ? `${user.firstName} ${user.lastName}` 
-        : user.firstName || '';
-
-      // Create profile with the Clerk user ID
-      const profileData = {
-        id: user.id, // This is crucial - use Clerk user ID
-        email: email || null,
-        phone: phone || null,
-        role,
-        full_name: fullName || null,
-      };
-
-      console.log('📝 Profile data to insert:', profileData);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([profileData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error creating profile:', error);
-        
-        // If there's a unique constraint violation, the profile might already exist
-        if (error.code === '23505') {
-          console.log('🔄 Profile already exists, trying to fetch it...');
-          const { data: existingData, error: fetchError } = await supabase
+        // Try to find by email
+        if (email && !foundProfile) {
+          const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', user.id)
+            .eq('email', email)
             .single();
           
-          if (!fetchError && existingData) {
-            console.log('✅ Found existing profile after conflict');
-            setProfile(existingData);
-            return;
+          if (!error && data) {
+            console.log('✅ Found existing profile by email');
+            foundProfile = data;
+            break;
           }
         }
         
-        throw error;
+        // If not found by email, try by phone
+        if (phone && !foundProfile) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('phone', phone)
+            .single();
+          
+          if (!error && data) {
+            console.log('✅ Found existing profile by phone');
+            foundProfile = data;
+            break;
+          }
+        }
+
+        // If this is not the last attempt, wait before retrying
+        if (attempt < maxAttempts) {
+          console.log(`⏳ Profile not found yet, waiting ${retryDelay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
       }
 
-      console.log('✅ Profile created successfully');
-      setProfile(data);
+      if (foundProfile) {
+        console.log('✅ Profile loaded successfully');
+        setProfile(foundProfile);
+      } else {
+        console.warn('⚠️ No profile found after all attempts. The Supabase trigger may not have executed yet.');
+        console.warn('💡 This could be due to:');
+        console.warn('   - Database trigger not firing');
+        console.warn('   - RLS policies blocking profile creation');
+        console.warn('   - Network connectivity issues');
+        console.warn('   - User authentication not fully synchronized');
+        
+        // Set profile to null but don't throw an error
+        // This allows the app to continue functioning
+        setProfile(null);
+      }
     } catch (error) {
-      console.error('❌ Error in createNewProfile:', error);
+      console.error('❌ Error in loadUserProfile:', error);
+      setProfile(null);
+    } finally {
+      setLoading(false);
     }
   };
 
