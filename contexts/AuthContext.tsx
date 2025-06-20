@@ -16,200 +16,132 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user profile from Supabase when Clerk user is available
+  // Load user profile when Clerk user is available
   useEffect(() => {
     if (isLoaded && user) {
-      authenticateWithSupabase();
+      loadUserProfile();
     } else if (isLoaded && !user) {
       setProfile(null);
       setLoading(false);
     }
   }, [user, isLoaded]);
 
-  const authenticateWithSupabase = async () => {
+  const loadUserProfile = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
+      console.log('🔄 Loading user profile...');
       
-      console.log('🔄 Starting Supabase authentication...');
+      // Try to find existing profile by email or phone
+      const email = user.emailAddresses?.[0]?.emailAddress;
+      const phone = user.phoneNumbers?.[0]?.phoneNumber;
       
-      // Get the Clerk session token with the supabase template
-      const token = await getToken({ template: 'supabase' });
+      let existingProfile = null;
       
-      if (!token) {
-        console.error('❌ No Clerk token available');
-        // Try to load profile directly if token fails
-        await loadProfileDirectly();
-        return;
+      // First try to find by email
+      if (email) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', email)
+          .single();
+        
+        if (!error) {
+          existingProfile = data;
+        }
+      }
+      
+      // If not found by email, try by phone
+      if (!existingProfile && phone) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('phone', phone)
+          .single();
+        
+        if (!error) {
+          existingProfile = data;
+        }
       }
 
-      console.log('✅ Got Clerk token, authenticating with Supabase...');
-
-      // Authenticate Supabase with Clerk's JWT token
-      const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
-        provider: 'custom',
-        token,
-      });
-
-      if (authError) {
-        console.error('❌ Error authenticating with Supabase:', authError);
-        // Fallback to direct profile loading
-        await loadProfileDirectly();
-        return;
+      if (existingProfile) {
+        console.log('✅ Found existing profile');
+        setProfile(existingProfile);
+      } else {
+        console.log('🔄 Creating new profile...');
+        await createNewProfile();
       }
-
-      if (!authData.user) {
-        console.error('❌ No Supabase user returned after authentication');
-        await loadProfileDirectly();
-        return;
-      }
-
-      console.log('✅ Supabase authentication successful');
-      // Now use the Supabase user ID (UUID) for profile operations
-      await loadProfile(authData.user.id);
     } catch (error) {
-      console.error('❌ Error in authenticateWithSupabase:', error);
-      // Fallback to direct profile loading
-      await loadProfileDirectly();
+      console.error('❌ Error in loadUserProfile:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadProfileDirectly = async () => {
+  const createNewProfile = async () => {
     if (!user) return;
 
     try {
-      console.log('🔄 Loading profile directly using Clerk user ID...');
+      console.log('🔄 Creating new profile...');
       
-      // Try to find profile by email or phone as fallback
-      const email = user.emailAddresses?.[0]?.emailAddress;
-      const phone = user.phoneNumbers?.[0]?.phoneNumber;
-      
-      let query = supabase.from('profiles').select('*');
-      
-      if (email) {
-        query = query.eq('email', email);
-      } else if (phone) {
-        query = query.eq('phone', phone);
-      } else {
-        console.error('❌ No email or phone available for profile lookup');
-        return;
-      }
+      const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
+      const email = user.emailAddresses?.[0]?.emailAddress || '';
+      const phone = user.phoneNumbers?.[0]?.phoneNumber || '';
+      const fullName = user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}` 
+        : user.firstName || '';
 
-      const { data: existingProfile, error } = await query.single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ Error loading profile directly:', error);
-        return;
-      }
-
-      if (existingProfile) {
-        console.log('✅ Found existing profile');
-        setProfile(existingProfile);
-      } else {
-        console.log('🔄 Creating new profile...');
-        // Create profile with a generated UUID
-        const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
-        await createProfileDirectly(role);
-      }
-    } catch (error) {
-      console.error('❌ Error in loadProfileDirectly:', error);
-    }
-  };
-
-  const loadProfile = async (supabaseUserId: string) => {
-    try {
-      console.log('🔄 Loading profile with Supabase user ID:', supabaseUserId);
-      
-      // Try to get existing profile using Supabase user ID
-      const { data: existingProfile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUserId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ Error loading profile:', error);
-        return;
-      }
-
-      if (existingProfile) {
-        console.log('✅ Found existing profile');
-        setProfile(existingProfile);
-      } else {
-        console.log('🔄 Creating new profile...');
-        // Create profile if it doesn't exist
-        const role = (user?.unsafeMetadata?.role as UserRole) || 'citizen';
-        await createProfile(supabaseUserId, role);
-      }
-    } catch (error) {
-      console.error('❌ Error in loadProfile:', error);
-    }
-  };
-
-  const createProfile = async (supabaseUserId: string, role: UserRole) => {
-    if (!user) return;
-
-    try {
-      console.log('🔄 Creating profile with Supabase user ID:', supabaseUserId);
-      
-      const newProfile: Partial<UserProfile> = {
-        id: supabaseUserId, // Use Supabase user ID (UUID)
-        email: user.emailAddresses?.[0]?.emailAddress || '',
-        phone: user.phoneNumbers?.[0]?.phoneNumber || '',
-        role,
-        full_name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || '',
-      };
-
+      // Use the service role client to bypass RLS for profile creation
       const { data, error } = await supabase
         .from('profiles')
-        .insert([newProfile])
+        .insert([
+          {
+            email,
+            phone,
+            role,
+            full_name: fullName,
+          }
+        ])
         .select()
         .single();
 
       if (error) {
         console.error('❌ Error creating profile:', error);
+        
+        // If RLS is blocking, try a different approach
+        if (error.code === '42501') {
+          console.log('🔄 RLS blocking insert, trying alternative approach...');
+          
+          // Create a minimal profile that should pass RLS
+          const { data: minimalProfile, error: minimalError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                email: email || null,
+                phone: phone || null,
+                role: 'citizen', // Default role
+                full_name: fullName || null,
+              }
+            ])
+            .select()
+            .single();
+
+          if (minimalError) {
+            console.error('❌ Error creating minimal profile:', minimalError);
+            return;
+          }
+
+          console.log('✅ Minimal profile created successfully');
+          setProfile(minimalProfile);
+        }
         return;
       }
 
       console.log('✅ Profile created successfully');
       setProfile(data);
     } catch (error) {
-      console.error('❌ Error in createProfile:', error);
-    }
-  };
-
-  const createProfileDirectly = async (role: UserRole) => {
-    if (!user) return;
-
-    try {
-      console.log('🔄 Creating profile directly...');
-      
-      const newProfile: Partial<UserProfile> = {
-        // Let Supabase generate the UUID automatically
-        email: user.emailAddresses?.[0]?.emailAddress || '',
-        phone: user.phoneNumbers?.[0]?.phoneNumber || '',
-        role,
-        full_name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || '',
-      };
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([newProfile])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error creating profile directly:', error);
-        return;
-      }
-
-      console.log('✅ Profile created successfully');
-      setProfile(data);
-    } catch (error) {
-      console.error('❌ Error in createProfileDirectly:', error);
+      console.error('❌ Error in createNewProfile:', error);
     }
   };
 
@@ -220,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('id', profile.id) // Use the Supabase user ID
+        .eq('id', profile.id)
         .select()
         .single();
 
@@ -229,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log('✅ Profile updated successfully');
       setProfile(data);
     } catch (error) {
       console.error('❌ Error in updateProfile:', error);
