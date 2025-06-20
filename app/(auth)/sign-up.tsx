@@ -77,65 +77,92 @@ export default function SignUpScreen() {
 
       if (authMethod === 'email') {
         signUpData.emailAddress = emailAddress.toLowerCase().trim();
+        console.log('📧 Signing up with email:', emailAddress);
       } else {
         const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
         signUpData.phoneNumber = formattedPhone;
+        console.log('📱 Signing up with phone:', formattedPhone);
       }
 
-      console.log('📝 Creating account with:', { 
-        method: authMethod, 
-        identifier: authMethod === 'email' ? emailAddress : phoneNumber,
-        role 
-      });
+      console.log('📝 Creating account with role:', role);
 
       // Create the user account
       const result = await signUp.create(signUpData);
-      console.log('📋 Sign-up result:', result.status);
+      console.log('📋 Sign-up result status:', result.status);
+      console.log('📋 Full sign-up result:', JSON.stringify(result, null, 2));
 
       // Handle different sign-up statuses
       if (result.status === 'complete') {
-        console.log('✅ Sign-up complete immediately');
-        await setActive({ session: result.createdSessionId });
-        router.replace('/(home)');
-      } else if (result.status === 'missing_requirements') {
-        console.log('⚠️ Missing requirements, attempting to complete...');
+        console.log('✅ Sign-up completed successfully');
         
-        // Try to complete the sign-up
-        try {
-          const completeResult = await signUp.update({
-            unsafeMetadata: { role }
-          });
+        if (result.createdSessionId) {
+          console.log('🔐 Setting active session:', result.createdSessionId);
+          await setActive({ session: result.createdSessionId });
           
-          if (completeResult.status === 'complete') {
-            console.log('✅ Sign-up completed after update');
-            await setActive({ session: completeResult.createdSessionId });
-            router.replace('/(home)');
-          } else {
-            console.log('⚠️ Still incomplete after update:', completeResult.status);
-            Alert.alert(
-              'Account Created',
-              'Your account has been created successfully! You can now sign in.',
-              [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
-            );
-          }
-        } catch (updateError) {
-          console.error('❌ Error updating sign-up:', updateError);
+          Alert.alert(
+            'Account Created Successfully!',
+            'Welcome to Impact! You are now signed in.',
+            [{ text: 'Continue', onPress: () => router.replace('/(home)') }]
+          );
+        } else {
+          console.log('⚠️ No session created, redirecting to sign-in');
           Alert.alert(
             'Account Created',
-            'Your account has been created successfully! You can now sign in.',
+            'Your account has been created successfully! Please sign in to continue.',
+            [{ text: 'Sign In', onPress: () => router.replace('/(auth)/sign-in') }]
+          );
+        }
+      } else if (result.status === 'missing_requirements') {
+        console.log('⚠️ Missing requirements, checking what is needed...');
+        console.log('📋 Missing requirements:', result.missingFields);
+        console.log('📋 Unverified fields:', result.unverifiedFields);
+        
+        // Check if email verification is required
+        if (result.unverifiedFields?.includes('email_address')) {
+          console.log('📧 Email verification required');
+          Alert.alert(
+            'Email Verification Required',
+            'Please check your email and click the verification link to complete your account setup.',
+            [
+              { 
+                text: 'I\'ll verify later', 
+                onPress: () => router.replace('/(auth)/sign-in') 
+              },
+              { 
+                text: 'Resend Email', 
+                onPress: async () => {
+                  try {
+                    await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+                    Alert.alert('Email Sent', 'Verification email has been resent.');
+                  } catch (error) {
+                    console.error('Error resending email:', error);
+                  }
+                }
+              }
+            ]
+          );
+        } else if (result.unverifiedFields?.includes('phone_number')) {
+          console.log('📱 Phone verification required');
+          Alert.alert(
+            'Phone Verification Required',
+            'Please verify your phone number to complete your account setup.',
             [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
+          );
+        } else {
+          console.log('❓ Unknown missing requirements');
+          Alert.alert(
+            'Account Setup Incomplete',
+            'Your account was created but requires additional setup. Please try signing in.',
+            [{ text: 'Sign In', onPress: () => router.replace('/(auth)/sign-in') }]
           );
         }
       } else {
-        console.log('⚠️ Sign-up incomplete:', result.status);
-        Alert.alert(
-          'Account Created',
-          'Your account has been created successfully! You can now sign in.',
-          [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
-        );
+        console.log('❌ Unexpected sign-up status:', result.status);
+        setError(`Sign-up failed with status: ${result.status}. Please try again or contact support.`);
       }
     } catch (err: any) {
       console.error('❌ Sign up error:', err);
+      console.error('❌ Error details:', JSON.stringify(err, null, 2));
       
       // Handle specific error cases
       if (err.errors?.[0]?.code === 'form_identifier_exists') {
@@ -144,12 +171,14 @@ export default function SignUpScreen() {
         setError('This password has been found in a data breach. Please choose a different password.');
       } else if (err.errors?.[0]?.code === 'form_password_length_too_short') {
         setError('Password must be at least 8 characters long.');
+      } else if (err.errors?.[0]?.code === 'form_password_validation_failed') {
+        setError('Password does not meet security requirements. Please choose a stronger password.');
       } else if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
       } else if (err.message) {
         setError(err.message);
       } else {
-        setError('Failed to create account. Please try again.');
+        setError('Failed to create account. Please check your internet connection and try again.');
       }
     } finally {
       setLoading(false);
@@ -174,11 +203,6 @@ export default function SignUpScreen() {
               <Text variant="bodyLarge" style={styles.subtitle}>
                 Create your account to start making a difference
               </Text>
-              <View style={styles.simplifiedBadge}>
-                <Text variant="bodySmall" style={styles.simplifiedBadgeText}>
-                  ✨ Simple Sign-Up Process
-                </Text>
-              </View>
             </View>
 
             <Card style={styles.card} mode="elevated">
@@ -312,7 +336,7 @@ export default function SignUpScreen() {
 
                 <View style={styles.infoBox}>
                   <Text variant="bodySmall" style={styles.infoText}>
-                    🚀 Your account will be created and you'll be signed in automatically
+                    ℹ️ You may need to verify your email/phone after account creation
                   </Text>
                 </View>
               </Card.Content>
@@ -377,18 +401,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 12,
-  },
-  simplifiedBadge: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  simplifiedBadgeText: {
-    color: '#047857',
-    fontWeight: '600',
   },
   card: {
     backgroundColor: '#FFFFFF',
