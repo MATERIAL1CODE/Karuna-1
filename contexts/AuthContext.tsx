@@ -27,10 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('🔄 AuthProvider: Initializing...');
     
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('❌ AuthProvider: Error getting session:', error);
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('🔄 AuthProvider: Initial session check', session ? 'Found' : 'None');
       handleAuthChange(session);
     });
@@ -93,7 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const fallbackProfile: UserProfile = {
         id: user.id,
         email: user.email || '',
-        phone: user.phone || '',
         role: 'citizen',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Platform } from 'react';
 import {
   View,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
 import {
@@ -48,21 +47,17 @@ export default function Signup() {
   // Auto-fill OTP on mobile platforms
   useEffect(() => {
     if (Platform.OS !== 'web' && useOtpVerify && otpSent) {
-      try {
-        const { hash, otp: autoOtp, message, timeoutError, stopListener, startListener } = useOtpVerify({
-          numberOfDigits: 6,
-        });
+      const { hash, otp: autoOtp, message, timeoutError, stopListener, startListener } = useOtpVerify({
+        numberOfDigits: 6,
+      });
 
-        if (autoOtp) {
-          setOtp(autoOtp);
-        }
-
-        return () => {
-          stopListener();
-        };
-      } catch (error) {
-        console.log('OTP auto-fill not available');
+      if (autoOtp) {
+        setOtp(autoOtp);
       }
+
+      return () => {
+        stopListener();
+      };
     }
   }, [otpSent]);
 
