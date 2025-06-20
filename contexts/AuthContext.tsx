@@ -12,19 +12,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
-  const { getToken } = useClerkAuth();
+  const { getToken, isLoaded: isAuthLoaded } = useClerkAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Load user profile when Clerk user is available
   useEffect(() => {
-    if (isLoaded && user) {
-      loadUserProfile();
-    } else if (isLoaded && !user) {
-      setProfile(null);
-      setLoading(false);
+    if (isLoaded && isAuthLoaded) {
+      if (user) {
+        loadUserProfile();
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, isAuthLoaded]);
 
   const loadUserProfile = async () => {
     if (!user) return;
@@ -33,66 +35,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       console.log('🔄 Loading user profile for user ID:', user.id);
       
+      // Step 1: Get Clerk token for Supabase
+      console.log('🔑 Getting Clerk token for Supabase...');
+      const clerkToken = await getToken({ template: 'supabase' });
+      
+      if (!clerkToken) {
+        console.error('❌ Failed to get Clerk token');
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Got Clerk token, setting Supabase session...');
+
+      // Step 2: Set Supabase session with Clerk token
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: clerkToken,
+        refresh_token: '', // Not needed for Clerk integration
+      });
+
+      if (sessionError) {
+        console.error('❌ Failed to set Supabase session:', sessionError);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Supabase session set successfully');
+
+      // Step 3: Get the authenticated Supabase user
+      const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !supabaseUser) {
+        console.error('❌ Failed to get Supabase user:', userError);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Got Supabase user ID:', supabaseUser.id);
+
+      // Step 4: Retry mechanism to wait for profile creation
       const maxAttempts = 10;
       const retryDelay = 1000; // 1 second
       let attempt = 0;
       let foundProfile = null;
 
-      // Retry mechanism to wait for Supabase trigger to create profile
       while (attempt < maxAttempts && !foundProfile) {
         attempt++;
         console.log(`🔄 Profile loading attempt ${attempt}/${maxAttempts}`);
 
-        // First try to find existing profile by ID
+        // Query profile using the Supabase user ID
         const { data: existingProfile, error: findError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', supabaseUser.id)
           .single();
 
         if (existingProfile && !findError) {
-          console.log('✅ Found existing profile by ID');
+          console.log('✅ Found existing profile');
           foundProfile = existingProfile;
           break;
         }
 
-        // If not found by ID, try to find by email or phone
-        const email = user.emailAddresses?.[0]?.emailAddress;
-        const phone = user.phoneNumbers?.[0]?.phoneNumber;
-        
-        // Try to find by email
-        if (email && !foundProfile) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('email', email)
-            .single();
-          
-          if (!error && data) {
-            console.log('✅ Found existing profile by email');
-            foundProfile = data;
-            break;
-          }
-        }
-        
-        // If not found by email, try by phone
-        if (phone && !foundProfile) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('phone', phone)
-            .single();
-          
-          if (!error && data) {
-            console.log('✅ Found existing profile by phone');
-            foundProfile = data;
-            break;
-          }
+        // Check for specific "no rows found" error
+        if (findError && findError.code === 'PGRST116') {
+          console.log('⏳ Profile not found yet, waiting for trigger to create it...');
+        } else if (findError) {
+          console.error('❌ Error querying profile:', findError);
         }
 
         // If this is not the last attempt, wait before retrying
         if (attempt < maxAttempts) {
-          console.log(`⏳ Profile not found yet, waiting ${retryDelay}ms before retry...`);
+          console.log(`⏳ Waiting ${retryDelay}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
       }
@@ -101,16 +116,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Profile loaded successfully');
         setProfile(foundProfile);
       } else {
-        console.warn('⚠️ No profile found after all attempts. The Supabase trigger may not have executed yet.');
-        console.warn('💡 This could be due to:');
-        console.warn('   - Database trigger not firing');
-        console.warn('   - RLS policies blocking profile creation');
-        console.warn('   - Network connectivity issues');
-        console.warn('   - User authentication not fully synchronized');
+        console.warn('⚠️ No profile found after all attempts. Creating profile manually...');
         
-        // Set profile to null but don't throw an error
-        // This allows the app to continue functioning
-        setProfile(null);
+        // Fallback: Try to create profile manually
+        const email = user.emailAddresses?.[0]?.emailAddress || '';
+        const phone = user.phoneNumbers?.[0]?.phoneNumber || '';
+        const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
+
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: supabaseUser.id,
+              email,
+              phone,
+              role,
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Failed to create profile manually:', createError);
+          setProfile(null);
+        } else {
+          console.log('✅ Profile created manually');
+          setProfile(newProfile);
+        }
       }
     } catch (error) {
       console.error('❌ Error in loadUserProfile:', error);
