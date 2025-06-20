@@ -15,6 +15,7 @@ import { Heart, Users, MapPin } from 'lucide-react-native';
 import { SignOutButton } from '@/components/SignOutButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
+import { useAppAuth } from '@/contexts/AuthContext';
 import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 import Animated, { 
   useSharedValue, 
@@ -26,6 +27,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomePage() {
   const { user } = useUser();
+  const { profile, loading } = useAppAuth();
   const citizenCardScale = useSharedValue(1);
   const facilitatorCardScale = useSharedValue(1);
 
@@ -52,12 +54,18 @@ export default function HomePage() {
   };
 
   const getUserRole = () => {
-    return user?.unsafeMetadata?.role as string || 'citizen';
+    return profile?.role || user?.unsafeMetadata?.role as string || 'citizen';
   };
 
   const getUserName = () => {
+    if (profile?.full_name) {
+      return profile.full_name.split(' ')[0];
+    }
     if (user?.firstName) {
       return user.firstName;
+    }
+    if (profile?.email) {
+      return profile.email.split('@')[0];
     }
     if (user?.emailAddresses?.[0]?.emailAddress) {
       return user.emailAddresses[0].emailAddress.split('@')[0];
@@ -67,6 +75,27 @@ export default function HomePage() {
     }
     return 'Friend';
   };
+
+  if (loading) {
+    return (
+      <ImageBackground
+        source={{ uri: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
+        style={styles.backgroundImage}
+        blurRadius={6}
+      >
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <View style={styles.iconContainer}>
+              <Heart size={48} color={colors.primary[600]} />
+            </View>
+            <Text variant="headlineSmall" style={styles.loadingText}>
+              Loading your profile...
+            </Text>
+          </View>
+        </SafeAreaView>
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground
@@ -202,6 +231,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing['3xl'],
+  },
+  loadingText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   content: {
     flex: 1,

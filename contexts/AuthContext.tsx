@@ -32,13 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       
-      // Get the Clerk session token
+      console.log('🔄 Starting Supabase authentication...');
+      
+      // Get the Clerk session token with the supabase template
       const token = await getToken({ template: 'supabase' });
       
       if (!token) {
-        console.error('No Clerk token available');
+        console.error('❌ No Clerk token available');
+        // Try to load profile directly if token fails
+        await loadProfileDirectly();
         return;
       }
+
+      console.log('✅ Got Clerk token, authenticating with Supabase...');
 
       // Authenticate Supabase with Clerk's JWT token
       const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
@@ -47,26 +53,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (authError) {
-        console.error('Error authenticating with Supabase:', authError);
+        console.error('❌ Error authenticating with Supabase:', authError);
+        // Fallback to direct profile loading
+        await loadProfileDirectly();
         return;
       }
 
       if (!authData.user) {
-        console.error('No Supabase user returned after authentication');
+        console.error('❌ No Supabase user returned after authentication');
+        await loadProfileDirectly();
         return;
       }
 
+      console.log('✅ Supabase authentication successful');
       // Now use the Supabase user ID (UUID) for profile operations
       await loadProfile(authData.user.id);
     } catch (error) {
-      console.error('Error in authenticateWithSupabase:', error);
+      console.error('❌ Error in authenticateWithSupabase:', error);
+      // Fallback to direct profile loading
+      await loadProfileDirectly();
     } finally {
       setLoading(false);
     }
   };
 
+  const loadProfileDirectly = async () => {
+    if (!user) return;
+
+    try {
+      console.log('🔄 Loading profile directly using Clerk user ID...');
+      
+      // Try to find profile by email or phone as fallback
+      const email = user.emailAddresses?.[0]?.emailAddress;
+      const phone = user.phoneNumbers?.[0]?.phoneNumber;
+      
+      let query = supabase.from('profiles').select('*');
+      
+      if (email) {
+        query = query.eq('email', email);
+      } else if (phone) {
+        query = query.eq('phone', phone);
+      } else {
+        console.error('❌ No email or phone available for profile lookup');
+        return;
+      }
+
+      const { data: existingProfile, error } = await query.single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('❌ Error loading profile directly:', error);
+        return;
+      }
+
+      if (existingProfile) {
+        console.log('✅ Found existing profile');
+        setProfile(existingProfile);
+      } else {
+        console.log('🔄 Creating new profile...');
+        // Create profile with a generated UUID
+        const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
+        await createProfileDirectly(role);
+      }
+    } catch (error) {
+      console.error('❌ Error in loadProfileDirectly:', error);
+    }
+  };
+
   const loadProfile = async (supabaseUserId: string) => {
     try {
+      console.log('🔄 Loading profile with Supabase user ID:', supabaseUserId);
+      
       // Try to get existing profile using Supabase user ID
       const { data: existingProfile, error } = await supabase
         .from('profiles')
@@ -75,19 +131,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error loading profile:', error);
+        console.error('❌ Error loading profile:', error);
         return;
       }
 
       if (existingProfile) {
+        console.log('✅ Found existing profile');
         setProfile(existingProfile);
       } else {
+        console.log('🔄 Creating new profile...');
         // Create profile if it doesn't exist
         const role = (user?.unsafeMetadata?.role as UserRole) || 'citizen';
         await createProfile(supabaseUserId, role);
       }
     } catch (error) {
-      console.error('Error in loadProfile:', error);
+      console.error('❌ Error in loadProfile:', error);
     }
   };
 
@@ -95,6 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
 
     try {
+      console.log('🔄 Creating profile with Supabase user ID:', supabaseUserId);
+      
       const newProfile: Partial<UserProfile> = {
         id: supabaseUserId, // Use Supabase user ID (UUID)
         email: user.emailAddresses?.[0]?.emailAddress || '',
@@ -110,13 +170,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error creating profile:', error);
+        console.error('❌ Error creating profile:', error);
         return;
       }
 
+      console.log('✅ Profile created successfully');
       setProfile(data);
     } catch (error) {
-      console.error('Error in createProfile:', error);
+      console.error('❌ Error in createProfile:', error);
+    }
+  };
+
+  const createProfileDirectly = async (role: UserRole) => {
+    if (!user) return;
+
+    try {
+      console.log('🔄 Creating profile directly...');
+      
+      const newProfile: Partial<UserProfile> = {
+        // Let Supabase generate the UUID automatically
+        email: user.emailAddresses?.[0]?.emailAddress || '',
+        phone: user.phoneNumbers?.[0]?.phoneNumber || '',
+        role,
+        full_name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName || '',
+      };
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([newProfile])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error creating profile directly:', error);
+        return;
+      }
+
+      console.log('✅ Profile created successfully');
+      setProfile(data);
+    } catch (error) {
+      console.error('❌ Error in createProfileDirectly:', error);
     }
   };
 
@@ -132,13 +225,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error updating profile:', error);
+        console.error('❌ Error updating profile:', error);
         return;
       }
 
       setProfile(data);
     } catch (error) {
-      console.error('Error in updateProfile:', error);
+      console.error('❌ Error in updateProfile:', error);
     }
   };
 
