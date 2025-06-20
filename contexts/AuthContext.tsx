@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-expo';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-expo';
 import { supabase, UserProfile, UserRole } from '@/lib/supabase';
 
 interface AuthContextType {
@@ -12,7 +12,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
-  const { getToken } = useAuth();
+  const { getToken } = useClerkAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -155,10 +155,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useAuth = () => {
+export const useAppAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAppAuth must be used within an AuthProvider');
   }
   return context;
 };

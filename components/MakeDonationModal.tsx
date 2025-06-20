@@ -11,7 +11,7 @@ import {
   Menu,
 } from 'react-native-paper';
 import { X, ChevronDown } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAppAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { GlassModal } from '@/components/ui/GlassModal';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -35,7 +35,7 @@ const resourceTypes = [
 ];
 
 export default function MakeDonationModal({ visible, onDismiss }: MakeDonationModalProps) {
-  const { profile } = useAuth();
+  const { profile } = useAppAuth();
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
