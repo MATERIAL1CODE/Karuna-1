@@ -7,17 +7,19 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import {
   Text,
-  TextInput,
-  Button,
-  Card,
   SegmentedButtons,
 } from 'react-native-paper';
 import { Link, useRouter } from 'expo-router';
 import { Heart, Mail, Phone, Lock, Users, MapPin } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassInput } from '@/components/ui/GlassInput';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -165,27 +167,31 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View style={styles.iconContainer}>
-                <Heart size={48} color="#4F46E5" />
+    <ImageBackground
+      source={{ uri: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
+      style={styles.backgroundImage}
+      blurRadius={8}
+    >
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.content}>
+              <View style={styles.header}>
+                <View style={styles.iconContainer}>
+                  <Heart size={48} color={colors.primary[600]} />
+                </View>
+                <Text variant="displaySmall" style={styles.title}>
+                  Join Impact
+                </Text>
+                <Text variant="bodyLarge" style={styles.subtitle}>
+                  Create your account to start making a difference
+                </Text>
               </View>
-              <Text variant="headlineLarge" style={styles.title}>
-                Join Impact
-              </Text>
-              <Text variant="bodyLarge" style={styles.subtitle}>
-                Create your account to start making a difference
-              </Text>
-            </View>
 
-            <Card style={styles.card} mode="elevated">
-              <Card.Content style={styles.cardContent}>
+              <GlassCard variant="elevated" style={styles.formCard}>
                 {error && (
                   <View style={styles.errorContainer}>
                     <Text style={styles.errorText}>{error}</Text>
@@ -205,13 +211,13 @@ export default function SignUpScreen() {
                     {
                       value: 'citizen',
                       label: 'Citizen',
-                      icon: () => <MapPin size={16} color={role === 'citizen' ? '#FFFFFF' : '#64748B'} />,
+                      icon: () => <MapPin size={16} color={role === 'citizen' ? '#FFFFFF' : colors.neutral[500]} />,
                       style: role === 'citizen' ? styles.selectedSegment : undefined,
                     },
                     {
                       value: 'facilitator',
                       label: 'Facilitator',
-                      icon: () => <Users size={16} color={role === 'facilitator' ? '#FFFFFF' : '#64748B'} />,
+                      icon: () => <Users size={16} color={role === 'facilitator' ? '#FFFFFF' : colors.neutral[500]} />,
                       style: role === 'facilitator' ? styles.selectedSegment : undefined,
                     },
                   ]}
@@ -232,13 +238,13 @@ export default function SignUpScreen() {
                     {
                       value: 'email',
                       label: 'Email',
-                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : '#64748B'} />,
+                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : colors.neutral[500]} />,
                       style: authMethod === 'email' ? styles.selectedSegment : undefined,
                     },
                     {
                       value: 'phone',
                       label: 'Phone',
-                      icon: () => <Phone size={16} color={authMethod === 'phone' ? '#FFFFFF' : '#64748B'} />,
+                      icon: () => <Phone size={16} color={authMethod === 'phone' ? '#FFFFFF' : colors.neutral[500]} />,
                       style: authMethod === 'phone' ? styles.selectedSegment : undefined,
                     },
                   ]}
@@ -247,23 +253,21 @@ export default function SignUpScreen() {
                 />
 
                 {authMethod === 'email' ? (
-                  <TextInput
+                  <GlassInput
                     label="Email Address"
                     value={emailAddress}
                     onChangeText={(text) => {
                       setEmailAddress(text.toLowerCase().trim());
                       setError(null);
                     }}
-                    mode="outlined"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoComplete="email"
-                    left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
-                    style={styles.input}
+                    leftIcon={<Mail size={20} color={colors.neutral[500]} />}
                     disabled={loading}
                   />
                 ) : (
-                  <TextInput
+                  <GlassInput
                     label="Phone Number"
                     value={phoneNumber}
                     onChangeText={(text) => {
@@ -272,203 +276,192 @@ export default function SignUpScreen() {
                       setPhoneNumber(cleaned);
                       setError(null);
                     }}
-                    mode="outlined"
                     keyboardType="phone-pad"
                     placeholder="+91 9876543210"
-                    left={<TextInput.Icon icon={() => <Phone size={20} color="#64748B" />} />}
-                    style={styles.input}
+                    leftIcon={<Phone size={20} color={colors.neutral[500]} />}
                     disabled={loading}
                   />
                 )}
 
-                <TextInput
+                <GlassInput
                   label="Password"
                   value={password}
                   onChangeText={(text) => {
                     setPassword(text);
                     setError(null);
                   }}
-                  mode="outlined"
                   secureTextEntry
                   autoComplete="password-new"
-                  left={<TextInput.Icon icon={() => <Lock size={20} color="#64748B" />} />}
-                  style={styles.input}
+                  leftIcon={<Lock size={20} color={colors.neutral[500]} />}
                   disabled={loading}
+                  helperText="Password must be at least 6 characters long"
                 />
 
-                <View style={styles.passwordRequirements}>
-                  <Text variant="bodySmall" style={styles.requirementText}>
-                    Password must be at least 6 characters long
-                  </Text>
-                </View>
-
-                <Button
-                  mode="contained"
+                <GlassButton
+                  title={loading ? 'Creating Account...' : 'Create Account'}
                   onPress={onSignUpPress}
                   loading={loading}
                   disabled={loading || (authMethod === 'email' ? (!emailAddress || !password) : (!phoneNumber || !password))}
-                  style={styles.button}
-                  contentStyle={styles.buttonContent}
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
+                  variant="primary"
+                  size="lg"
+                  style={styles.createButton}
+                />
 
                 <View style={styles.infoBox}>
                   <Text variant="bodySmall" style={styles.infoText}>
                     🚀 No verification required - you'll be signed in immediately!
                   </Text>
                 </View>
-              </Card.Content>
-            </Card>
+              </GlassCard>
 
-            <View style={styles.footer}>
-              <Text style={styles.termsText}>
-                By creating an account, you agree to our{' '}
-                <Text style={styles.linkText}>Terms of Service</Text> and{' '}
-                <Text style={styles.linkText}>Privacy Policy</Text>.
-              </Text>
+              <View style={styles.footer}>
+                <Text style={styles.termsText}>
+                  By creating an account, you agree to our{' '}
+                  <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+                  <Text style={styles.linkText}>Privacy Policy</Text>.
+                </Text>
 
-              <View style={styles.signInContainer}>
-                <Text style={styles.signInText}>Already have an account? </Text>
-                <Link href="/(auth)/sign-in" asChild>
-                  <Text style={styles.signInLink}>Sign in</Text>
-                </Link>
+                <View style={styles.signInContainer}>
+                  <Text style={styles.signInText}>Already have an account? </Text>
+                  <Link href="/(auth)/sign-in" asChild>
+                    <Text style={styles.signInLink}>Sign in</Text>
+                  </Link>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
+    padding: spacing['3xl'],
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
     justifyContent: 'center',
-    minHeight: '100%',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['6xl'],
   },
   iconContainer: {
-    backgroundColor: '#EBF4FF',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 24,
+    backgroundColor: colors.glass.light,
+    borderRadius: borderRadius['3xl'],
+    padding: spacing['2xl'],
+    marginBottom: spacing['3xl'],
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
   title: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: spacing.md,
     textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
-    color: '#64748B',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 12,
+    marginBottom: spacing.lg,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    elevation: 2,
-    borderRadius: 16,
-  },
-  cardContent: {
-    padding: 32,
+  formCard: {
+    marginBottom: spacing['4xl'],
   },
   errorContainer: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
   },
   errorText: {
-    color: '#DC2626',
+    color: colors.error[400],
     fontSize: 14,
     textAlign: 'center',
+    fontFamily: 'Inter-Medium',
   },
   roleLabel: {
-    color: '#1E293B',
-    marginBottom: 12,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
     fontWeight: '600',
   },
   authMethodLabel: {
-    color: '#1E293B',
-    marginBottom: 12,
-    marginTop: 16,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    marginTop: spacing.lg,
     fontWeight: '600',
   },
   segmentedButtons: {
-    marginBottom: 24,
+    marginBottom: spacing['3xl'],
   },
   selectedSegment: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary[600],
   },
-  input: {
-    marginBottom: 16,
-  },
-  passwordRequirements: {
-    marginBottom: 24,
-  },
-  requirementText: {
-    color: '#64748B',
-    fontSize: 12,
-  },
-  button: {
-    marginTop: 8,
-    borderRadius: 12,
-  },
-  buttonContent: {
-    paddingVertical: 8,
+  createButton: {
+    marginTop: spacing.lg,
   },
   infoBox: {
-    backgroundColor: '#ECFDF5',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 16,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginTop: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   infoText: {
-    color: '#047857',
+    color: colors.success[600],
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
   footer: {
-    marginTop: 32,
     alignItems: 'center',
   },
   termsText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     lineHeight: 18,
+    fontFamily: 'Inter-Regular',
   },
   linkText: {
-    color: '#4F46E5',
+    color: colors.primary[300],
+    fontFamily: 'Inter-Medium',
   },
   signInContainer: {
     flexDirection: 'row',
-    marginTop: 24,
+    marginTop: spacing['3xl'],
   },
   signInText: {
-    color: '#64748B',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontFamily: 'Inter-Regular',
   },
   signInLink: {
-    color: '#4F46E5',
+    color: colors.primary[300],
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
 });

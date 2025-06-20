@@ -5,23 +5,25 @@ import {
   SafeAreaView,
   ScrollView,
   Pressable,
+  ImageBackground,
 } from 'react-native';
 import {
   Text,
   Appbar,
-  Card,
 } from 'react-native-paper';
 import { Bell, MapPin, Gift, ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 import ReportNeedModal from '@/components/ReportNeedModal';
 import MakeDonationModal from '@/components/MakeDonationModal';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
 } from 'react-native-reanimated';
 
-const AnimatedCard = Animated.createAnimatedComponent(Card);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function CitizenDashboard() {
   const [reportModalVisible, setReportModalVisible] = useState(false);
@@ -53,37 +55,41 @@ export default function CitizenDashboard() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={styles.header} elevated={false}>
-        <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
-          onPress={() => router.replace('/')} 
-        />
-        <View style={styles.headerContent}>
-          <Text variant="headlineSmall" style={styles.welcomeText}>
-            Hello, Friend! 👋
-          </Text>
-        </View>
-        <Appbar.Action 
-          icon={() => <Bell size={24} color="#6B7280" />} 
-          onPress={() => {}} 
-        />
-      </Appbar.Header>
+    <ImageBackground
+      source={{ uri: 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
+      style={styles.backgroundImage}
+      blurRadius={6}
+    >
+      <SafeAreaView style={styles.container}>
+        <Appbar.Header style={styles.header} elevated={false}>
+          <Appbar.Action 
+            icon={() => <ArrowLeft size={24} color="#FFFFFF" />} 
+            onPress={() => router.replace('/')} 
+          />
+          <View style={styles.headerContent}>
+            <Text variant="headlineSmall" style={styles.welcomeText}>
+              Hello, Friend! 👋
+            </Text>
+          </View>
+          <Appbar.Action 
+            icon={() => <Bell size={24} color="#FFFFFF" />} 
+            onPress={() => {}} 
+          />
+        </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.titleSection}>
-          <Text variant="headlineMedium" style={styles.mainTitle}>
-            How would you like to help today?
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Every small act of kindness makes a big difference
-          </Text>
-        </View>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.titleSection}>
+            <Text variant="displaySmall" style={styles.mainTitle}>
+              How would you like to help today?
+            </Text>
+            <Text variant="bodyLarge" style={styles.subtitle}>
+              Every small act of kindness makes a big difference
+            </Text>
+          </View>
 
-        <View style={styles.actionCards}>
-          <Pressable onPress={handleReportPress}>
-            <AnimatedCard style={[styles.actionCard, styles.reportCard, reportCardAnimatedStyle]} mode="elevated">
-              <Card.Content style={styles.cardContent}>
+          <View style={styles.actionCards}>
+            <AnimatedPressable onPress={handleReportPress} style={reportCardAnimatedStyle}>
+              <GlassCard variant="elevated" style={styles.reportCard}>
                 <View style={styles.iconContainer}>
                   <MapPin size={40} color="#FFFFFF" />
                 </View>
@@ -93,13 +99,11 @@ export default function CitizenDashboard() {
                 <Text variant="bodyMedium" style={styles.cardDescription}>
                   See someone who needs help? Let us know their location and we'll coordinate assistance.
                 </Text>
-              </Card.Content>
-            </AnimatedCard>
-          </Pressable>
+              </GlassCard>
+            </AnimatedPressable>
 
-          <Pressable onPress={handleDonationPress}>
-            <AnimatedCard style={[styles.actionCard, styles.donationCard, donationCardAnimatedStyle]} mode="elevated">
-              <Card.Content style={styles.cardContent}>
+            <AnimatedPressable onPress={handleDonationPress} style={donationCardAnimatedStyle}>
+              <GlassCard variant="elevated" style={styles.donationCard}>
                 <View style={styles.iconContainer}>
                   <Gift size={40} color="#FFFFFF" />
                 </View>
@@ -109,161 +113,176 @@ export default function CitizenDashboard() {
                 <Text variant="bodyMedium" style={styles.cardDescription}>
                   Have surplus food or resources? Connect with those who need it most.
                 </Text>
-              </Card.Content>
-            </AnimatedCard>
-          </Pressable>
-        </View>
+              </GlassCard>
+            </AnimatedPressable>
+          </View>
 
-        <View style={styles.statsSection}>
-          <Text variant="titleLarge" style={styles.sectionTitle}>
-            Community Impact
-          </Text>
-          
-          <View style={styles.statsGrid}>
-            <Card style={styles.statCard} mode="contained">
-              <Card.Content style={styles.statContent}>
-                <Text variant="headlineMedium" style={styles.statNumber}>
+          <View style={styles.statsSection}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>
+              Community Impact
+            </Text>
+            
+            <View style={styles.statsGrid}>
+              <GlassCard variant="standard" style={styles.statCard}>
+                <Text variant="displaySmall" style={styles.statNumber}>
                   1,247
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
                   People Helped
                 </Text>
-              </Card.Content>
-            </Card>
+              </GlassCard>
 
-            <Card style={styles.statCard} mode="contained">
-              <Card.Content style={styles.statContent}>
-                <Text variant="headlineMedium" style={styles.statNumber}>
+              <GlassCard variant="standard" style={styles.statCard}>
+                <Text variant="displaySmall" style={styles.statNumber}>
                   89
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
                   Active Volunteers
                 </Text>
-              </Card.Content>
-            </Card>
+              </GlassCard>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      <ReportNeedModal 
-        visible={reportModalVisible}
-        onDismiss={() => setReportModalVisible(false)}
-      />
+        <ReportNeedModal 
+          visible={reportModalVisible}
+          onDismiss={() => setReportModalVisible(false)}
+        />
 
-      <MakeDonationModal 
-        visible={donationModalVisible}
-        onDismiss={() => setDonationModalVisible(false)}
-      />
-    </SafeAreaView>
+        <MakeDonationModal 
+          visible={donationModalVisible}
+          onDismiss={() => setDonationModalVisible(false)}
+        />
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   header: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'transparent',
     elevation: 0,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.md,
   },
   headerContent: {
     flex: 1,
-    paddingLeft: 16,
+    paddingLeft: spacing.lg,
   },
   welcomeText: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#FFFFFF',
+    fontFamily: 'Inter-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   scrollContent: {
-    padding: 24,
+    padding: spacing['3xl'],
   },
   titleSection: {
-    marginBottom: 32,
+    marginBottom: spacing['4xl'],
     alignItems: 'center',
   },
   mainTitle: {
     fontWeight: '800',
-    color: '#1E293B',
+    color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.md,
     lineHeight: 36,
+    fontFamily: 'Inter-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
-    color: '#64748B',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 24,
+    fontFamily: 'Inter-Regular',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   actionCards: {
-    gap: 20,
-    marginBottom: 40,
-  },
-  actionCard: {
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    gap: spacing['2xl'],
+    marginBottom: spacing['5xl'],
   },
   reportCard: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+    borderColor: 'rgba(79, 70, 229, 0.3)',
+    borderWidth: 1,
+    alignItems: 'center',
   },
   donationCard: {
-    backgroundColor: '#10B981',
-  },
-  cardContent: {
-    padding: 32,
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderWidth: 1,
     alignItems: 'center',
   },
   iconContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: borderRadius['3xl'],
+    padding: spacing['2xl'],
+    marginBottom: spacing['2xl'],
   },
   cardTitle: {
     color: '#FFFFFF',
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   cardDescription: {
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 22,
+    fontFamily: 'Inter-Regular',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   statsSection: {
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
   sectionTitle: {
     fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 20,
+    color: '#FFFFFF',
+    marginBottom: spacing['2xl'],
     textAlign: 'center',
+    fontFamily: 'Inter-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.lg,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-  },
-  statContent: {
     alignItems: 'center',
-    padding: 24,
+    paddingVertical: spacing['3xl'],
   },
   statNumber: {
     fontWeight: '800',
-    color: '#4F46E5',
-    marginBottom: 8,
+    color: colors.primary[600],
+    marginBottom: spacing.md,
+    fontFamily: 'Inter-Bold',
   },
   statLabel: {
-    color: '#64748B',
+    color: colors.neutral[600],
     textAlign: 'center',
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
   },
 });

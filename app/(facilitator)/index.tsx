@@ -6,10 +6,13 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
-import { Text, Card, Chip, Appbar } from 'react-native-paper';
+import { Text, Chip, Appbar } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Clock, ArrowLeft } from 'lucide-react-native';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 
 // Mock data for missions
 const mockMissions = [
@@ -63,123 +66,121 @@ function MissionCard({ mission, onPress }: MissionCardProps) {
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'high':
-        return '#EF4444';
+        return colors.error[500];
       case 'medium':
-        return '#F59E0B';
+        return colors.warning[500];
       default:
-        return '#10B981';
+        return colors.success[500];
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Food':
-        return '#10B981';
+        return colors.success[500];
       case 'Medicine':
-        return '#EF4444';
+        return colors.error[500];
       default:
-        return '#3B82F6';
+        return colors.info[500];
     }
   };
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card style={styles.missionCard} mode="elevated">
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.cardHeader}>
-            <Text variant="titleLarge" style={styles.missionTitle}>
-              {mission.title}
+      <GlassCard variant="elevated" style={styles.missionCard}>
+        <View style={styles.cardHeader}>
+          <Text variant="titleLarge" style={styles.missionTitle}>
+            {mission.title}
+          </Text>
+          <View style={styles.chipContainer}>
+            <Chip
+              style={[
+                styles.typeChip,
+                { backgroundColor: getTypeColor(mission.type) },
+              ]}
+              textStyle={styles.chipText}
+            >
+              {mission.type}
+            </Chip>
+            <Chip
+              style={[
+                styles.urgencyChip,
+                { backgroundColor: getUrgencyColor(mission.urgency) },
+              ]}
+              textStyle={styles.chipText}
+            >
+              {mission.urgency.toUpperCase()}
+            </Chip>
+          </View>
+        </View>
+
+        <View style={styles.locationSection}>
+          <View style={styles.locationItem}>
+            <View style={styles.locationDot}>
+              <View style={[styles.dot, { backgroundColor: colors.success[500] }]} />
+            </View>
+            <View style={styles.locationText}>
+              <Text variant="labelMedium" style={styles.locationLabel}>
+                PICKUP
+              </Text>
+              <Text variant="bodyMedium" style={styles.locationValue}>
+                {mission.pickupLocation}
+              </Text>
+              <Text variant="bodySmall" style={styles.contactText}>
+                Contact: {mission.pickupContact}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.routeLine} />
+
+          <View style={styles.locationItem}>
+            <View style={styles.locationDot}>
+              <View style={[styles.dot, { backgroundColor: colors.error[500] }]} />
+            </View>
+            <View style={styles.locationText}>
+              <Text variant="labelMedium" style={styles.locationLabel}>
+                DELIVERY
+              </Text>
+              <Text variant="bodyMedium" style={styles.locationValue}>
+                {mission.deliveryLocation}
+              </Text>
+              <Text variant="bodySmall" style={styles.contactText}>
+                Contact: {mission.deliveryContact}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.routePreview}>
+          <Image
+            source={{
+              uri: 'https://images.pexels.com/photos/3243090/pexels-photo-3243090.jpeg?auto=compress&cs=tinysrgb&w=400&h=150&fit=crop',
+            }}
+            style={styles.routeImage}
+          />
+          <View style={styles.routeOverlay}>
+            <Text variant="bodySmall" style={styles.distanceText}>
+              {mission.distance} • Est. 15 min
             </Text>
-            <View style={styles.chipContainer}>
-              <Chip
-                style={[
-                  styles.typeChip,
-                  { backgroundColor: getTypeColor(mission.type) },
-                ]}
-                textStyle={styles.chipText}
-              >
-                {mission.type}
-              </Chip>
-              <Chip
-                style={[
-                  styles.urgencyChip,
-                  { backgroundColor: getUrgencyColor(mission.urgency) },
-                ]}
-                textStyle={styles.chipText}
-              >
-                {mission.urgency.toUpperCase()}
-              </Chip>
-            </View>
           </View>
+        </View>
 
-          <View style={styles.locationSection}>
-            <View style={styles.locationItem}>
-              <View style={styles.locationDot}>
-                <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-              </View>
-              <View style={styles.locationText}>
-                <Text variant="labelMedium" style={styles.locationLabel}>
-                  PICKUP
-                </Text>
-                <Text variant="bodyMedium" style={styles.locationValue}>
-                  {mission.pickupLocation}
-                </Text>
-                <Text variant="bodySmall" style={styles.contactText}>
-                  Contact: {mission.pickupContact}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.routeLine} />
-
-            <View style={styles.locationItem}>
-              <View style={styles.locationDot}>
-                <View style={[styles.dot, { backgroundColor: '#EF4444' }]} />
-              </View>
-              <View style={styles.locationText}>
-                <Text variant="labelMedium" style={styles.locationLabel}>
-                  DELIVERY
-                </Text>
-                <Text variant="bodyMedium" style={styles.locationValue}>
-                  {mission.deliveryLocation}
-                </Text>
-                <Text variant="bodySmall" style={styles.contactText}>
-                  Contact: {mission.deliveryContact}
-                </Text>
-              </View>
-            </View>
+        <View style={styles.timeSection}>
+          <View style={styles.timeItem}>
+            <Clock size={16} color={colors.neutral[500]} />
+            <Text variant="bodySmall" style={styles.timeText}>
+              Pickup: {mission.pickupTime}
+            </Text>
           </View>
-
-          <View style={styles.routePreview}>
-            <Image
-              source={{
-                uri: 'https://images.pexels.com/photos/3243090/pexels-photo-3243090.jpeg?auto=compress&cs=tinysrgb&w=400&h=150&fit=crop',
-              }}
-              style={styles.routeImage}
-            />
-            <View style={styles.routeOverlay}>
-              <Text variant="bodySmall" style={styles.distanceText}>
-                {mission.distance} • Est. 15 min
-              </Text>
-            </View>
+          <View style={styles.timeItem}>
+            <Clock size={16} color={colors.neutral[500]} />
+            <Text variant="bodySmall" style={styles.timeText}>
+              Delivery: {mission.deliveryTime}
+            </Text>
           </View>
-
-          <View style={styles.timeSection}>
-            <View style={styles.timeItem}>
-              <Clock size={16} color="#64748B" />
-              <Text variant="bodySmall" style={styles.timeText}>
-                Pickup: {mission.pickupTime}
-              </Text>
-            </View>
-            <View style={styles.timeItem}>
-              <Clock size={16} color="#64748B" />
-              <Text variant="bodySmall" style={styles.timeText}>
-                Delivery: {mission.deliveryTime}
-              </Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
+        </View>
+      </GlassCard>
     </TouchableOpacity>
   );
 }
@@ -197,114 +198,112 @@ export default function FacilitatorDashboard() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={styles.header} elevated={false}>
-        <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
-          onPress={() => router.replace('/')} 
-        />
-        <Appbar.Content title="Available Missions" titleStyle={styles.headerTitle} />
-      </Appbar.Header>
+    <ImageBackground
+      source={{ uri: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
+      style={styles.backgroundImage}
+      blurRadius={6}
+    >
+      <SafeAreaView style={styles.container}>
+        <Appbar.Header style={styles.header} elevated={false}>
+          <Appbar.Action 
+            icon={() => <ArrowLeft size={24} color="#FFFFFF" />} 
+            onPress={() => router.replace('/')} 
+          />
+          <Appbar.Content title="Available Missions" titleStyle={styles.headerTitle} />
+        </Appbar.Header>
 
-      <View style={styles.content}>
-        <View style={styles.summaryCard}>
-          <Text variant="bodyLarge" style={styles.summaryText}>
-            {mockMissions.length} missions waiting for volunteers
-          </Text>
-          <Text variant="bodyMedium" style={styles.summarySubtext}>
-            Choose a mission that fits your schedule
-          </Text>
+        <View style={styles.content}>
+          <GlassCard variant="standard" style={styles.summaryCard}>
+            <Text variant="bodyLarge" style={styles.summaryText}>
+              {mockMissions.length} missions waiting for volunteers
+            </Text>
+            <Text variant="bodyMedium" style={styles.summarySubtext}>
+              Choose a mission that fits your schedule
+            </Text>
+          </GlassCard>
+
+          <FlatList
+            data={mockMissions}
+            renderItem={renderMission}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <MapPin size={48} color="rgba(255, 255, 255, 0.7)" />
+                <Text variant="titleMedium" style={styles.emptyTitle}>
+                  No available missions
+                </Text>
+                <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                  Check back later for new opportunities to help.
+                </Text>
+              </View>
+            }
+          />
         </View>
-
-        <FlatList
-          data={mockMissions}
-          renderItem={renderMission}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <MapPin size={48} color="#64748B" />
-              <Text variant="titleMedium" style={styles.emptyTitle}>
-                No available missions
-              </Text>
-              <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                Check back later for new opportunities to help.
-              </Text>
-            </View>
-          }
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   header: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'transparent',
     elevation: 0,
   },
   headerTitle: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#FFFFFF',
+    fontFamily: 'Inter-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing['3xl'],
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: spacing['3xl'],
   },
   summaryText: {
-    color: '#1E293B',
+    color: colors.neutral[800],
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.sm,
+    fontFamily: 'Inter-SemiBold',
   },
   summarySubtext: {
-    color: '#64748B',
+    color: colors.neutral[600],
+    fontFamily: 'Inter-Regular',
   },
   listContent: {
-    paddingBottom: 24,
+    paddingBottom: spacing['3xl'],
   },
   missionCard: {
-    marginBottom: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  cardContent: {
-    padding: 24,
+    marginBottom: spacing['2xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: spacing['2xl'],
   },
   missionTitle: {
     fontWeight: '700',
-    color: '#1E293B',
+    color: colors.neutral[800],
     flex: 1,
-    marginRight: 12,
+    marginRight: spacing.lg,
+    fontFamily: 'Inter-Bold',
   },
   chipContainer: {
-    gap: 8,
+    gap: spacing.md,
   },
   typeChip: {
     alignSelf: 'flex-end',
@@ -316,17 +315,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
   locationSection: {
-    marginBottom: 20,
+    marginBottom: spacing['2xl'],
   },
   locationItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: spacing.lg,
   },
   locationDot: {
-    marginTop: 4,
+    marginTop: spacing.sm,
   },
   dot: {
     width: 12,
@@ -335,50 +335,54 @@ const styles = StyleSheet.create({
   },
   routeLine: {
     width: 2,
-    height: 20,
-    backgroundColor: '#E2E8F0',
+    height: spacing['2xl'],
+    backgroundColor: colors.neutral[300],
     marginLeft: 21,
-    marginVertical: 8,
+    marginVertical: spacing.md,
   },
   locationText: {
     flex: 1,
   },
   locationLabel: {
-    color: '#64748B',
+    color: colors.neutral[500],
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.sm,
+    fontFamily: 'Inter-SemiBold',
   },
   locationValue: {
-    color: '#1E293B',
+    color: colors.neutral[800],
     fontWeight: '500',
-    marginBottom: 2,
+    marginBottom: spacing.xs,
+    fontFamily: 'Inter-Medium',
   },
   contactText: {
-    color: '#64748B',
+    color: colors.neutral[600],
+    fontFamily: 'Inter-Regular',
   },
   routePreview: {
-    marginBottom: 20,
-    borderRadius: 12,
+    marginBottom: spacing['2xl'],
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     position: 'relative',
   },
   routeImage: {
     width: '100%',
     height: 120,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: colors.neutral[200],
   },
   routeOverlay: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
+    bottom: spacing.md,
+    right: spacing.md,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   distanceText: {
     color: '#FFFFFF',
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
   timeSection: {
     flexDirection: 'row',
@@ -387,25 +391,34 @@ const styles = StyleSheet.create({
   timeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.md,
   },
   timeText: {
-    color: '#64748B',
+    color: colors.neutral[600],
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: spacing['8xl'],
   },
   emptyTitle: {
-    color: '#1E293B',
-    marginTop: 16,
-    marginBottom: 8,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   emptySubtitle: {
-    color: '#64748B',
+    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });

@@ -7,15 +7,15 @@ import {
   Platform,
 } from 'react-native';
 import {
-  Modal,
-  Portal,
   Text,
-  TextInput,
-  Button,
   Appbar,
-  Card,
 } from 'react-native-paper';
 import { X } from 'lucide-react-native';
+import { GlassModal } from '@/components/ui/GlassModal';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassInput } from '@/components/ui/GlassInput';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 
 // Conditionally import native-only modules
 let MapView: any = null;
@@ -141,13 +141,13 @@ export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalP
           <Text variant="bodyMedium" style={styles.webMapSubtext}>
             Tap here to simulate pin placement
           </Text>
-          <Button 
-            mode="outlined" 
+          <GlassButton 
+            title="Place Pin"
             onPress={() => setMarkerCoordinate({ latitude: 28.6139, longitude: 77.2090 })}
+            variant="secondary"
+            size="md"
             style={styles.webMapButton}
-          >
-            Place Pin
-          </Button>
+          />
         </View>
       );
     }
@@ -174,85 +174,79 @@ export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalP
   };
 
   return (
-    <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={onDismiss}
-        contentContainerStyle={styles.modalContainer}
-      >
-        <View style={styles.modal}>
-          <Appbar.Header style={styles.modalHeader}>
-            <Appbar.Content title="Report a Need" titleStyle={styles.modalTitle} />
-            <Appbar.Action 
-              icon={() => <X size={24} color="#1F2937" />} 
-              onPress={onDismiss} 
-            />
-          </Appbar.Header>
+    <GlassModal
+      visible={visible}
+      onClose={onDismiss}
+      animationType="slide"
+      style={styles.modalContent}
+    >
+      <View style={styles.modal}>
+        <Appbar.Header style={styles.modalHeader}>
+          <Appbar.Content title="Report a Need" titleStyle={styles.modalTitle} />
+          <Appbar.Action 
+            icon={() => <X size={24} color={colors.neutral[800]} />} 
+            onPress={onDismiss} 
+          />
+        </Appbar.Header>
 
-          <View style={styles.mapContainer}>
-            <MapComponent />
-            
-            <View style={styles.mapOverlay}>
-              <Text variant="bodyMedium" style={styles.mapInstruction}>
-                {markerCoordinate ? 
-                  '📍 Pin placed. Drag to adjust.' : 
-                  Platform.OS === 'web' ? 
-                    'Tap the button to place a pin' :
-                    'Tap on the map to pin the location'
-                }
-              </Text>
-            </View>
-          </View>
-
-          <Card style={styles.formCard} mode="elevated">
-            <Card.Content style={styles.formContent}>
-              <Text variant="titleMedium" style={styles.formTitle}>
-                Details
-              </Text>
-
-              <TextInput
-                label="Estimated number of people in need *"
-                value={peopleCount}
-                onChangeText={setPeopleCount}
-                mode="outlined"
-                keyboardType="numeric"
-                placeholder="e.g., 5"
-                style={styles.input}
-              />
-
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                loading={loading}
-                disabled={loading || !markerCoordinate || !peopleCount}
-                style={styles.submitButton}
-                contentStyle={styles.buttonContent}
-              >
-                Submit Report
-              </Button>
-            </Card.Content>
-          </Card>
+        <View style={styles.mapContainer}>
+          <MapComponent />
+          
+          <GlassCard variant="standard" style={styles.mapOverlay}>
+            <Text variant="bodyMedium" style={styles.mapInstruction}>
+              {markerCoordinate ? 
+                '📍 Pin placed. Drag to adjust.' : 
+                Platform.OS === 'web' ? 
+                  'Tap the button to place a pin' :
+                  'Tap on the map to pin the location'
+              }
+            </Text>
+          </GlassCard>
         </View>
-      </Modal>
-    </Portal>
+
+        <GlassCard variant="elevated" style={styles.formCard}>
+          <Text variant="titleMedium" style={styles.formTitle}>
+            Details
+          </Text>
+
+          <GlassInput
+            label="Estimated number of people in need *"
+            value={peopleCount}
+            onChangeText={setPeopleCount}
+            keyboardType="numeric"
+            placeholder="e.g., 5"
+          />
+
+          <GlassButton
+            title="Submit Report"
+            onPress={handleSubmit}
+            loading={loading}
+            disabled={loading || !markerCoordinate || !peopleCount}
+            variant="primary"
+            size="lg"
+          />
+        </GlassCard>
+      </View>
+    </GlassModal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
+  modalContent: {
+    margin: 0,
+    padding: 0,
   },
   modal: {
     flex: 1,
   },
   modalHeader: {
-    backgroundColor: '#FFFFFF',
-    elevation: 2,
+    backgroundColor: 'transparent',
+    elevation: 0,
   },
   modalTitle: {
     fontWeight: '700',
-    color: '#1F2937',
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   mapContainer: {
     flex: 1,
@@ -266,59 +260,44 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#E5E7EB',
-    padding: 40,
+    backgroundColor: colors.neutral[100],
+    padding: spacing['5xl'],
   },
   webMapText: {
-    color: '#1F2937',
+    color: colors.neutral[800],
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.md,
+    fontFamily: 'Inter-SemiBold',
   },
   webMapSubtext: {
-    color: '#6B7280',
+    color: colors.neutral[500],
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Regular',
   },
   webMapButton: {
-    borderColor: '#4F46E5',
+    borderColor: colors.primary[600],
   },
   mapOverlay: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 12,
-    padding: 16,
-    elevation: 4,
+    top: spacing.lg,
+    left: spacing.lg,
+    right: spacing.lg,
   },
   mapInstruction: {
     textAlign: 'center',
-    color: '#1F2937',
+    color: colors.neutral[800],
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
   },
   formCard: {
-    margin: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 4,
-  },
-  formContent: {
-    padding: 24,
+    margin: spacing.lg,
   },
   formTitle: {
     fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 20,
-  },
-  input: {
-    marginBottom: 24,
-  },
-  submitButton: {
-    borderRadius: 12,
-  },
-  buttonContent: {
-    paddingVertical: 8,
+    color: colors.neutral[800],
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Bold',
   },
 });

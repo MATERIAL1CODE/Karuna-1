@@ -4,22 +4,25 @@ import {
   StyleSheet,
   SafeAreaView,
   Pressable,
+  ImageBackground,
 } from 'react-native';
 import {
   Text,
-  Card,
 } from 'react-native-paper';
 import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
 import { Link, router } from 'expo-router';
 import { Heart, Users, MapPin } from 'lucide-react-native';
 import { SignOutButton } from '@/components/SignOutButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { colors, spacing, borderRadius } from '@/lib/design-tokens';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
 } from 'react-native-reanimated';
 
-const AnimatedCard = Animated.createAnimatedComponent(Card);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomePage() {
   const { user } = useUser();
@@ -66,37 +69,41 @@ export default function HomePage() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <SignedIn>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.welcomeSection}>
-              <View style={styles.iconContainer}>
-                <Heart size={48} color="#4F46E5" />
+    <ImageBackground
+      source={{ uri: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
+      style={styles.backgroundImage}
+      blurRadius={6}
+    >
+      <SafeAreaView style={styles.container}>
+        <SignedIn>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <View style={styles.welcomeSection}>
+                <View style={styles.iconContainer}>
+                  <Heart size={48} color={colors.primary[600]} />
+                </View>
+                <Text variant="displayMedium" style={styles.title}>
+                  Welcome Back!
+                </Text>
+                <Text variant="headlineSmall" style={styles.subtitle}>
+                  Hello {getUserName()}
+                </Text>
+                <Text variant="bodyLarge" style={styles.roleText}>
+                  Registered as: {getUserRole() === 'citizen' ? 'Citizen' : 'Facilitator'}
+                </Text>
+                <Text variant="bodyMedium" style={styles.description}>
+                  Choose how you'd like to make a difference today
+                </Text>
               </View>
-              <Text variant="headlineLarge" style={styles.title}>
-                Welcome Back!
-              </Text>
-              <Text variant="bodyLarge" style={styles.subtitle}>
-                Hello {getUserName()}
-              </Text>
-              <Text variant="bodyMedium" style={styles.roleText}>
-                Registered as: {getUserRole() === 'citizen' ? 'Citizen' : 'Facilitator'}
-              </Text>
-              <Text variant="bodyMedium" style={styles.description}>
-                Choose how you'd like to make a difference today
-              </Text>
+              
+              <View style={styles.signOutContainer}>
+                <SignOutButton />
+              </View>
             </View>
-            
-            <View style={styles.signOutContainer}>
-              <SignOutButton />
-            </View>
-          </View>
 
-          <View style={styles.roleCards}>
-            <Pressable onPress={handleCitizenPress}>
-              <AnimatedCard style={[styles.roleCard, styles.citizenCard, citizenCardAnimatedStyle]} mode="elevated">
-                <Card.Content style={styles.cardContent}>
+            <View style={styles.roleCards}>
+              <AnimatedPressable onPress={handleCitizenPress} style={citizenCardAnimatedStyle}>
+                <GlassCard variant="elevated" style={styles.citizenCard}>
                   <View style={styles.cardIcon}>
                     <MapPin size={40} color="#FFFFFF" />
                   </View>
@@ -111,13 +118,11 @@ export default function HomePage() {
                     <Text style={styles.feature}>• Donate food & resources</Text>
                     <Text style={styles.feature}>• Track your impact</Text>
                   </View>
-                </Card.Content>
-              </AnimatedCard>
-            </Pressable>
+                </GlassCard>
+              </AnimatedPressable>
 
-            <Pressable onPress={handleFacilitatorPress}>
-              <AnimatedCard style={[styles.roleCard, styles.facilitatorCard, facilitatorCardAnimatedStyle]} mode="elevated">
-                <Card.Content style={styles.cardContent}>
+              <AnimatedPressable onPress={handleFacilitatorPress} style={facilitatorCardAnimatedStyle}>
+                <GlassCard variant="elevated" style={styles.facilitatorCard}>
                   <View style={styles.cardIcon}>
                     <Users size={40} color="#FFFFFF" />
                   </View>
@@ -132,187 +137,196 @@ export default function HomePage() {
                     <Text style={styles.feature}>• Coordinate aid efforts</Text>
                     <Text style={styles.feature}>• Make direct impact</Text>
                   </View>
-                </Card.Content>
-              </AnimatedCard>
-            </Pressable>
-          </View>
-
-          <View style={styles.footer}>
-            <Text variant="bodySmall" style={styles.footerText}>
-              You can use both modes regardless of your registration role
-            </Text>
-          </View>
-        </View>
-      </SignedIn>
-
-      <SignedOut>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <Heart size={48} color="#4F46E5" />
+                </GlassCard>
+              </AnimatedPressable>
             </View>
-            <Text variant="headlineLarge" style={styles.title}>
-              Welcome to Impact
-            </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
-              Join our community to make a difference
-            </Text>
-          </View>
 
-          <View style={styles.authButtons}>
-            <Link href="/(auth)/sign-in" asChild>
-              <Pressable style={styles.authButton}>
-                <Text style={styles.authButtonText}>Sign In</Text>
-              </Pressable>
-            </Link>
-            
-            <Link href="/(auth)/sign-up" asChild>
-              <Pressable style={[styles.authButton, styles.primaryButton]}>
-                <Text style={[styles.authButtonText, styles.primaryButtonText]}>Sign Up</Text>
-              </Pressable>
-            </Link>
+            <View style={styles.footer}>
+              <Text variant="bodySmall" style={styles.footerText}>
+                You can use both modes regardless of your registration role
+              </Text>
+            </View>
           </View>
+        </SignedIn>
 
-          <View style={styles.footer}>
-            <Text variant="bodySmall" style={styles.footerText}>
-              Sign up to start helping your community
-            </Text>
+        <SignedOut>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <Heart size={48} color={colors.primary[600]} />
+              </View>
+              <Text variant="displayMedium" style={styles.title}>
+                Welcome to Impact
+              </Text>
+              <Text variant="headlineSmall" style={styles.subtitle}>
+                Join our community to make a difference
+              </Text>
+            </View>
+
+            <View style={styles.authButtons}>
+              <Link href="/(auth)/sign-in" asChild>
+                <GlassButton
+                  title="Sign In"
+                  onPress={() => {}}
+                  variant="secondary"
+                  size="lg"
+                />
+              </Link>
+              
+              <Link href="/(auth)/sign-up" asChild>
+                <GlassButton
+                  title="Sign Up"
+                  onPress={() => {}}
+                  variant="primary"
+                  size="lg"
+                />
+              </Link>
+            </View>
+
+            <View style={styles.footer}>
+              <Text variant="bodySmall" style={styles.footerText}>
+                Sign up to start helping your community
+              </Text>
+            </View>
           </View>
-        </View>
-      </SignedOut>
-    </SafeAreaView>
+        </SignedOut>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing['3xl'],
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['6xl'],
   },
   welcomeSection: {
     alignItems: 'center',
   },
   iconContainer: {
-    backgroundColor: '#EBF4FF',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 24,
+    backgroundColor: colors.glass.light,
+    borderRadius: borderRadius['3xl'],
+    padding: spacing['2xl'],
+    marginBottom: spacing['3xl'],
+    borderWidth: 1,
+    borderColor: colors.glass.border,
   },
   title: {
     fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: spacing.md,
     textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
-    color: '#4F46E5',
+    color: colors.primary[300],
     textAlign: 'center',
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: spacing.sm,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   roleText: {
-    color: '#10B981',
+    color: colors.success[400],
     textAlign: 'center',
     fontWeight: '500',
-    marginBottom: 8,
+    marginBottom: spacing.md,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   description: {
-    color: '#64748B',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   signOutContainer: {
-    marginTop: 24,
+    marginTop: spacing['3xl'],
   },
   roleCards: {
-    gap: 24,
-    marginBottom: 32,
-  },
-  roleCard: {
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    gap: spacing['3xl'],
+    marginBottom: spacing['4xl'],
   },
   citizenCard: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+    borderColor: 'rgba(79, 70, 229, 0.3)',
+    borderWidth: 1,
   },
   facilitatorCard: {
-    backgroundColor: '#10B981',
-  },
-  cardContent: {
-    padding: 32,
-    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderWidth: 1,
   },
   cardIcon: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: borderRadius['3xl'],
+    padding: spacing['2xl'],
+    marginBottom: spacing['2xl'],
+    alignSelf: 'center',
   },
   cardTitle: {
     color: '#FFFFFF',
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.lg,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   cardDescription: {
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 20,
+    marginBottom: spacing['2xl'],
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   features: {
     alignItems: 'flex-start',
-    gap: 8,
+    gap: spacing.md,
   },
   feature: {
     color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Inter-Medium',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   authButtons: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  authButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E2E8F0',
-  },
-  primaryButton: {
-    backgroundColor: '#4F46E5',
-    borderColor: '#4F46E5',
-  },
-  authButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
+    gap: spacing.lg,
+    marginBottom: spacing['4xl'],
   },
   footer: {
     alignItems: 'center',
   },
   footerText: {
-    color: '#9CA3AF',
+    color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });
