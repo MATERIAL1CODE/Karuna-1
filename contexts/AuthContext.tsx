@@ -1,42 +1,77 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useUser } from '@clerk/clerk-expo';
+import { useUser, useAuth } from '@clerk/clerk-expo';
 import { supabase, UserProfile, UserRole } from '@/lib/supabase';
 
 interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  createProfile: (role: UserRole) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Load user profile from Supabase when Clerk user is available
   useEffect(() => {
     if (isLoaded && user) {
-      loadProfile();
+      authenticateWithSupabase();
     } else if (isLoaded && !user) {
       setProfile(null);
       setLoading(false);
     }
   }, [user, isLoaded]);
 
-  const loadProfile = async () => {
+  const authenticateWithSupabase = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       
-      // Try to get existing profile
+      // Get the Clerk session token
+      const token = await getToken({ template: 'supabase' });
+      
+      if (!token) {
+        console.error('No Clerk token available');
+        return;
+      }
+
+      // Authenticate Supabase with Clerk's JWT token
+      const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
+        provider: 'custom',
+        token,
+      });
+
+      if (authError) {
+        console.error('Error authenticating with Supabase:', authError);
+        return;
+      }
+
+      if (!authData.user) {
+        console.error('No Supabase user returned after authentication');
+        return;
+      }
+
+      // Now use the Supabase user ID (UUID) for profile operations
+      await loadProfile(authData.user.id);
+    } catch (error) {
+      console.error('Error in authenticateWithSupabase:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProfile = async (supabaseUserId: string) => {
+    try {
+      // Try to get existing profile using Supabase user ID
       const { data: existingProfile, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', supabaseUserId)
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -48,22 +83,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(existingProfile);
       } else {
         // Create profile if it doesn't exist
-        const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
-        await createProfile(role);
+        const role = (user?.unsafeMetadata?.role as UserRole) || 'citizen';
+        await createProfile(supabaseUserId, role);
       }
     } catch (error) {
       console.error('Error in loadProfile:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const createProfile = async (role: UserRole) => {
+  const createProfile = async (supabaseUserId: string, role: UserRole) => {
     if (!user) return;
 
     try {
       const newProfile: Partial<UserProfile> = {
-        id: user.id,
+        id: supabaseUserId, // Use Supabase user ID (UUID)
         email: user.emailAddresses?.[0]?.emailAddress || '',
         phone: user.phoneNumbers?.[0]?.phoneNumber || '',
         role,
@@ -88,13 +121,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user || !profile) return;
+    if (!profile) return;
 
     try {
       const { data, error } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('id', user.id)
+        .eq('id', profile.id) // Use the Supabase user ID
         .select()
         .single();
 
@@ -113,7 +146,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     loading,
     updateProfile,
-    createProfile,
   };
 
   return (
