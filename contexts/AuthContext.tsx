@@ -46,6 +46,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // 🔍 DEBUG: Print the actual JWT token
+      console.log('🔍 DEBUG: Clerk JWT Token:', clerkToken);
+      console.log('🔍 DEBUG: Token length:', clerkToken.length);
+      console.log('🔍 DEBUG: Token starts with:', clerkToken.substring(0, 50) + '...');
+      
+      // Try to decode the JWT payload for debugging
+      try {
+        const tokenParts = clerkToken.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('🔍 DEBUG: JWT Payload:', JSON.stringify(payload, null, 2));
+          console.log('🔍 DEBUG: Audience (aud):', payload.aud);
+          console.log('🔍 DEBUG: Issuer (iss):', payload.iss);
+          console.log('🔍 DEBUG: Subject (sub):', payload.sub);
+          console.log('🔍 DEBUG: Expiration (exp):', payload.exp, new Date(payload.exp * 1000));
+          console.log('🔍 DEBUG: Not Before (nbf):', payload.nbf, new Date(payload.nbf * 1000));
+        }
+      } catch (decodeError) {
+        console.error('🔍 DEBUG: Failed to decode JWT:', decodeError);
+      }
+
       console.log('✅ Got Clerk token, setting Supabase session...');
 
       // Step 2: Set Supabase session with Clerk token
@@ -56,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (sessionError) {
         console.error('❌ Failed to set Supabase session:', sessionError);
+        console.error('❌ Session error details:', JSON.stringify(sessionError, null, 2));
         setProfile(null);
         setLoading(false);
         return;
