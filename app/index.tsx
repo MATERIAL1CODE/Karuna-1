@@ -33,7 +33,7 @@ export default function IndexScreen() {
         router.replace('/(auth)/login');
       } else if (session && profile) {
         // Authenticated with profile - redirect to appropriate dashboard
-        console.log('🔄 Index: Authenticated user with profile, redirecting to dashboard');
+        console.log('🔄 Index: Authenticated user, redirecting to dashboard');
         if (profile.role === 'facilitator') {
           router.replace('/(facilitator)');
         } else {
@@ -83,84 +83,79 @@ export default function IndexScreen() {
     );
   }
 
-  // If no session, will redirect to login (return null to prevent flash)
+  // Only show role selection if user is authenticated but doesn't have a profile yet
+  // This is a fallback case that shouldn't normally happen
   if (!session) {
-    return null;
+    return null; // Will redirect to login
   }
 
-  // If session but no profile, show role selection (fallback case)
-  if (session && !profile) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <Heart size={48} color="#4F46E5" />
-            </View>
-            <Text variant="headlineLarge" style={styles.title}>
-              Choose Your Role
-            </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
-              How would you like to make a difference in your community?
-            </Text>
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Heart size={48} color="#4F46E5" />
           </View>
-
-          <View style={styles.roleCards}>
-            <Pressable onPress={handleCitizenPress}>
-              <AnimatedCard style={[styles.roleCard, styles.citizenCard, citizenCardAnimatedStyle]} mode="elevated">
-                <Card.Content style={styles.cardContent}>
-                  <View style={styles.cardIcon}>
-                    <MapPin size={40} color="#FFFFFF" />
-                  </View>
-                  <Text variant="headlineSmall" style={styles.cardTitle}>
-                    I'm a Citizen
-                  </Text>
-                  <Text variant="bodyMedium" style={styles.cardDescription}>
-                    Report people in need and donate surplus resources to help your community
-                  </Text>
-                  <View style={styles.features}>
-                    <Text style={styles.feature}>• Report people in need</Text>
-                    <Text style={styles.feature}>• Donate food & resources</Text>
-                    <Text style={styles.feature}>• Track your impact</Text>
-                  </View>
-                </Card.Content>
-              </AnimatedCard>
-            </Pressable>
-
-            <Pressable onPress={handleFacilitatorPress}>
-              <AnimatedCard style={[styles.roleCard, styles.facilitatorCard, facilitatorCardAnimatedStyle]} mode="elevated">
-                <Card.Content style={styles.cardContent}>
-                  <View style={styles.cardIcon}>
-                    <Users size={40} color="#FFFFFF" />
-                  </View>
-                  <Text variant="headlineSmall" style={styles.cardTitle}>
-                    I'm a Facilitator
-                  </Text>
-                  <Text variant="bodyMedium" style={styles.cardDescription}>
-                    Accept delivery missions and coordinate aid efforts to help those in need
-                  </Text>
-                  <View style={styles.features}>
-                    <Text style={styles.feature}>• Accept delivery missions</Text>
-                    <Text style={styles.feature}>• Coordinate aid efforts</Text>
-                    <Text style={styles.feature}>• Make direct impact</Text>
-                  </View>
-                </Card.Content>
-              </AnimatedCard>
-            </Pressable>
-          </View>
-
-          <View style={styles.footer}>
-            <Text variant="bodySmall" style={styles.footerText}>
-              You can switch roles anytime in the app settings
-            </Text>
-          </View>
+          <Text variant="headlineLarge" style={styles.title}>
+            Choose Your Role
+          </Text>
+          <Text variant="bodyLarge" style={styles.subtitle}>
+            How would you like to make a difference in your community?
+          </Text>
         </View>
-      </SafeAreaView>
-    );
-  }
 
-  // If we have both session and profile, will redirect (return null to prevent flash)
-  return null;
+        <View style={styles.roleCards}>
+          <Pressable onPress={handleCitizenPress}>
+            <AnimatedCard style={[styles.roleCard, styles.citizenCard, citizenCardAnimatedStyle]} mode="elevated">
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.cardIcon}>
+                  <MapPin size={40} color="#FFFFFF" />
+                </View>
+                <Text variant="headlineSmall" style={styles.cardTitle}>
+                  I'm a Citizen
+                </Text>
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  Report people in need and donate surplus resources to help your community
+                </Text>
+                <View style={styles.features}>
+                  <Text style={styles.feature}>• Report people in need</Text>
+                  <Text style={styles.feature}>• Donate food & resources</Text>
+                  <Text style={styles.feature}>• Track your impact</Text>
+                </View>
+              </Card.Content>
+            </AnimatedCard>
+          </Pressable>
+
+          <Pressable onPress={handleFacilitatorPress}>
+            <AnimatedCard style={[styles.roleCard, styles.facilitatorCard, facilitatorCardAnimatedStyle]} mode="elevated">
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.cardIcon}>
+                  <Users size={40} color="#FFFFFF" />
+                </View>
+                <Text variant="headlineSmall" style={styles.cardTitle}>
+                  I'm a Facilitator
+                </Text>
+                <Text variant="bodyMedium" style={styles.cardDescription}>
+                  Accept delivery missions and coordinate aid efforts to help those in need
+                </Text>
+                <View style={styles.features}>
+                  <Text style={styles.feature}>• Accept delivery missions</Text>
+                  <Text style={styles.feature}>• Coordinate aid efforts</Text>
+                  <Text style={styles.feature}>• Make direct impact</Text>
+                </View>
+              </Card.Content>
+            </AnimatedCard>
+          </Pressable>
+        </View>
+
+        <View style={styles.footer}>
+          <Text variant="bodySmall" style={styles.footerText}>
+            You can switch roles anytime in the app settings
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
