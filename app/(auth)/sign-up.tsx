@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import {
   View,
   StyleSheet,
@@ -6,30 +6,34 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {
   Text,
   TextInput,
   Button,
   Card,
+  SegmentedButtons,
 } from 'react-native-paper';
 import { Link, useRouter } from 'expo-router';
-import { Heart, Mail, Lock, CircleCheck as CheckCircle } from 'lucide-react-native';
+import { Heart, Mail, Phone, Lock } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
-  const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Form state
+  const [authMethod, setAuthMethod] = React.useState<'email' | 'phone'>('email');
+  const [emailAddress, setEmailAddress] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [pendingVerification, setPendingVerification] = React.useState(false);
+  const [code, setCode] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const onSignUpPress = async () => {
+  // Handle email sign-up
+  const onEmailSignUpPress = async () => {
     if (!isLoaded) return;
 
     if (!emailAddress || !password) {
@@ -51,15 +55,20 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
+      // Start sign-up process using email and password provided
       await signUp.create({
         emailAddress,
         password,
       });
 
+      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      // Set 'pendingVerification' to true to display second form
+      // and capture OTP code
       setPendingVerification(true);
     } catch (err: any) {
-      console.error('Sign up error:', JSON.stringify(err, null, 2));
+      console.error('Email sign up error:', JSON.stringify(err, null, 2));
       
       if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
@@ -71,11 +80,24 @@ export default function SignUpScreen() {
     }
   };
 
-  const onVerifyPress = async () => {
+  // Handle phone sign-up
+  const onPhoneSignUpPress = async () => {
     if (!isLoaded) return;
 
-    if (!code || code.length !== 6) {
-      setError('Please enter the 6-digit verification code');
+    if (!phoneNumber || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    // Basic phone number validation
+    const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
 
@@ -83,14 +105,56 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
+      // Start sign-up process using phone and password
+      await signUp.create({
+        phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`,
+        password,
       });
 
+      // Send user an SMS with verification code
+      await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
+
+      // Set 'pendingVerification' to true to display second form
+      setPendingVerification(true);
+    } catch (err: any) {
+      console.error('Phone sign up error:', JSON.stringify(err, null, 2));
+      
+      if (err.errors?.[0]?.message) {
+        setError(err.errors[0].message);
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle verification
+  const onVerifyPress = async () => {
+    if (!isLoaded) return;
+
+    if (!code || code.length < 4) {
+      setError('Please enter the verification code');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Use the code the user provided to attempt verification
+      const signUpAttempt = authMethod === 'email' 
+        ? await signUp.attemptEmailAddressVerification({ code })
+        : await signUp.attemptPhoneNumberVerification({ code });
+
+      // If verification was completed, set the session to active
+      // and redirect the user
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace('/(home)');
       } else {
+        // If the status is not complete, check why. User may need to
+        // complete further steps.
         console.error('Verification incomplete:', JSON.stringify(signUpAttempt, null, 2));
         setError('Verification failed. Please try again.');
       }
@@ -118,13 +182,18 @@ export default function SignUpScreen() {
             <View style={styles.content}>
               <View style={styles.header}>
                 <View style={styles.iconContainer}>
-                  <Mail size={48} color="#4F46E5" />
+                  {authMethod === 'email' ? (
+                    <Mail size={48} color="#4F46E5" />
+                  ) : (
+                    <Phone size={48} color="#4F46E5" />
+                  )}
                 </View>
                 <Text variant="headlineLarge" style={styles.title}>
-                  Check Your Email
+                  Verify Your {authMethod === 'email' ? 'Email' : 'Phone'}
                 </Text>
                 <Text variant="bodyLarge" style={styles.subtitle}>
-                  We've sent a verification code to {emailAddress}
+                  We've sent a verification code to{' '}
+                  {authMethod === 'email' ? emailAddress : phoneNumber}
                 </Text>
               </View>
 
@@ -140,13 +209,12 @@ export default function SignUpScreen() {
                     label="Verification Code"
                     value={code}
                     onChangeText={(text) => {
-                      setCode(text.replace(/\D/g, '').slice(0, 6));
+                      setCode(text.replace(/\D/g, ''));
                       setError(null);
                     }}
                     mode="outlined"
                     keyboardType="number-pad"
-                    placeholder="Enter 6-digit code"
-                    maxLength={6}
+                    placeholder="Enter verification code"
                     style={styles.input}
                     disabled={loading}
                   />
@@ -155,11 +223,11 @@ export default function SignUpScreen() {
                     mode="contained"
                     onPress={onVerifyPress}
                     loading={loading}
-                    disabled={loading || code.length !== 6}
+                    disabled={loading || !code}
                     style={styles.button}
                     contentStyle={styles.buttonContent}
                   >
-                    {loading ? 'Verifying...' : 'Verify Email'}
+                    {loading ? 'Verifying...' : 'Verify'}
                   </Button>
 
                   <Button
@@ -211,21 +279,71 @@ export default function SignUpScreen() {
                   </View>
                 )}
 
-                <TextInput
-                  label="Email Address"
-                  value={emailAddress}
-                  onChangeText={(text) => {
-                    setEmailAddress(text.toLowerCase().trim());
+                <Text variant="labelLarge" style={styles.authMethodLabel}>
+                  Sign up with:
+                </Text>
+                <SegmentedButtons
+                  value={authMethod}
+                  onValueChange={(value) => {
+                    setAuthMethod(value as 'email' | 'phone');
                     setError(null);
                   }}
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
-                  style={styles.input}
+                  buttons={[
+                    {
+                      value: 'email',
+                      label: 'Email',
+                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'email' ? styles.selectedSegment : undefined,
+                    },
+                    {
+                      value: 'phone',
+                      label: 'Phone',
+                      icon: () => <Phone size={16} color={authMethod === 'phone' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'phone' ? styles.selectedSegment : undefined,
+                    },
+                  ]}
+                  style={styles.segmentedButtons}
                   disabled={loading}
                 />
+
+                {authMethod === 'email' ? (
+                  <>
+                    <TextInput
+                      label="Email Address"
+                      value={emailAddress}
+                      onChangeText={(text) => {
+                        setEmailAddress(text.toLowerCase().trim());
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
+                      style={styles.input}
+                      disabled={loading}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <TextInput
+                      label="Phone Number"
+                      value={phoneNumber}
+                      onChangeText={(text) => {
+                        // Allow only numbers, spaces, and + sign
+                        const cleaned = text.replace(/[^\d\s+]/g, '');
+                        setPhoneNumber(cleaned);
+                        setError(null);
+                      }}
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      placeholder="+91 9876543210"
+                      left={<TextInput.Icon icon={() => <Phone size={20} color="#64748B" />} />}
+                      style={styles.input}
+                      disabled={loading}
+                    />
+                  </>
+                )}
 
                 <TextInput
                   label="Password"
@@ -250,13 +368,13 @@ export default function SignUpScreen() {
 
                 <Button
                   mode="contained"
-                  onPress={onSignUpPress}
+                  onPress={authMethod === 'email' ? onEmailSignUpPress : onPhoneSignUpPress}
                   loading={loading}
-                  disabled={loading || !emailAddress || !password}
+                  disabled={loading || (authMethod === 'email' ? (!emailAddress || !password) : (!phoneNumber || !password))}
                   style={styles.button}
                   contentStyle={styles.buttonContent}
                 >
-                  {loading ? 'Creating Account...' : 'Create Account'}
+                  {loading ? 'Creating Account...' : 'Continue'}
                 </Button>
               </Card.Content>
             </Card>
@@ -340,6 +458,17 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 14,
     textAlign: 'center',
+  },
+  authMethodLabel: {
+    color: '#1E293B',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  segmentedButtons: {
+    marginBottom: 24,
+  },
+  selectedSegment: {
+    backgroundColor: '#4F46E5',
   },
   input: {
     marginBottom: 16,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
@@ -12,29 +12,36 @@ import {
   TextInput,
   Button,
   Card,
+  SegmentedButtons,
 } from 'react-native-paper';
 import { Link, useRouter } from 'expo-router';
-import { Heart, Mail, Lock } from 'lucide-react-native';
+import { Heart, Mail, Phone, Lock } from 'lucide-react-native';
 import { useSignIn } from '@clerk/clerk-expo';
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Form state
+  const [authMethod, setAuthMethod] = React.useState<'email' | 'phone'>('email');
+  const [emailAddress, setEmailAddress] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
+  // Handle the submission of the sign-in form
   const onSignInPress = async () => {
     if (!isLoaded) return;
 
-    if (!emailAddress || !password) {
+    const identifier = authMethod === 'email' ? emailAddress : phoneNumber;
+    
+    if (!identifier || !password) {
       setError('Please fill in all fields');
       return;
     }
 
-    if (!emailAddress.includes('@')) {
+    if (authMethod === 'email' && !emailAddress.includes('@')) {
       setError('Please enter a valid email address');
       return;
     }
@@ -43,15 +50,20 @@ export default function SignInScreen() {
     setError(null);
 
     try {
+      // Start the sign-in process using the email/phone and password provided
       const signInAttempt = await signIn.create({
-        identifier: emailAddress,
+        identifier: authMethod === 'email' ? emailAddress : (phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`),
         password,
       });
 
+      // If sign-in process is complete, set the created session as active
+      // and redirect the user
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/(home)');
       } else {
+        // If the status isn't complete, check why. User might need to
+        // complete further steps.
         console.error('Sign in incomplete:', JSON.stringify(signInAttempt, null, 2));
         setError('Sign in failed. Please check your credentials.');
       }
@@ -61,7 +73,7 @@ export default function SignInScreen() {
       if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
       } else {
-        setError('Invalid email or password. Please try again.');
+        setError('Invalid credentials. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -96,21 +108,67 @@ export default function SignInScreen() {
                   </View>
                 )}
 
-                <TextInput
-                  label="Email Address"
-                  value={emailAddress}
-                  onChangeText={(text) => {
-                    setEmailAddress(text.toLowerCase().trim());
+                <Text variant="labelLarge" style={styles.authMethodLabel}>
+                  Sign in with:
+                </Text>
+                <SegmentedButtons
+                  value={authMethod}
+                  onValueChange={(value) => {
+                    setAuthMethod(value as 'email' | 'phone');
                     setError(null);
                   }}
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
-                  style={styles.input}
+                  buttons={[
+                    {
+                      value: 'email',
+                      label: 'Email',
+                      icon: () => <Mail size={16} color={authMethod === 'email' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'email' ? styles.selectedSegment : undefined,
+                    },
+                    {
+                      value: 'phone',
+                      label: 'Phone',
+                      icon: () => <Phone size={16} color={authMethod === 'phone' ? '#FFFFFF' : '#64748B'} />,
+                      style: authMethod === 'phone' ? styles.selectedSegment : undefined,
+                    },
+                  ]}
+                  style={styles.segmentedButtons}
                   disabled={loading}
                 />
+
+                {authMethod === 'email' ? (
+                  <TextInput
+                    label="Email Address"
+                    value={emailAddress}
+                    onChangeText={(text) => {
+                      setEmailAddress(text.toLowerCase().trim());
+                      setError(null);
+                    }}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
+                    style={styles.input}
+                    disabled={loading}
+                  />
+                ) : (
+                  <TextInput
+                    label="Phone Number"
+                    value={phoneNumber}
+                    onChangeText={(text) => {
+                      // Allow only numbers, spaces, and + sign
+                      const cleaned = text.replace(/[^\d\s+]/g, '');
+                      setPhoneNumber(cleaned);
+                      setError(null);
+                    }}
+                    mode="outlined"
+                    keyboardType="phone-pad"
+                    placeholder="+91 9876543210"
+                    left={<TextInput.Icon icon={() => <Phone size={20} color="#64748B" />} />}
+                    style={styles.input}
+                    disabled={loading}
+                  />
+                )}
 
                 <TextInput
                   label="Password"
@@ -131,11 +189,11 @@ export default function SignInScreen() {
                   mode="contained"
                   onPress={onSignInPress}
                   loading={loading}
-                  disabled={loading || !emailAddress || !password}
+                  disabled={loading || (authMethod === 'email' ? (!emailAddress || !password) : (!phoneNumber || !password))}
                   style={styles.button}
                   contentStyle={styles.buttonContent}
                 >
-                  {loading ? 'Signing In...' : 'Sign In'}
+                  {loading ? 'Signing In...' : 'Continue'}
                 </Button>
 
                 <Button
@@ -229,6 +287,17 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 14,
     textAlign: 'center',
+  },
+  authMethodLabel: {
+    color: '#1E293B',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  segmentedButtons: {
+    marginBottom: 24,
+  },
+  selectedSegment: {
+    backgroundColor: '#4F46E5',
   },
   input: {
     marginBottom: 16,
