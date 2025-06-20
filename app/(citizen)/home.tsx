@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   Pressable,
 } from 'react-native';
 import {
@@ -13,20 +12,17 @@ import {
   Card,
 } from 'react-native-paper';
 import { Bell, MapPin, Gift } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
 import ReportNeedModal from '@/components/ReportNeedModal';
 import MakeDonationModal from '@/components/MakeDonationModal';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
-  withTiming 
 } from 'react-native-reanimated';
 
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export default function HomeScreen() {
-  const { profile } = useAuth();
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
 
@@ -56,12 +52,6 @@ export default function HomeScreen() {
   };
 
   const getUserName = () => {
-    if (profile?.full_name) {
-      return profile.full_name.split(' ')[0];
-    }
-    if (profile?.email) {
-      return profile.email.split('@')[0];
-    }
     return 'Friend';
   };
 
