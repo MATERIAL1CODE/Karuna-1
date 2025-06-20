@@ -15,7 +15,7 @@ import {
   Card,
 } from 'react-native-paper';
 import { Link, useRouter } from 'expo-router';
-import { Heart, Mail, Lock, CheckCircle } from 'lucide-react-native';
+import { Heart, Mail, Lock, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 
 export default function SignUpScreen() {
