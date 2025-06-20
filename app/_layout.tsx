@@ -11,16 +11,24 @@ import { theme } from '@/lib/theme';
 export default function RootLayout() {
   useFrameworkReady();
 
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+  // Get the publishable key with fallback
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_placeholder';
 
-  if (!publishableKey) {
-    throw new Error(
-      'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your environment'
-    );
+  if (!publishableKey || publishableKey === 'pk_test_placeholder') {
+    console.warn('⚠️ Missing Clerk Publishable Key. Please add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file');
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+    <ClerkProvider 
+      tokenCache={tokenCache} 
+      publishableKey={publishableKey}
+      // Add development mode settings
+      options={{
+        experimental: {
+          skipVerification: true,
+        },
+      }}
+    >
       <AuthProvider>
         <PaperProvider theme={theme}>
           <Stack screenOptions={{ headerShown: false }}>

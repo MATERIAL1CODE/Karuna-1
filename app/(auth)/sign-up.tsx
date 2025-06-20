@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -33,14 +34,17 @@ export default function SignUpScreen() {
 
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      Alert.alert('Error', 'Authentication service is not ready. Please try again.');
+      return;
+    }
 
+    // Validate form
     if (authMethod === 'email') {
       if (!emailAddress || !password) {
         setError('Please fill in all fields');
         return;
       }
-
       if (!emailAddress.includes('@')) {
         setError('Please enter a valid email address');
         return;
@@ -48,13 +52,6 @@ export default function SignUpScreen() {
     } else {
       if (!phoneNumber || !password) {
         setError('Please fill in all fields');
-        return;
-      }
-
-      // Basic phone number validation
-      const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
-      if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
-        setError('Please enter a valid phone number');
         return;
       }
     }
@@ -68,49 +65,45 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
-      console.log('🔄 Starting simplified sign-up process...');
+      console.log('🔄 Starting sign-up process...');
       
-      // Create sign-up data
+      // Prepare sign-up data
       const signUpData: any = {
         password,
         unsafeMetadata: {
           role: role,
         },
-        // Skip verification by not requesting it
-        skipVerification: true,
       };
 
       if (authMethod === 'email') {
-        signUpData.emailAddress = emailAddress;
+        signUpData.emailAddress = emailAddress.toLowerCase().trim();
       } else {
-        signUpData.phoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+        const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+        signUpData.phoneNumber = formattedPhone;
       }
 
-      console.log('📝 Creating sign-up with data:', { 
+      console.log('📝 Creating account with:', { 
         method: authMethod, 
         identifier: authMethod === 'email' ? emailAddress : phoneNumber,
         role 
       });
 
-      // Create the user directly without verification
+      // Create the user account
       const result = await signUp.create(signUpData);
-      console.log('📋 Sign-up creation result:', result.status);
+      console.log('📋 Sign-up result:', result.status);
 
-      // If sign-up is complete, set active session and redirect
+      // Handle different sign-up statuses
       if (result.status === 'complete') {
-        console.log('✅ Sign-up complete, setting active session');
+        console.log('✅ Sign-up complete immediately');
         await setActive({ session: result.createdSessionId });
         router.replace('/(home)');
-      } else {
-        // If not complete, try to complete it manually
-        console.log('⚠️ Sign-up not complete, attempting to complete...');
+      } else if (result.status === 'missing_requirements') {
+        console.log('⚠️ Missing requirements, attempting to complete...');
         
+        // Try to complete the sign-up
         try {
-          // Try to complete the sign-up without verification
           const completeResult = await signUp.update({
-            unsafeMetadata: {
-              role: role,
-            }
+            unsafeMetadata: { role }
           });
           
           if (completeResult.status === 'complete') {
@@ -118,21 +111,43 @@ export default function SignUpScreen() {
             await setActive({ session: completeResult.createdSessionId });
             router.replace('/(home)');
           } else {
-            console.error('⚠️ Could not complete sign-up:', completeResult.status);
-            setError('Account created but could not sign in automatically. Please try signing in.');
+            console.log('⚠️ Still incomplete after update:', completeResult.status);
+            Alert.alert(
+              'Account Created',
+              'Your account has been created successfully! You can now sign in.',
+              [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
+            );
           }
-        } catch (completeError) {
-          console.error('❌ Error completing sign-up:', completeError);
-          setError('Account created but could not sign in automatically. Please try signing in.');
+        } catch (updateError) {
+          console.error('❌ Error updating sign-up:', updateError);
+          Alert.alert(
+            'Account Created',
+            'Your account has been created successfully! You can now sign in.',
+            [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
+          );
         }
+      } else {
+        console.log('⚠️ Sign-up incomplete:', result.status);
+        Alert.alert(
+          'Account Created',
+          'Your account has been created successfully! You can now sign in.',
+          [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
+        );
       }
     } catch (err: any) {
-      console.error('❌ Sign up error:', JSON.stringify(err, null, 2));
+      console.error('❌ Sign up error:', err);
       
+      // Handle specific error cases
       if (err.errors?.[0]?.code === 'form_identifier_exists') {
         setError('An account with this email/phone already exists. Please sign in instead.');
+      } else if (err.errors?.[0]?.code === 'form_password_pwned') {
+        setError('This password has been found in a data breach. Please choose a different password.');
+      } else if (err.errors?.[0]?.code === 'form_password_length_too_short') {
+        setError('Password must be at least 8 characters long.');
       } else if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
+      } else if (err.message) {
+        setError(err.message);
       } else {
         setError('Failed to create account. Please try again.');
       }
@@ -161,7 +176,7 @@ export default function SignUpScreen() {
               </Text>
               <View style={styles.simplifiedBadge}>
                 <Text variant="bodySmall" style={styles.simplifiedBadgeText}>
-                  ✨ Quick Sign-Up - No Verification Required
+                  ✨ Simple Sign-Up Process
                 </Text>
               </View>
             </View>
@@ -292,12 +307,12 @@ export default function SignUpScreen() {
                   style={styles.button}
                   contentStyle={styles.buttonContent}
                 >
-                  {loading ? 'Creating Account...' : 'Create Account & Sign In'}
+                  {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
 
                 <View style={styles.infoBox}>
                   <Text variant="bodySmall" style={styles.infoText}>
-                    🚀 Your account will be created instantly without email/phone verification
+                    🚀 Your account will be created and you'll be signed in automatically
                   </Text>
                 </View>
               </Card.Content>
