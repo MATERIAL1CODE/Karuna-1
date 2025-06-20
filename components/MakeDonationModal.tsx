@@ -55,7 +55,7 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
 
     setLoading(true);
     try {
-      // Here you would submit to Supabase
+      // Here you would submit to your backend
       console.log('Submitting donation:', {
         resourceType,
         quantity,

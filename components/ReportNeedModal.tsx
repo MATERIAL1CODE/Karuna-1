@@ -15,8 +15,6 @@ import {
   Appbar,
   Card,
 } from 'react-native-paper';
-import MapView, { Marker, Region } from 'react-native-maps';
-import * as Location from 'expo-location';
 import { X } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -27,54 +25,12 @@ interface ReportNeedModalProps {
 }
 
 export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalProps) {
-  const [region, setRegion] = useState<Region>({
-    latitude: 28.6139,
-    longitude: 77.2090,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  });
   const [markerCoordinate, setMarkerCoordinate] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [peopleCount, setPeopleCount] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (visible) {
-      getCurrentLocation();
-    }
-  }, [visible]);
-
-  const getCurrentLocation = async () => {
-    try {
-      if (Platform.OS === 'web') {
-        // For web, use default Delhi location
-        return;
-      }
-
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Location permission is required');
-        return;
-      }
-
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    } catch (error) {
-      console.error('Error getting location:', error);
-    }
-  };
-
-  const handleMapPress = (event: any) => {
-    const coordinate = event.nativeEvent.coordinate;
-    setMarkerCoordinate(coordinate);
-  };
 
   const handleSubmit = async () => {
     if (!markerCoordinate) {
@@ -89,7 +45,7 @@ export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalP
 
     setLoading(true);
     try {
-      // Here you would submit to Supabase
+      // Here you would submit to your backend
       console.log('Submitting report:', {
         location: markerCoordinate,
         peopleCount: Number(peopleCount),
@@ -111,43 +67,23 @@ export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalP
     }
   };
 
-  const MapComponent = Platform.OS === 'web' ? 
-    () => (
-      <View style={styles.webMapPlaceholder}>
-        <Text variant="bodyLarge" style={styles.webMapText}>
-          Map functionality available on mobile devices
-        </Text>
-        <Text variant="bodyMedium" style={styles.webMapSubtext}>
-          Tap here to simulate pin placement
-        </Text>
-        <Button 
-          mode="outlined" 
-          onPress={() => setMarkerCoordinate({ latitude: 28.6139, longitude: 77.2090 })}
-          style={styles.webMapButton}
-        >
-          Place Pin
-        </Button>
-      </View>
-    ) : 
-    () => (
-      <MapView
-        style={styles.map}
-        region={region}
-        onPress={handleMapPress}
-        showsUserLocation
-        showsMyLocationButton
+  const MapComponent = () => (
+    <View style={styles.webMapPlaceholder}>
+      <Text variant="bodyLarge" style={styles.webMapText}>
+        Map functionality available on mobile devices
+      </Text>
+      <Text variant="bodyMedium" style={styles.webMapSubtext}>
+        Tap here to simulate pin placement
+      </Text>
+      <Button 
+        mode="outlined" 
+        onPress={() => setMarkerCoordinate({ latitude: 28.6139, longitude: 77.2090 })}
+        style={styles.webMapButton}
       >
-        {markerCoordinate && (
-          <Marker
-            coordinate={markerCoordinate}
-            title="Need Location"
-            description="Person/family in need"
-            draggable
-            onDragEnd={(e) => setMarkerCoordinate(e.nativeEvent.coordinate)}
-          />
-        )}
-      </MapView>
-    );
+        Place Pin
+      </Button>
+    </View>
+  );
 
   return (
     <Portal>
@@ -231,10 +167,6 @@ const styles = StyleSheet.create({
   mapContainer: {
     flex: 1,
     position: 'relative',
-  },
-  map: {
-    width: width,
-    height: '100%',
   },
   webMapPlaceholder: {
     flex: 1,
