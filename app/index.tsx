@@ -21,29 +21,8 @@ import Animated, {
 
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
-export default function IndexScreen() {
+export default function RoleSelectionScreen() {
   const { session, profile, loading } = useAuth();
-
-  // Redirect based on authentication state
-  useEffect(() => {
-    if (!loading) {
-      if (!session) {
-        // No session - redirect to login
-        console.log('🔄 Index: No session, redirecting to login');
-        router.replace('/(auth)/login');
-      } else if (session && profile) {
-        // Authenticated with profile - redirect to appropriate dashboard
-        console.log('🔄 Index: Authenticated user, redirecting to dashboard');
-        if (profile.role === 'facilitator') {
-          router.replace('/(facilitator)');
-        } else {
-          router.replace('/(citizen)');
-        }
-      }
-      // If session exists but no profile, stay on this screen to show role selection
-    }
-  }, [loading, session, profile]);
-
   const citizenCardScale = useSharedValue(1);
   const facilitatorCardScale = useSharedValue(1);
 
@@ -55,18 +34,40 @@ export default function IndexScreen() {
     transform: [{ scale: facilitatorCardScale.value }],
   }));
 
+  // Redirect authenticated users to their appropriate dashboard
+  useEffect(() => {
+    if (!loading && session && profile) {
+      console.log('🔄 Index: Redirecting authenticated user to dashboard');
+      if (profile.role === 'facilitator') {
+        router.replace('/(facilitator)');
+      } else {
+        router.replace('/(citizen)');
+      }
+    }
+  }, [loading, session, profile]);
+
   const handleCitizenPress = () => {
     citizenCardScale.value = withSpring(0.95, {}, () => {
       citizenCardScale.value = withSpring(1);
     });
-    router.push('/(citizen)');
+    
+    if (session) {
+      router.push('/(citizen)');
+    } else {
+      router.push('/(auth)/signup');
+    }
   };
 
   const handleFacilitatorPress = () => {
     facilitatorCardScale.value = withSpring(0.95, {}, () => {
       facilitatorCardScale.value = withSpring(1);
     });
-    router.push('/(facilitator)');
+    
+    if (session) {
+      router.push('/(facilitator)');
+    } else {
+      router.push('/(auth)/signup');
+    }
   };
 
   // Show loading spinner while checking authentication
@@ -83,12 +84,6 @@ export default function IndexScreen() {
     );
   }
 
-  // Only show role selection if user is authenticated but doesn't have a profile yet
-  // This is a fallback case that shouldn't normally happen
-  if (!session) {
-    return null; // Will redirect to login
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -97,11 +92,18 @@ export default function IndexScreen() {
             <Heart size={48} color="#4F46E5" />
           </View>
           <Text variant="headlineLarge" style={styles.title}>
-            Choose Your Role
+            Welcome to Impact
           </Text>
           <Text variant="bodyLarge" style={styles.subtitle}>
-            How would you like to make a difference in your community?
+            Choose how you'd like to make a difference in your community
           </Text>
+          {!session && (
+            <View style={styles.authPrompt}>
+              <Text variant="bodyMedium" style={styles.authPromptText}>
+                Sign up or sign in to get started
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.roleCards}>
@@ -152,6 +154,14 @@ export default function IndexScreen() {
           <Text variant="bodySmall" style={styles.footerText}>
             You can switch roles anytime in the app settings
           </Text>
+          {!session && (
+            <View style={styles.authLinks}>
+              <Text style={styles.authLinkText}>Already have an account? </Text>
+              <Pressable onPress={() => router.push('/(auth)/login')}>
+                <Text style={styles.authLink}>Sign in</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -198,6 +208,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 16,
+  },
+  authPrompt: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+  },
+  authPromptText: {
+    color: '#0369A1',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   roleCards: {
     gap: 24,
@@ -250,9 +271,21 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
+    gap: 16,
   },
   footerText: {
     color: '#9CA3AF',
     textAlign: 'center',
+  },
+  authLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  authLinkText: {
+    color: '#64748B',
+  },
+  authLink: {
+    color: '#4F46E5',
+    fontWeight: '600',
   },
 });
