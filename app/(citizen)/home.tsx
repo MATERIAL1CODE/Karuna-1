@@ -12,6 +12,7 @@ import {
   Card,
 } from 'react-native-paper';
 import { Bell, MapPin, Gift } from 'lucide-react-native';
+import { useUser } from '@clerk/clerk-expo';
 import ReportNeedModal from '@/components/ReportNeedModal';
 import MakeDonationModal from '@/components/MakeDonationModal';
 import Animated, { 
@@ -23,6 +24,7 @@ import Animated, {
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export default function HomeScreen() {
+  const { user } = useUser();
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
 
@@ -52,6 +54,12 @@ export default function HomeScreen() {
   };
 
   const getUserName = () => {
+    if (user?.firstName) {
+      return user.firstName;
+    }
+    if (user?.emailAddresses?.[0]?.emailAddress) {
+      return user.emailAddresses[0].emailAddress.split('@')[0];
+    }
     return 'Friend';
   };
 
