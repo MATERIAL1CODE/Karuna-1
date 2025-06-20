@@ -28,8 +28,6 @@ export default function SignUpScreen() {
   const [emailAddress, setEmailAddress] = React.useState('');
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -70,22 +68,16 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
-      console.log('🔄 Starting sign-up process...');
+      console.log('🔄 Starting simplified sign-up process...');
       
-      // Check if signUp is already complete (to prevent "verification_already_verified" error)
-      if (signUp?.status === 'complete') {
-        console.log('✅ Sign-up already complete, setting active session');
-        await setActive({ session: signUp.createdSessionId });
-        router.replace('/(home)');
-        return;
-      }
-
-      // Start sign-up process using email/phone and password provided
+      // Create sign-up data
       const signUpData: any = {
         password,
         unsafeMetadata: {
           role: role,
         },
+        // Skip verification by not requesting it
+        skipVerification: true,
       };
 
       if (authMethod === 'email') {
@@ -100,27 +92,39 @@ export default function SignUpScreen() {
         role 
       });
 
+      // Create the user directly without verification
       const result = await signUp.create(signUpData);
       console.log('📋 Sign-up creation result:', result.status);
 
-      // Check if verification is needed
-      if (result.status === 'missing_requirements') {
-        console.log('⚠️ Missing requirements:', result.missingFields);
-        
-        // Send verification code
-        if (authMethod === 'email') {
-          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-          console.log('📧 Email verification code sent');
-        } else {
-          await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
-          console.log('📱 Phone verification code sent');
-        }
-
-        setPendingVerification(true);
-      } else if (result.status === 'complete') {
-        console.log('✅ Sign-up complete immediately');
+      // If sign-up is complete, set active session and redirect
+      if (result.status === 'complete') {
+        console.log('✅ Sign-up complete, setting active session');
         await setActive({ session: result.createdSessionId });
         router.replace('/(home)');
+      } else {
+        // If not complete, try to complete it manually
+        console.log('⚠️ Sign-up not complete, attempting to complete...');
+        
+        try {
+          // Try to complete the sign-up without verification
+          const completeResult = await signUp.update({
+            unsafeMetadata: {
+              role: role,
+            }
+          });
+          
+          if (completeResult.status === 'complete') {
+            console.log('✅ Sign-up completed after update');
+            await setActive({ session: completeResult.createdSessionId });
+            router.replace('/(home)');
+          } else {
+            console.error('⚠️ Could not complete sign-up:', completeResult.status);
+            setError('Account created but could not sign in automatically. Please try signing in.');
+          }
+        } catch (completeError) {
+          console.error('❌ Error completing sign-up:', completeError);
+          setError('Account created but could not sign in automatically. Please try signing in.');
+        }
       }
     } catch (err: any) {
       console.error('❌ Sign up error:', JSON.stringify(err, null, 2));
@@ -136,151 +140,6 @@ export default function SignUpScreen() {
       setLoading(false);
     }
   };
-
-  // Handle submission of verification form
-  const onVerifyPress = async () => {
-    if (!isLoaded) return;
-
-    if (!code || code.length < 4) {
-      setError('Please enter the verification code');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      console.log('🔄 Attempting verification with code:', code);
-      
-      // Check if already verified to prevent "verification_already_verified" error
-      if (signUp?.status === 'complete') {
-        console.log('✅ Already verified, setting active session');
-        await setActive({ session: signUp.createdSessionId });
-        router.replace('/(home)');
-        return;
-      }
-
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = authMethod === 'email' 
-        ? await signUp.attemptEmailAddressVerification({ code })
-        : await signUp.attemptPhoneNumberVerification({ code });
-
-      console.log('📋 Verification attempt result:', signUpAttempt.status);
-
-      // If verification was completed, set the session to active and redirect
-      if (signUpAttempt.status === 'complete') {
-        console.log('✅ Verification complete, setting active session');
-        await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace('/(home)');
-      } else {
-        console.error('⚠️ Verification incomplete:', JSON.stringify(signUpAttempt, null, 2));
-        setError('Verification failed. Please try again.');
-      }
-    } catch (err: any) {
-      console.error('❌ Verification error:', JSON.stringify(err, null, 2));
-      
-      if (err.errors?.[0]?.code === 'verification_already_verified') {
-        console.log('⚠️ Already verified, attempting to complete sign-up');
-        try {
-          if (signUp?.status === 'complete') {
-            await setActive({ session: signUp.createdSessionId });
-            router.replace('/(home)');
-            return;
-          }
-        } catch (completeErr) {
-          console.error('❌ Error completing already verified sign-up:', completeErr);
-        }
-      }
-      
-      if (err.errors?.[0]?.message) {
-        setError(err.errors[0].message);
-      } else {
-        setError('Invalid verification code. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (pendingVerification) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-        >
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <View style={styles.content}>
-              <View style={styles.header}>
-                <View style={styles.iconContainer}>
-                  {authMethod === 'email' ? (
-                    <Mail size={48} color="#4F46E5" />
-                  ) : (
-                    <Phone size={48} color="#4F46E5" />
-                  )}
-                </View>
-                <Text variant="headlineLarge" style={styles.title}>
-                  Verify Your {authMethod === 'email' ? 'Email' : 'Phone'}
-                </Text>
-                <Text variant="bodyLarge" style={styles.subtitle}>
-                  We've sent a verification code to{' '}
-                  {authMethod === 'email' ? emailAddress : phoneNumber}
-                </Text>
-              </View>
-
-              <Card style={styles.card} mode="elevated">
-                <Card.Content style={styles.cardContent}>
-                  {error && (
-                    <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{error}</Text>
-                    </View>
-                  )}
-
-                  <TextInput
-                    label="Verification Code"
-                    value={code}
-                    onChangeText={(text) => {
-                      setCode(text.replace(/\D/g, ''));
-                      setError(null);
-                    }}
-                    mode="outlined"
-                    keyboardType="number-pad"
-                    placeholder="Enter verification code"
-                    style={styles.input}
-                    disabled={loading}
-                  />
-
-                  <Button
-                    mode="contained"
-                    onPress={onVerifyPress}
-                    loading={loading}
-                    disabled={loading || !code}
-                    style={styles.button}
-                    contentStyle={styles.buttonContent}
-                  >
-                    {loading ? 'Verifying...' : 'Verify'}
-                  </Button>
-
-                  <Button
-                    mode="text"
-                    onPress={() => {
-                      setPendingVerification(false);
-                      setCode('');
-                      setError(null);
-                    }}
-                    disabled={loading}
-                    style={styles.backButton}
-                  >
-                    Back to Sign Up
-                  </Button>
-                </Card.Content>
-              </Card>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -300,6 +159,11 @@ export default function SignUpScreen() {
               <Text variant="bodyLarge" style={styles.subtitle}>
                 Create your account to start making a difference
               </Text>
+              <View style={styles.simplifiedBadge}>
+                <Text variant="bodySmall" style={styles.simplifiedBadgeText}>
+                  ✨ Quick Sign-Up - No Verification Required
+                </Text>
+              </View>
             </View>
 
             <Card style={styles.card} mode="elevated">
@@ -428,8 +292,14 @@ export default function SignUpScreen() {
                   style={styles.button}
                   contentStyle={styles.buttonContent}
                 >
-                  {loading ? 'Creating Account...' : 'Continue'}
+                  {loading ? 'Creating Account...' : 'Create Account & Sign In'}
                 </Button>
+
+                <View style={styles.infoBox}>
+                  <Text variant="bodySmall" style={styles.infoText}>
+                    🚀 Your account will be created instantly without email/phone verification
+                  </Text>
+                </View>
               </Card.Content>
             </Card>
 
@@ -491,6 +361,19 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 24,
+    marginBottom: 12,
+  },
+  simplifiedBadge: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  simplifiedBadgeText: {
+    color: '#047857',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -547,8 +430,16 @@ const styles = StyleSheet.create({
   buttonContent: {
     paddingVertical: 8,
   },
-  backButton: {
+  infoBox: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 8,
+    padding: 12,
     marginTop: 16,
+  },
+  infoText: {
+    color: '#0369A1',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   footer: {
     marginTop: 32,
