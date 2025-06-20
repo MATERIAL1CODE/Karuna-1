@@ -1,21 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
-
+// Placeholder for future Supabase integration
 export type UserRole = 'citizen' | 'facilitator';
 
 export interface UserProfile {
   id: string;
-  email: string;
+  email?: string;
   phone?: string;
   role: UserRole;
   full_name?: string;
