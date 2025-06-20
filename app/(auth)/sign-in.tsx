@@ -63,7 +63,6 @@ export default function SignInScreen() {
       });
 
       console.log('📋 Sign-in attempt result:', signInAttempt.status);
-      console.log('📋 Full sign-in result:', JSON.stringify(signInAttempt, null, 2));
 
       // If sign-in process is complete, set the created session as active
       // and redirect the user
@@ -75,25 +74,15 @@ export default function SignInScreen() {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
         console.error('⚠️ Sign in incomplete:', JSON.stringify(signInAttempt, null, 2));
-        
-        if (signInAttempt.status === 'needs_identifier') {
-          setError('Please provide a valid email or phone number.');
-        } else if (signInAttempt.status === 'needs_factor_one') {
-          setError('Additional authentication required. Please check your email or phone.');
-        } else {
-          setError('Sign in incomplete. Please try again or contact support.');
-        }
+        setError('Sign in failed. Please check your credentials and try again.');
       }
     } catch (err: any) {
       console.error('❌ Sign in error:', JSON.stringify(err, null, 2));
       
       if (err.errors?.[0]?.code === 'form_identifier_not_found') {
-        setError("Account not found. Please check your email/phone or sign up for a new account.");
+        setError("Account not found. Please check your email/phone or create a new account.");
       } else if (err.errors?.[0]?.code === 'form_password_incorrect') {
         setError('Incorrect password. Please try again.');
-      } else if (err.errors?.[0]?.code === 'session_exists') {
-        setError('You are already signed in. Redirecting...');
-        setTimeout(() => router.replace('/(home)'), 1000);
       } else if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
       } else {
