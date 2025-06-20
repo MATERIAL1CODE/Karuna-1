@@ -15,7 +15,7 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 import { Link, useRouter } from 'expo-router';
-import { Heart, Mail, Phone, Lock } from 'lucide-react-native';
+import { Heart, Mail, Phone, Lock, Users, MapPin } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 
 export default function SignUpScreen() {
@@ -23,6 +23,7 @@ export default function SignUpScreen() {
   const router = useRouter();
 
   // Form state
+  const [role, setRole] = React.useState<'citizen' | 'facilitator'>('citizen');
   const [authMethod, setAuthMethod] = React.useState<'email' | 'phone'>('email');
   const [emailAddress, setEmailAddress] = React.useState('');
   const [phoneNumber, setPhoneNumber] = React.useState('');
@@ -32,22 +33,36 @@ export default function SignUpScreen() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Handle email sign-up
-  const onEmailSignUpPress = async () => {
+  // Handle submission of sign-up form
+  const onSignUpPress = async () => {
     if (!isLoaded) return;
 
-    if (!emailAddress || !password) {
-      setError('Please fill in all fields');
-      return;
+    if (authMethod === 'email') {
+      if (!emailAddress || !password) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      if (!emailAddress.includes('@')) {
+        setError('Please enter a valid email address');
+        return;
+      }
+    } else {
+      if (!phoneNumber || !password) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      // Basic phone number validation
+      const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
+      if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+        setError('Please enter a valid phone number');
+        return;
+      }
     }
 
-    if (!emailAddress.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
@@ -55,20 +70,34 @@ export default function SignUpScreen() {
     setError(null);
 
     try {
-      // Start sign-up process using email and password provided
-      await signUp.create({
-        emailAddress,
+      // Start sign-up process using email/phone and password provided
+      const signUpData: any = {
         password,
-      });
+        unsafeMetadata: {
+          role: role,
+        },
+      };
 
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      if (authMethod === 'email') {
+        signUpData.emailAddress = emailAddress;
+      } else {
+        signUpData.phoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+      }
+
+      await signUp.create(signUpData);
+
+      // Send user verification code
+      if (authMethod === 'email') {
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      } else {
+        await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
+      }
 
       // Set 'pendingVerification' to true to display second form
       // and capture OTP code
       setPendingVerification(true);
     } catch (err: any) {
-      console.error('Email sign up error:', JSON.stringify(err, null, 2));
+      console.error('Sign up error:', JSON.stringify(err, null, 2));
       
       if (err.errors?.[0]?.message) {
         setError(err.errors[0].message);
@@ -80,56 +109,7 @@ export default function SignUpScreen() {
     }
   };
 
-  // Handle phone sign-up
-  const onPhoneSignUpPress = async () => {
-    if (!isLoaded) return;
-
-    if (!phoneNumber || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    // Basic phone number validation
-    const phoneRegex = /^[+]?[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
-      setError('Please enter a valid phone number');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Start sign-up process using phone and password
-      await signUp.create({
-        phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`,
-        password,
-      });
-
-      // Send user an SMS with verification code
-      await signUp.preparePhoneNumberVerification({ strategy: 'phone_code' });
-
-      // Set 'pendingVerification' to true to display second form
-      setPendingVerification(true);
-    } catch (err: any) {
-      console.error('Phone sign up error:', JSON.stringify(err, null, 2));
-      
-      if (err.errors?.[0]?.message) {
-        setError(err.errors[0].message);
-      } else {
-        setError('Failed to create account. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle verification
+  // Handle submission of verification form
   const onVerifyPress = async () => {
     if (!isLoaded) return;
 
@@ -279,6 +259,33 @@ export default function SignUpScreen() {
                   </View>
                 )}
 
+                <Text variant="labelLarge" style={styles.roleLabel}>
+                  I want to join as:
+                </Text>
+                <SegmentedButtons
+                  value={role}
+                  onValueChange={(value) => {
+                    setRole(value as 'citizen' | 'facilitator');
+                    setError(null);
+                  }}
+                  buttons={[
+                    {
+                      value: 'citizen',
+                      label: 'Citizen',
+                      icon: () => <MapPin size={16} color={role === 'citizen' ? '#FFFFFF' : '#64748B'} />,
+                      style: role === 'citizen' ? styles.selectedSegment : undefined,
+                    },
+                    {
+                      value: 'facilitator',
+                      label: 'Facilitator',
+                      icon: () => <Users size={16} color={role === 'facilitator' ? '#FFFFFF' : '#64748B'} />,
+                      style: role === 'facilitator' ? styles.selectedSegment : undefined,
+                    },
+                  ]}
+                  style={styles.segmentedButtons}
+                  disabled={loading}
+                />
+
                 <Text variant="labelLarge" style={styles.authMethodLabel}>
                   Sign up with:
                 </Text>
@@ -307,42 +314,38 @@ export default function SignUpScreen() {
                 />
 
                 {authMethod === 'email' ? (
-                  <>
-                    <TextInput
-                      label="Email Address"
-                      value={emailAddress}
-                      onChangeText={(text) => {
-                        setEmailAddress(text.toLowerCase().trim());
-                        setError(null);
-                      }}
-                      mode="outlined"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoComplete="email"
-                      left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
-                      style={styles.input}
-                      disabled={loading}
-                    />
-                  </>
+                  <TextInput
+                    label="Email Address"
+                    value={emailAddress}
+                    onChangeText={(text) => {
+                      setEmailAddress(text.toLowerCase().trim());
+                      setError(null);
+                    }}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    left={<TextInput.Icon icon={() => <Mail size={20} color="#64748B" />} />}
+                    style={styles.input}
+                    disabled={loading}
+                  />
                 ) : (
-                  <>
-                    <TextInput
-                      label="Phone Number"
-                      value={phoneNumber}
-                      onChangeText={(text) => {
-                        // Allow only numbers, spaces, and + sign
-                        const cleaned = text.replace(/[^\d\s+]/g, '');
-                        setPhoneNumber(cleaned);
-                        setError(null);
-                      }}
-                      mode="outlined"
-                      keyboardType="phone-pad"
-                      placeholder="+91 9876543210"
-                      left={<TextInput.Icon icon={() => <Phone size={20} color="#64748B" />} />}
-                      style={styles.input}
-                      disabled={loading}
-                    />
-                  </>
+                  <TextInput
+                    label="Phone Number"
+                    value={phoneNumber}
+                    onChangeText={(text) => {
+                      // Allow only numbers, spaces, and + sign
+                      const cleaned = text.replace(/[^\d\s+]/g, '');
+                      setPhoneNumber(cleaned);
+                      setError(null);
+                    }}
+                    mode="outlined"
+                    keyboardType="phone-pad"
+                    placeholder="+91 9876543210"
+                    left={<TextInput.Icon icon={() => <Phone size={20} color="#64748B" />} />}
+                    style={styles.input}
+                    disabled={loading}
+                  />
                 )}
 
                 <TextInput
@@ -362,13 +365,13 @@ export default function SignUpScreen() {
 
                 <View style={styles.passwordRequirements}>
                   <Text variant="bodySmall" style={styles.requirementText}>
-                    Password must be at least 8 characters long
+                    Password must be at least 6 characters long
                   </Text>
                 </View>
 
                 <Button
                   mode="contained"
-                  onPress={authMethod === 'email' ? onEmailSignUpPress : onPhoneSignUpPress}
+                  onPress={onSignUpPress}
                   loading={loading}
                   disabled={loading || (authMethod === 'email' ? (!emailAddress || !password) : (!phoneNumber || !password))}
                   style={styles.button}
@@ -459,9 +462,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  roleLabel: {
+    color: '#1E293B',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
   authMethodLabel: {
     color: '#1E293B',
     marginBottom: 12,
+    marginTop: 16,
     fontWeight: '600',
   },
   segmentedButtons: {

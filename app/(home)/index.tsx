@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
 import { Link, router } from 'expo-router';
-import { Heart, Users, MapPin, LogOut } from 'lucide-react-native';
+import { Heart, Users, MapPin } from 'lucide-react-native';
 import { SignOutButton } from '@/components/SignOutButton';
 import Animated, { 
   useSharedValue, 
@@ -48,6 +48,23 @@ export default function HomePage() {
     router.push('/(facilitator)');
   };
 
+  const getUserRole = () => {
+    return user?.unsafeMetadata?.role as string || 'citizen';
+  };
+
+  const getUserName = () => {
+    if (user?.firstName) {
+      return user.firstName;
+    }
+    if (user?.emailAddresses?.[0]?.emailAddress) {
+      return user.emailAddresses[0].emailAddress.split('@')[0];
+    }
+    if (user?.phoneNumbers?.[0]?.phoneNumber) {
+      return user.phoneNumbers[0].phoneNumber;
+    }
+    return 'Friend';
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <SignedIn>
@@ -61,7 +78,10 @@ export default function HomePage() {
                 Welcome Back!
               </Text>
               <Text variant="bodyLarge" style={styles.subtitle}>
-                Hello {user?.firstName || user?.emailAddresses[0].emailAddress?.split('@')[0]}
+                Hello {getUserName()}
+              </Text>
+              <Text variant="bodyMedium" style={styles.roleText}>
+                Registered as: {getUserRole() === 'citizen' ? 'Citizen' : 'Facilitator'}
               </Text>
               <Text variant="bodyMedium" style={styles.description}>
                 Choose how you'd like to make a difference today
@@ -81,7 +101,7 @@ export default function HomePage() {
                     <MapPin size={40} color="#FFFFFF" />
                   </View>
                   <Text variant="headlineSmall" style={styles.cardTitle}>
-                    I'm a Citizen
+                    Citizen Mode
                   </Text>
                   <Text variant="bodyMedium" style={styles.cardDescription}>
                     Report people in need and donate surplus resources to help your community
@@ -102,7 +122,7 @@ export default function HomePage() {
                     <Users size={40} color="#FFFFFF" />
                   </View>
                   <Text variant="headlineSmall" style={styles.cardTitle}>
-                    I'm a Facilitator
+                    Facilitator Mode
                   </Text>
                   <Text variant="bodyMedium" style={styles.cardDescription}>
                     Accept delivery missions and coordinate aid efforts to help those in need
@@ -119,7 +139,7 @@ export default function HomePage() {
 
           <View style={styles.footer}>
             <Text variant="bodySmall" style={styles.footerText}>
-              You can switch roles anytime in the app settings
+              You can use both modes regardless of your registration role
             </Text>
           </View>
         </View>
@@ -197,6 +217,12 @@ const styles = StyleSheet.create({
     color: '#4F46E5',
     textAlign: 'center',
     fontWeight: '600',
+    marginBottom: 4,
+  },
+  roleText: {
+    color: '#10B981',
+    textAlign: 'center',
+    fontWeight: '500',
     marginBottom: 8,
   },
   description: {
