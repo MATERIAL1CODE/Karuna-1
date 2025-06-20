@@ -31,15 +31,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       setLoading(true);
-      console.log('🔄 Loading user profile...');
+      console.log('🔄 Loading user profile for user ID:', user.id);
       
-      // Try to find existing profile by email or phone
+      // First try to find existing profile by ID
+      const { data: existingProfile, error: findError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (existingProfile && !findError) {
+        console.log('✅ Found existing profile by ID');
+        setProfile(existingProfile);
+        return;
+      }
+
+      // If not found by ID, try to find by email or phone
       const email = user.emailAddresses?.[0]?.emailAddress;
       const phone = user.phoneNumbers?.[0]?.phoneNumber;
       
-      let existingProfile = null;
+      let profileByContact = null;
       
-      // First try to find by email
+      // Try to find by email
       if (email) {
         const { data, error } = await supabase
           .from('profiles')
@@ -47,29 +60,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('email', email)
           .single();
         
-        if (!error) {
-          existingProfile = data;
+        if (!error && data) {
+          profileByContact = data;
         }
       }
       
       // If not found by email, try by phone
-      if (!existingProfile && phone) {
+      if (!profileByContact && phone) {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('phone', phone)
           .single();
         
-        if (!error) {
-          existingProfile = data;
+        if (!error && data) {
+          profileByContact = data;
         }
       }
 
-      if (existingProfile) {
-        console.log('✅ Found existing profile');
-        setProfile(existingProfile);
+      if (profileByContact) {
+        console.log('✅ Found existing profile by contact info');
+        setProfile(profileByContact);
       } else {
-        console.log('🔄 Creating new profile...');
+        console.log('🔄 No existing profile found, creating new one...');
         await createNewProfile();
       }
     } catch (error) {
@@ -83,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
 
     try {
-      console.log('🔄 Creating new profile...');
+      console.log('🔄 Creating new profile with user ID:', user.id);
       
       const role = (user.unsafeMetadata?.role as UserRole) || 'citizen';
       const email = user.emailAddresses?.[0]?.emailAddress || '';
@@ -92,50 +105,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? `${user.firstName} ${user.lastName}` 
         : user.firstName || '';
 
-      // Use the service role client to bypass RLS for profile creation
+      // Create profile with the Clerk user ID
+      const profileData = {
+        id: user.id, // This is crucial - use Clerk user ID
+        email: email || null,
+        phone: phone || null,
+        role,
+        full_name: fullName || null,
+      };
+
+      console.log('📝 Profile data to insert:', profileData);
+
       const { data, error } = await supabase
         .from('profiles')
-        .insert([
-          {
-            email,
-            phone,
-            role,
-            full_name: fullName,
-          }
-        ])
+        .insert([profileData])
         .select()
         .single();
 
       if (error) {
         console.error('❌ Error creating profile:', error);
         
-        // If RLS is blocking, try a different approach
-        if (error.code === '42501') {
-          console.log('🔄 RLS blocking insert, trying alternative approach...');
-          
-          // Create a minimal profile that should pass RLS
-          const { data: minimalProfile, error: minimalError } = await supabase
+        // If there's a unique constraint violation, the profile might already exist
+        if (error.code === '23505') {
+          console.log('🔄 Profile already exists, trying to fetch it...');
+          const { data: existingData, error: fetchError } = await supabase
             .from('profiles')
-            .insert([
-              {
-                email: email || null,
-                phone: phone || null,
-                role: 'citizen', // Default role
-                full_name: fullName || null,
-              }
-            ])
-            .select()
+            .select('*')
+            .eq('id', user.id)
             .single();
-
-          if (minimalError) {
-            console.error('❌ Error creating minimal profile:', minimalError);
+          
+          if (!fetchError && existingData) {
+            console.log('✅ Found existing profile after conflict');
+            setProfile(existingData);
             return;
           }
-
-          console.log('✅ Minimal profile created successfully');
-          setProfile(minimalProfile);
         }
-        return;
+        
+        throw error;
       }
 
       console.log('✅ Profile created successfully');
