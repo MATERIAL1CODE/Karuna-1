@@ -7,7 +7,8 @@ import {
 } from 'react-native';
 import { Text, Card, Appbar, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
-import { CircleCheck as CheckCircle, MapPin, Clock, ArrowLeft } from 'lucide-react-native';
+import { CircleCheck as CheckCircle, MapPin, Clock, ArrowLeft, TrendingUp } from 'lucide-react-native';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 const completedMissions = [
   {
@@ -17,6 +18,7 @@ const completedMissions = [
     location: 'Saket to Lajpat Nagar',
     completedAt: '2 hours ago',
     peopleHelped: 4,
+    rating: 5,
   },
   {
     id: '2',
@@ -25,6 +27,7 @@ const completedMissions = [
     location: 'Hospital to Community Center',
     completedAt: '1 day ago',
     peopleHelped: 2,
+    rating: 5,
   },
   {
     id: '3',
@@ -33,6 +36,25 @@ const completedMissions = [
     location: 'Mall to Railway Station',
     completedAt: '3 days ago',
     peopleHelped: 6,
+    rating: 4,
+  },
+  {
+    id: '4',
+    title: 'Emergency Supply Delivery',
+    type: 'Emergency',
+    location: 'Warehouse to Shelter',
+    completedAt: '1 week ago',
+    peopleHelped: 12,
+    rating: 5,
+  },
+  {
+    id: '5',
+    title: 'Food Distribution',
+    type: 'Food',
+    location: 'Restaurant to Community Kitchen',
+    completedAt: '2 weeks ago',
+    peopleHelped: 8,
+    rating: 5,
   },
 ];
 
@@ -44,12 +66,22 @@ function CompletedMissionCard({ mission }: CompletedMissionCardProps) {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Food':
-        return '#10B981';
+        return colors.success[500];
       case 'Medicine':
-        return '#EF4444';
+        return colors.error[500];
+      case 'Emergency':
+        return colors.warning[500];
       default:
-        return '#3B82F6';
+        return colors.info[500];
     }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Text key={i} style={[styles.star, { color: i < rating ? colors.warning[500] : colors.neutral[300] }]}>
+        ★
+      </Text>
+    ));
   };
 
   return (
@@ -57,7 +89,7 @@ function CompletedMissionCard({ mission }: CompletedMissionCardProps) {
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <View style={styles.iconContainer}>
-            <CheckCircle size={24} color="#10B981" />
+            <CheckCircle size={24} color={colors.success[500]} />
           </View>
           <View style={styles.missionInfo}>
             <View style={styles.titleRow}>
@@ -75,14 +107,14 @@ function CompletedMissionCard({ mission }: CompletedMissionCardProps) {
               </Chip>
             </View>
             <View style={styles.locationRow}>
-              <MapPin size={14} color="#64748B" />
+              <MapPin size={14} color={colors.neutral[500]} />
               <Text variant="bodyMedium" style={styles.locationText}>
                 {mission.location}
               </Text>
             </View>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Clock size={14} color="#64748B" />
+                <Clock size={14} color={colors.neutral[500]} />
                 <Text variant="bodySmall" style={styles.timeText}>
                   {mission.completedAt}
                 </Text>
@@ -91,6 +123,12 @@ function CompletedMissionCard({ mission }: CompletedMissionCardProps) {
                 <Text variant="bodySmall" style={styles.helpedText}>
                   {mission.peopleHelped} people helped
                 </Text>
+              </View>
+            </View>
+            <View style={styles.ratingRow}>
+              <Text variant="bodySmall" style={styles.ratingLabel}>Rating:</Text>
+              <View style={styles.starsContainer}>
+                {renderStars(mission.rating)}
               </View>
             </View>
           </View>
@@ -105,25 +143,59 @@ export default function CompletedMissionsScreen() {
     <CompletedMissionCard mission={item} />
   );
 
+  const totalPeopleHelped = completedMissions.reduce((sum, mission) => sum + mission.peopleHelped, 0);
+  const averageRating = (completedMissions.reduce((sum, mission) => sum + mission.rating, 0) / completedMissions.length).toFixed(1);
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
           onPress={() => router.replace('/(facilitator)')} 
         />
-        <Appbar.Content title="Completed Missions" titleStyle={styles.headerTitle} />
+        <Appbar.Content title="Mission History" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
       <View style={styles.content}>
+        {/* Impact Summary */}
         <View style={styles.summaryCard}>
           <Text variant="titleLarge" style={styles.summaryTitle}>
-            Your Impact
+            Your Mission Record
           </Text>
-          <Text variant="bodyMedium" style={styles.summaryText}>
-            You've completed {completedMissions.length} missions and helped{' '}
-            {completedMissions.reduce((sum, mission) => sum + mission.peopleHelped, 0)} people
-          </Text>
+          
+          <View style={styles.summaryStats}>
+            <View style={styles.summaryStatItem}>
+              <Text variant="headlineMedium" style={styles.summaryNumber}>
+                {completedMissions.length}
+              </Text>
+              <Text variant="bodyMedium" style={styles.summaryLabel}>
+                Missions Completed
+              </Text>
+            </View>
+            <View style={styles.summaryStatItem}>
+              <Text variant="headlineMedium" style={styles.summaryNumber}>
+                {totalPeopleHelped}
+              </Text>
+              <Text variant="bodyMedium" style={styles.summaryLabel}>
+                People Helped
+              </Text>
+            </View>
+            <View style={styles.summaryStatItem}>
+              <Text variant="headlineMedium" style={styles.summaryNumber}>
+                {averageRating}
+              </Text>
+              <Text variant="bodyMedium" style={styles.summaryLabel}>
+                Avg Rating
+              </Text>
+            </View>
+          </View>
+          
+          <View style={styles.trendContainer}>
+            <TrendingUp size={20} color={colors.success[500]} />
+            <Text variant="bodyMedium" style={styles.trendText}>
+              Your impact is growing! Keep up the excellent work.
+            </Text>
+          </View>
         </View>
 
         <FlatList
@@ -134,7 +206,7 @@ export default function CompletedMissionsScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <CheckCircle size={48} color="#64748B" />
+              <CheckCircle size={48} color={colors.neutral[500]} />
               <Text variant="titleMedium" style={styles.emptyTitle}>
                 No completed missions yet
               </Text>
@@ -152,65 +224,91 @@ export default function CompletedMissionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surface,
     elevation: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral[200],
   },
   headerTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.lg,
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing['3xl'],
+    marginVertical: spacing.lg,
+    ...shadows.md,
   },
   summaryTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing['2xl'],
+    textAlign: 'center',
+    fontFamily: 'Inter-Bold',
   },
-  summaryText: {
-    color: '#64748B',
-    lineHeight: 20,
+  summaryStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing['2xl'],
+  },
+  summaryStatItem: {
+    alignItems: 'center',
+  },
+  summaryNumber: {
+    fontWeight: typography.fontWeight.extrabold,
+    color: colors.primary[600],
+    marginBottom: spacing.sm,
+    fontFamily: 'Inter-Bold',
+  },
+  summaryLabel: {
+    color: colors.neutral[500],
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+  },
+  trendContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.success[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+  },
+  trendText: {
+    color: colors.success[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   listContent: {
-    paddingBottom: 24,
+    paddingBottom: spacing['3xl'],
   },
   missionCard: {
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   cardContent: {
-    padding: 20,
+    padding: spacing['2xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: spacing.lg,
   },
   iconContainer: {
-    backgroundColor: '#ECFDF5',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: colors.success[100],
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
   },
   missionInfo: {
     flex: 1,
@@ -219,13 +317,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
   missionTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neutral[800],
     flex: 1,
-    marginRight: 8,
+    marginRight: spacing.md,
+    fontFamily: 'Inter-SemiBold',
   },
   typeChip: {
     alignSelf: 'flex-start',
@@ -233,49 +332,72 @@ const styles = StyleSheet.create({
   chipText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   locationText: {
-    color: '#64748B',
+    color: colors.neutral[500],
     flex: 1,
+    fontFamily: 'Inter-Regular',
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.sm,
   },
   timeText: {
-    color: '#64748B',
+    color: colors.neutral[500],
+    fontFamily: 'Inter-Regular',
   },
   helpedText: {
-    color: '#10B981',
-    fontWeight: '600',
+    color: colors.success[500],
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  ratingLabel: {
+    color: colors.neutral[500],
+    fontFamily: 'Inter-Regular',
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  star: {
+    fontSize: 14,
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: spacing['8xl'],
   },
   emptyTitle: {
-    color: '#1E293B',
-    marginTop: 16,
-    marginBottom: 8,
-    fontWeight: '600',
+    color: colors.neutral[800],
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   emptySubtitle: {
-    color: '#64748B',
+    color: colors.neutral[500],
     textAlign: 'center',
     lineHeight: 20,
+    fontFamily: 'Inter-Regular',
   },
 });

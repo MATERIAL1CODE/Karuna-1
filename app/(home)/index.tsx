@@ -4,15 +4,14 @@ import {
   StyleSheet,
   SafeAreaView,
   Pressable,
-  ImageBackground,
+  Image,
 } from 'react-native';
 import {
   Text,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { Heart, Users, MapPin } from 'lucide-react-native';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { colors, spacing, borderRadius } from '@/lib/design-tokens';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -48,88 +47,79 @@ export default function HomePage() {
   };
 
   return (
-    <ImageBackground
-      source={{ uri: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }}
-      style={styles.backgroundImage}
-      blurRadius={6}
-    >
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.welcomeSection}>
-              <View style={styles.iconContainer}>
-                <Heart size={48} color={colors.primary[600]} />
-              </View>
-              <Text variant="displayMedium" style={styles.title}>
-                Welcome to Impact
-              </Text>
-              <Text variant="headlineSmall" style={styles.subtitle}>
-                Making a Difference Together
-              </Text>
-              <Text variant="bodyMedium" style={styles.description}>
-                Choose how you'd like to make a difference today
-              </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.welcomeSection}>
+            <View style={styles.iconContainer}>
+              <Heart size={48} color={colors.primary[600]} />
             </View>
-          </View>
-
-          <View style={styles.roleCards}>
-            <AnimatedPressable onPress={handleCitizenPress} style={citizenCardAnimatedStyle}>
-              <GlassCard variant="elevated" style={styles.citizenCard}>
-                <View style={styles.cardIcon}>
-                  <MapPin size={40} color="#FFFFFF" />
-                </View>
-                <Text variant="headlineSmall" style={styles.cardTitle}>
-                  Citizen Mode
-                </Text>
-                <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Report people in need and donate surplus resources to help your community
-                </Text>
-                <View style={styles.features}>
-                  <Text style={styles.feature}>• Report people in need</Text>
-                  <Text style={styles.feature}>• Donate food & resources</Text>
-                  <Text style={styles.feature}>• Track your impact</Text>
-                </View>
-              </GlassCard>
-            </AnimatedPressable>
-
-            <AnimatedPressable onPress={handleFacilitatorPress} style={facilitatorCardAnimatedStyle}>
-              <GlassCard variant="elevated" style={styles.facilitatorCard}>
-                <View style={styles.cardIcon}>
-                  <Users size={40} color="#FFFFFF" />
-                </View>
-                <Text variant="headlineSmall" style={styles.cardTitle}>
-                  Facilitator Mode
-                </Text>
-                <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Accept delivery missions and coordinate aid efforts to help those in need
-                </Text>
-                <View style={styles.features}>
-                  <Text style={styles.feature}>• Accept delivery missions</Text>
-                  <Text style={styles.feature}>• Coordinate aid efforts</Text>
-                  <Text style={styles.feature}>• Make direct impact</Text>
-                </View>
-              </GlassCard>
-            </AnimatedPressable>
-          </View>
-
-          <View style={styles.footer}>
-            <Text variant="bodySmall" style={styles.footerText}>
-              Start making a positive impact in your community today
+            <Text variant="displayMedium" style={styles.title}>
+              Welcome to Sahayata
+            </Text>
+            <Text variant="headlineSmall" style={styles.subtitle}>
+              Making a Difference Together
+            </Text>
+            <Text variant="bodyMedium" style={styles.description}>
+              Choose how you'd like to make a difference today
             </Text>
           </View>
         </View>
-      </SafeAreaView>
-    </ImageBackground>
+
+        <View style={styles.roleCards}>
+          <AnimatedPressable onPress={handleCitizenPress} style={citizenCardAnimatedStyle}>
+            <View style={[styles.roleCard, styles.citizenCard]}>
+              <View style={styles.cardIcon}>
+                <MapPin size={40} color={colors.primary[600]} />
+              </View>
+              <Text variant="headlineSmall" style={styles.cardTitle}>
+                Citizen Mode
+              </Text>
+              <Text variant="bodyMedium" style={styles.cardDescription}>
+                Report people in need and donate surplus resources to help your community
+              </Text>
+              <View style={styles.features}>
+                <Text style={styles.feature}>• Report people in need</Text>
+                <Text style={styles.feature}>• Donate food & resources</Text>
+                <Text style={styles.feature}>• Track your impact</Text>
+              </View>
+            </View>
+          </AnimatedPressable>
+
+          <AnimatedPressable onPress={handleFacilitatorPress} style={facilitatorCardAnimatedStyle}>
+            <View style={[styles.roleCard, styles.facilitatorCard]}>
+              <View style={styles.cardIcon}>
+                <Users size={40} color={colors.success[500]} />
+              </View>
+              <Text variant="headlineSmall" style={styles.cardTitle}>
+                Facilitator Mode
+              </Text>
+              <Text variant="bodyMedium" style={styles.cardDescription}>
+                Accept delivery missions and coordinate aid efforts to help those in need
+              </Text>
+              <View style={styles.features}>
+                <Text style={styles.feature}>• Accept delivery missions</Text>
+                <Text style={styles.feature}>• Coordinate aid efforts</Text>
+                <Text style={styles.feature}>• Make direct impact</Text>
+              </View>
+            </View>
+          </AnimatedPressable>
+        </View>
+
+        <View style={styles.footer}>
+          <Text variant="bodySmall" style={styles.footerText}>
+            Start making a positive impact in your community today
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -144,101 +134,88 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconContainer: {
-    backgroundColor: colors.glass.light,
+    backgroundColor: colors.primary[100],
     borderRadius: borderRadius['3xl'],
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
     marginBottom: spacing['3xl'],
-    borderWidth: 1,
-    borderColor: colors.glass.border,
+    ...shadows.md,
   },
   title: {
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontWeight: typography.fontWeight.extrabold,
+    color: colors.neutral[800],
     marginBottom: spacing.md,
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    fontFamily: 'Inter-Bold',
   },
   subtitle: {
-    color: colors.primary[300],
+    color: colors.primary[600],
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     marginBottom: spacing.sm,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontFamily: 'Inter-SemiBold',
   },
   description: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.neutral[500],
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: spacing.lg,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontFamily: 'Inter-Regular',
   },
   roleCards: {
     gap: spacing['3xl'],
     marginBottom: spacing['4xl'],
   },
+  roleCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius['2xl'],
+    padding: spacing['4xl'],
+    alignItems: 'center',
+    ...shadows.md,
+  },
   citizenCard: {
-    backgroundColor: 'rgba(79, 70, 229, 0.2)',
-    borderColor: 'rgba(79, 70, 229, 0.3)',
-    borderWidth: 1,
+    borderWidth: 2,
+    borderColor: colors.primary[200],
   },
   facilitatorCard: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    borderColor: 'rgba(16, 185, 129, 0.3)',
-    borderWidth: 1,
+    borderWidth: 2,
+    borderColor: colors.success[200],
   },
   cardIcon: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.neutral[50],
     borderRadius: borderRadius['3xl'],
     padding: spacing['2xl'],
     marginBottom: spacing['2xl'],
-    alignSelf: 'center',
   },
   cardTitle: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.bold,
     textAlign: 'center',
     marginBottom: spacing.lg,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontFamily: 'Inter-Bold',
   },
   cardDescription: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.neutral[500],
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: spacing['2xl'],
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontFamily: 'Inter-Regular',
   },
   features: {
     alignItems: 'flex-start',
     gap: spacing.md,
   },
   feature: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.neutral[600],
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   footer: {
     alignItems: 'center',
   },
   footerText: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: colors.neutral[400],
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
 });
