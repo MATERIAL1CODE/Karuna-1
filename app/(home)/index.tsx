@@ -18,7 +18,7 @@ export default function HomePage() {
   const styles = createStyles(theme);
 
   const handleCitizenPress = () => {
-    router.push('/(citizen)');
+    router.push('/(citizen)/(tabs)/home');
   };
 
   const handleFacilitatorPress = () => {
