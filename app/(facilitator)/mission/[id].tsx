@@ -6,6 +6,8 @@ import {
   ScrollView,
   Image,
   Alert,
+  Modal,
+  Platform,
 } from 'react-native';
 import {
   Text,
@@ -13,18 +15,30 @@ import {
   Appbar,
   Card,
   Chip,
+  IconButton,
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
-import { MapPin, User, Clock, Phone, AlertTriangle } from 'lucide-react-native';
+import { Video } from 'expo-av';
+import { MapPin, User, Clock, Phone, AlertTriangle, VideoIcon, X, Play } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import ReportIssueModal from '@/components/ReportIssueModal';
 
 type MissionState = 'accepted' | 'enRoutePickup' | 'arrivedPickup' | 'enRouteDelivery' | 'arrivedDelivery' | 'completed';
 
+// Mock mission data with video
+const mockMissionData = {
+  id: '1',
+  title: 'Food for 4 People',
+  videoUri: Platform.OS === 'web' ? null : 'mock-video-uri', // Simulate video availability
+  videoDuration: 12,
+  hasVideo: true,
+};
+
 export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams();
   const [missionState, setMissionState] = useState<MissionState>('accepted');
   const [reportIssueVisible, setReportIssueVisible] = useState(false);
+  const [videoModalVisible, setVideoModalVisible] = useState(false);
 
   const getPrimaryActionText = () => {
     switch (missionState) {
@@ -85,6 +99,66 @@ export default function MissionDetailScreen() {
     }
   };
 
+  const handleVideoPress = () => {
+    if (Platform.OS === 'web') {
+      Alert.alert(
+        'Video Context',
+        'This would show the video recorded by the citizen to provide context about the situation. Video playback is available on mobile devices.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      setVideoModalVisible(true);
+    }
+  };
+
+  const VideoModal = () => (
+    <Modal
+      visible={videoModalVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={() => setVideoModalVisible(false)}
+    >
+      <View style={styles.videoModal}>
+        <View style={styles.videoModalHeader}>
+          <Text variant="titleLarge" style={styles.videoModalTitle}>
+            Video Context
+          </Text>
+          <IconButton
+            icon={() => <X size={24} color={colors.neutral[800]} />}
+            onPress={() => setVideoModalVisible(false)}
+          />
+        </View>
+        
+        <View style={styles.videoModalContent}>
+          <Text variant="bodyMedium" style={styles.videoModalDescription}>
+            This video was recorded by the citizen to provide visual context about the situation.
+          </Text>
+          
+          {Platform.OS === 'web' ? (
+            <View style={styles.mockVideoPlayer}>
+              <Play size={48} color={colors.primary[600]} />
+              <Text variant="bodyMedium" style={styles.mockVideoText}>
+                Video Player ({mockMissionData.videoDuration}s)
+              </Text>
+            </View>
+          ) : (
+            <Video
+              style={styles.videoPlayer}
+              source={{ uri: mockMissionData.videoUri || '' }}
+              useNativeControls
+              resizeMode="contain"
+              shouldPlay={false}
+            />
+          )}
+          
+          <Text variant="bodySmall" style={styles.videoPrivacyNote}>
+            🔒 This video is securely encrypted and only visible to you as the assigned facilitator.
+          </Text>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const isCompleted = missionState === 'completed';
 
   return (
@@ -98,12 +172,33 @@ export default function MissionDetailScreen() {
         {/* Mission State Card */}
         <Card style={styles.stateCard} mode="elevated">
           <Card.Content style={styles.stateContent}>
-            <Text variant="titleLarge" style={styles.stateTitle}>
-              Food for 4 People
-            </Text>
+            <View style={styles.stateHeader}>
+              <Text variant="titleLarge" style={styles.stateTitle}>
+                {mockMissionData.title}
+              </Text>
+              {mockMissionData.hasVideo && (
+                <Button
+                  mode="outlined"
+                  onPress={handleVideoPress}
+                  style={styles.videoButton}
+                  contentStyle={styles.videoButtonContent}
+                  icon={() => <VideoIcon size={20} color={colors.primary[600]} />}
+                >
+                  View Context
+                </Button>
+              )}
+            </View>
             <Text variant="bodyMedium" style={styles.stateDescription}>
               {getStateDescription()}
             </Text>
+            {mockMissionData.hasVideo && (
+              <View style={styles.videoIndicator}>
+                <VideoIcon size={16} color={colors.success[500]} />
+                <Text variant="bodySmall" style={styles.videoIndicatorText}>
+                  Video context available ({mockMissionData.videoDuration}s)
+                </Text>
+              </View>
+            )}
           </Card.Content>
         </Card>
 
@@ -272,6 +367,8 @@ export default function MissionDetailScreen() {
         visible={reportIssueVisible}
         onDismiss={() => setReportIssueVisible(false)}
       />
+
+      <VideoModal />
     </SafeAreaView>
   );
 }
@@ -306,15 +403,43 @@ const styles = StyleSheet.create({
   stateContent: {
     padding: spacing['3xl'],
   },
+  stateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
+  },
   stateTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.primary[800],
-    marginBottom: spacing.lg,
+    flex: 1,
+    marginRight: spacing['2xl'],
     fontFamily: 'Inter-Bold',
+  },
+  videoButton: {
+    borderColor: colors.primary[600],
+    borderRadius: borderRadius.lg,
+  },
+  videoButtonContent: {
+    paddingVertical: spacing.md,
   },
   stateDescription: {
     color: colors.primary[700],
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Regular',
+  },
+  videoIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+    backgroundColor: colors.success[50],
+    padding: spacing['2xl'],
+    borderRadius: borderRadius.lg,
+  },
+  videoIndicatorText: {
+    color: colors.success[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   focusCard: {
     marginBottom: spacing['2xl'],
@@ -424,5 +549,56 @@ const styles = StyleSheet.create({
   },
   primaryButtonContent: {
     paddingVertical: spacing['2xl'],
+  },
+  videoModal: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  videoModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing['3xl'],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral[200],
+  },
+  videoModalTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
+  },
+  videoModalContent: {
+    flex: 1,
+    padding: spacing['3xl'],
+    gap: spacing['3xl'],
+  },
+  videoModalDescription: {
+    color: colors.neutral[600],
+    fontFamily: 'Inter-Regular',
+  },
+  videoPlayer: {
+    flex: 1,
+    backgroundColor: colors.neutral[900],
+    borderRadius: borderRadius.lg,
+  },
+  mockVideoPlayer: {
+    flex: 1,
+    backgroundColor: colors.neutral[100],
+    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing['2xl'],
+  },
+  mockVideoText: {
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Regular',
+  },
+  videoPrivacyNote: {
+    color: colors.success[600],
+    backgroundColor: colors.success[50],
+    padding: spacing['2xl'],
+    borderRadius: borderRadius.lg,
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
   },
 });

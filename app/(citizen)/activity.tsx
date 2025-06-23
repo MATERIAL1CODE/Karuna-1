@@ -13,7 +13,7 @@ import {
   Chip,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin, Gift, ArrowLeft } from 'lucide-react-native';
+import { MapPin, Gift, ArrowLeft, Eye } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 interface ActivityItem {
@@ -114,52 +114,70 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
     return null;
   };
 
+  const handlePress = () => {
+    if (item.status === 'in_progress') {
+      router.push(`/(citizen)/live-mission-view/${item.id}`);
+    }
+  };
+
   return (
-    <Card style={styles.activityCard} mode="elevated">
-      <Card.Content style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-            <IconComponent size={24} color={iconColor} />
-          </View>
-          <View style={styles.activityInfo}>
-            <View style={styles.titleRow}>
-              <Text variant="titleMedium" style={styles.activityTitle}>
-                {item.title}
-              </Text>
-              <Chip
-                style={[
-                  styles.statusChip,
-                  { backgroundColor: getStatusColor(item.status) },
-                ]}
-                textStyle={styles.statusText}
-              >
-                {getStatusText(item.status)}
-              </Chip>
+    <Pressable onPress={handlePress} disabled={item.status !== 'in_progress'}>
+      <Card style={styles.activityCard} mode="elevated">
+        <Card.Content style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
+              <IconComponent size={24} color={iconColor} />
             </View>
-            <Text variant="bodyMedium" style={styles.activitySubtitle}>
-              {item.subtitle}
-            </Text>
-            <View style={styles.bottomRow}>
-              <Text variant="bodySmall" style={styles.activityDate}>
-                {item.date}
-              </Text>
-              {getHelpedText() && (
-                <View style={styles.helpedContainer}>
-                  <Text variant="bodySmall" style={styles.helpedText}>
-                    {getHelpedText()}
-                  </Text>
-                  {item.status === 'completed' && (
-                    <Pressable style={styles.viewStoryButton}>
-                      <Text style={styles.viewStoryText}>View Story</Text>
-                    </Pressable>
+            <View style={styles.activityInfo}>
+              <View style={styles.titleRow}>
+                <Text variant="titleMedium" style={styles.activityTitle}>
+                  {item.title}
+                </Text>
+                <View style={styles.statusContainer}>
+                  <Chip
+                    style={[
+                      styles.statusChip,
+                      { backgroundColor: getStatusColor(item.status) },
+                    ]}
+                    textStyle={styles.statusText}
+                  >
+                    {getStatusText(item.status)}
+                  </Chip>
+                  {item.status === 'in_progress' && (
+                    <View style={styles.liveIndicator}>
+                      <Eye size={16} color={colors.primary[600]} />
+                      <Text variant="bodySmall" style={styles.liveText}>
+                        Track Live
+                      </Text>
+                    </View>
                   )}
                 </View>
-              )}
+              </View>
+              <Text variant="bodyMedium" style={styles.activitySubtitle}>
+                {item.subtitle}
+              </Text>
+              <View style={styles.bottomRow}>
+                <Text variant="bodySmall" style={styles.activityDate}>
+                  {item.date}
+                </Text>
+                {getHelpedText() && (
+                  <View style={styles.helpedContainer}>
+                    <Text variant="bodySmall" style={styles.helpedText}>
+                      {getHelpedText()}
+                    </Text>
+                    {item.status === 'completed' && (
+                      <Pressable style={styles.viewStoryButton}>
+                        <Text style={styles.viewStoryText}>View Story</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                )}
+              </View>
             </View>
           </View>
-        </View>
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </Pressable>
   );
 }
 
@@ -287,6 +305,10 @@ const styles = StyleSheet.create({
     marginRight: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
+  statusContainer: {
+    alignItems: 'flex-end',
+    gap: spacing.lg,
+  },
   activitySubtitle: {
     color: colors.neutral[500],
     marginBottom: spacing.lg,
@@ -329,6 +351,20 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#FFFFFF',
     fontSize: 10,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
+  },
+  liveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+  },
+  liveText: {
+    color: colors.primary[600],
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
