@@ -16,14 +16,16 @@ import {
   Provider,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin } from 'lucide-react-native';
+import { MapPin, ChevronDown } from 'lucide-react-native';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 const resourceTypes = [
-  'Food',
+  'Cooked Meals',
+  'Groceries',
+  'Blankets',
+  'Water',
   'Clothing',
   'Medicine',
-  'Educational Materials',
-  'Household Items',
   'Other',
 ];
 
@@ -31,12 +33,13 @@ export default function DonateScreen() {
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
   const handleSubmit = async () => {
-    if (!resourceType || !quantity || !pickupLocation) {
+    if (!resourceType || !quantity || !pickupLocation || !pickupTime) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -47,6 +50,7 @@ export default function DonateScreen() {
         resourceType,
         quantity,
         pickupLocation,
+        pickupTime,
         notes,
       });
 
@@ -91,13 +95,17 @@ export default function DonateScreen() {
                     onPressIn={openMenu}
                     right={
                       <TextInput.Icon
-                        icon="chevron-down"
+                        icon={() => <ChevronDown size={20} color={colors.neutral[500]} />}
                         onPress={openMenu}
                       />
                     }
                     style={styles.input}
+                    outlineColor={colors.neutral[200]}
+                    activeOutlineColor={colors.primary[600]}
+                    placeholderTextColor={colors.neutral[400]}
                   />
                 }
+                contentStyle={styles.menuContent}
               >
                 {resourceTypes.map((type) => (
                   <Menu.Item
@@ -107,33 +115,56 @@ export default function DonateScreen() {
                       closeMenu();
                     }}
                     title={type}
+                    titleStyle={styles.menuItemTitle}
                   />
                 ))}
               </Menu>
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
-                Quantity *
+                Quantity (approx.) *
               </Text>
               <TextInput
                 value={quantity}
                 onChangeText={setQuantity}
                 mode="outlined"
-                placeholder="e.g., 5 boxes, 2 bags"
+                placeholder="e.g., 15 meals, 5 blankets"
                 style={styles.input}
+                outlineColor={colors.neutral[200]}
+                activeOutlineColor={colors.primary[600]}
+                placeholderTextColor={colors.neutral[400]}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
-                Pickup Location *
+                Pickup Address *
               </Text>
               <TextInput
                 value={pickupLocation}
                 onChangeText={setPickupLocation}
                 mode="outlined"
-                placeholder="Enter address or select on map"
+                placeholder="Enter your address"
+                multiline
+                numberOfLines={2}
                 right={
-                  <TextInput.Icon icon={() => <MapPin size={20} color="#64748B" />} />
+                  <TextInput.Icon icon={() => <MapPin size={20} color={colors.neutral[500]} />} />
                 }
                 style={styles.input}
+                outlineColor={colors.neutral[200]}
+                activeOutlineColor={colors.primary[600]}
+                placeholderTextColor={colors.neutral[400]}
+              />
+
+              <Text variant="labelLarge" style={styles.fieldLabel}>
+                Pickup Time *
+              </Text>
+              <TextInput
+                value={pickupTime}
+                onChangeText={setPickupTime}
+                mode="outlined"
+                placeholder="e.g., Today, 8-9 PM"
+                style={styles.input}
+                outlineColor={colors.neutral[200]}
+                activeOutlineColor={colors.primary[600]}
+                placeholderTextColor={colors.neutral[400]}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -147,6 +178,9 @@ export default function DonateScreen() {
                 numberOfLines={4}
                 placeholder="e.g., perishable items, best time for pickup"
                 style={styles.textArea}
+                outlineColor={colors.neutral[200]}
+                activeOutlineColor={colors.primary[600]}
+                placeholderTextColor={colors.neutral[400]}
               />
 
               <Button
@@ -170,45 +204,58 @@ export default function DonateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.neutral[200],
   },
   headerTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing.lg,
   },
   formCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   formContent: {
-    padding: 24,
+    padding: spacing['3xl'],
   },
   fieldLabel: {
-    color: '#1E293B',
-    marginBottom: 8,
-    marginTop: 16,
+    color: colors.neutral[800],
+    marginBottom: spacing.md,
+    marginTop: spacing.lg,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   input: {
-    marginBottom: 8,
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
   },
   textArea: {
-    marginBottom: 24,
+    marginBottom: spacing['3xl'],
+    backgroundColor: colors.surface,
+  },
+  menuContent: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+  },
+  menuItemTitle: {
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Regular',
   },
   submitButton: {
-    borderRadius: 12,
-    marginTop: 8,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.primary[600],
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: spacing.md,
   },
 });

@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Alert,
   Dimensions,
+  Platform,
 } from 'react-native';
 import {
   Text,
@@ -13,14 +14,36 @@ import {
   Appbar,
   Card,
 } from 'react-native-paper';
-import MapView, { Marker, Region } from 'react-native-maps';
 import { router } from 'expo-router';
-import * as Location from 'expo-location';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
+
+// Conditionally import native-only modules
+let MapView: any = null;
+let Marker: any = null;
+let Location: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const Maps = require('react-native-maps');
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+    Location = require('expo-location');
+  } catch (error) {
+    console.log('Maps not available on this platform');
+  }
+}
 
 const { width, height } = Dimensions.get('window');
 
+interface Region {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
+
 export default function ReportScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<any>(null);
   const [region, setRegion] = useState<Region>({
     latitude: 28.6139,
     longitude: 77.2090,
@@ -36,10 +59,14 @@ export default function ReportScreen() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getCurrentLocation();
+    if (Platform.OS !== 'web') {
+      getCurrentLocation();
+    }
   }, []);
 
   const getCurrentLocation = async () => {
+    if (!Location) return;
+
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -96,6 +123,47 @@ export default function ReportScreen() {
     }
   };
 
+  const MapComponent = () => {
+    if (Platform.OS === 'web' || !MapView) {
+      return (
+        <View style={styles.webMapPlaceholder}>
+          <Text variant="bodyLarge" style={styles.webMapText}>
+            Map functionality available on mobile devices
+          </Text>
+          <Text variant="bodyMedium" style={styles.webMapSubtext}>
+            Tap here to simulate pin placement
+          </Text>
+          <Button 
+            mode="outlined"
+            onPress={() => setMarkerCoordinate({ latitude: 28.6139, longitude: 77.2090 })}
+            style={styles.webMapButton}
+            textColor={colors.primary[600]}
+          >
+            Place Pin
+          </Button>
+        </View>
+      );
+    }
+
+    return (
+      <MapView
+        style={styles.map}
+        region={region}
+        onPress={handleMapPress}
+        showsUserLocation
+        showsMyLocationButton
+      >
+        {markerCoordinate && (
+          <Marker
+            coordinate={markerCoordinate}
+            title="Need Location"
+            description="Person/family in need"
+          />
+        )}
+      </MapView>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header}>
@@ -104,25 +172,16 @@ export default function ReportScreen() {
       </Appbar.Header>
 
       <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          region={region}
-          onPress={handleMapPress}
-          showsUserLocation
-          showsMyLocationButton
-        >
-          {markerCoordinate && (
-            <Marker
-              coordinate={markerCoordinate}
-              title="Need Location"
-              description="Person/family in need"
-            />
-          )}
-        </MapView>
+        <MapComponent />
 
         <View style={styles.mapOverlay}>
           <Text variant="bodyMedium" style={styles.mapInstruction}>
-            Tap on the map to pin the location
+            {markerCoordinate ? 
+              '📍 Pin placed. Tap elsewhere to move.' : 
+              Platform.OS === 'web' ? 
+                'Tap the button to place a pin' :
+                'Tap on the map to pin the location'
+            }
           </Text>
         </View>
       </View>
@@ -141,6 +200,9 @@ export default function ReportScreen() {
             keyboardType="numeric"
             placeholder="e.g., 5"
             style={styles.input}
+            outlineColor={colors.neutral[200]}
+            activeOutlineColor={colors.primary[600]}
+            placeholderTextColor={colors.neutral[400]}
           />
 
           <TextInput
@@ -152,6 +214,9 @@ export default function ReportScreen() {
             numberOfLines={3}
             placeholder="Add more details about the situation, specific needs, etc."
             style={styles.textArea}
+            outlineColor={colors.neutral[200]}
+            activeOutlineColor={colors.primary[600]}
+            placeholderTextColor={colors.neutral[400]}
           />
 
           <Button
@@ -173,17 +238,18 @@ export default function ReportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.neutral[200],
   },
   headerTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   mapContainer: {
     flex: 1,
@@ -193,43 +259,73 @@ const styles = StyleSheet.create({
     width: width,
     height: '100%',
   },
+  webMapPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.neutral[100],
+    padding: spacing['5xl'],
+  },
+  webMapText: {
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.semibold,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+    fontFamily: 'Inter-SemiBold',
+  },
+  webMapSubtext: {
+    color: colors.neutral[500],
+    textAlign: 'center',
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Regular',
+  },
+  webMapButton: {
+    borderColor: colors.primary[600],
+  },
   mapOverlay: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 8,
-    padding: 12,
+    top: spacing.lg,
+    left: spacing.lg,
+    right: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.md,
   },
   mapInstruction: {
     textAlign: 'center',
-    color: '#64748B',
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   formCard: {
-    margin: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
+    margin: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   formContent: {
-    padding: 20,
+    padding: spacing['2xl'],
   },
   formTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 16,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Bold',
   },
   input: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
   },
   textArea: {
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
+    backgroundColor: colors.surface,
   },
   submitButton: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.primary[600],
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: spacing.md,
   },
 });

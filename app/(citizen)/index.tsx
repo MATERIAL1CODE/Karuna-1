@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
@@ -12,20 +12,15 @@ import {
 } from 'react-native-paper';
 import { Bell, MapPin, Gift, ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
-import ReportNeedModal from '@/components/ReportNeedModal';
-import MakeDonationModal from '@/components/MakeDonationModal';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function CitizenDashboard() {
-  const [reportModalVisible, setReportModalVisible] = useState(false);
-  const [donationModalVisible, setDonationModalVisible] = useState(false);
-
   const handleReportPress = () => {
-    setReportModalVisible(true);
+    router.push('/(citizen)/report');
   };
 
   const handleDonationPress = () => {
-    setDonationModalVisible(true);
+    router.push('/(citizen)/donate');
   };
 
   const totalPeopleHelped = 1247; // Mock data
@@ -62,7 +57,7 @@ export default function CitizenDashboard() {
           <Pressable onPress={handleReportPress} style={styles.actionCard}>
             <View style={styles.cardContent}>
               <View style={[styles.iconContainer, styles.reportIconContainer]}>
-                <MapPin size={40} color={colors.primary[600]} />
+                <MapPin size={32} color={colors.primary[600]} />
               </View>
               <View style={styles.cardTextContent}>
                 <Text variant="titleLarge" style={styles.cardTitle}>
@@ -78,7 +73,7 @@ export default function CitizenDashboard() {
           <Pressable onPress={handleDonationPress} style={styles.actionCard}>
             <View style={styles.cardContent}>
               <View style={[styles.iconContainer, styles.donationIconContainer]}>
-                <Gift size={40} color={colors.success[500]} />
+                <Gift size={32} color={colors.success[500]} />
               </View>
               <View style={styles.cardTextContent}>
                 <Text variant="titleLarge" style={styles.cardTitle}>
@@ -93,14 +88,12 @@ export default function CitizenDashboard() {
         </View>
 
         <View style={styles.communityImpactSection}>
-          <Text variant="bodyMedium" style={styles.communityImpactText}>
-            Together, our community has helped {totalPeopleHelped.toLocaleString()} people this month
-          </Text>
-        </View>
-
-        <View style={styles.statsSection}>
           <Text variant="titleLarge" style={styles.sectionTitle}>
             Community Impact
+          </Text>
+          
+          <Text variant="bodyMedium" style={styles.communityImpactText}>
+            Together, our community has helped {totalPeopleHelped.toLocaleString()} people this month
           </Text>
           
           <View style={styles.statsGrid}>
@@ -128,16 +121,6 @@ export default function CitizenDashboard() {
           </View>
         </View>
       </ScrollView>
-
-      <ReportNeedModal 
-        visible={reportModalVisible}
-        onDismiss={() => setReportModalVisible(false)}
-      />
-
-      <MakeDonationModal 
-        visible={donationModalVisible}
-        onDismiss={() => setDonationModalVisible(false)}
-      />
     </SafeAreaView>
   );
 }
@@ -183,7 +166,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   actionCards: {
-    gap: spacing['2xl'],
+    gap: spacing.lg,
     marginBottom: spacing['4xl'],
   },
   actionCard: {
@@ -194,12 +177,12 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing['3xl'],
-    gap: spacing['2xl'],
+    padding: spacing['2xl'],
+    gap: spacing.lg,
   },
   iconContainer: {
-    borderRadius: borderRadius['2xl'],
-    padding: spacing['2xl'],
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
   },
   reportIconContainer: {
     backgroundColor: colors.primary[100],
@@ -213,36 +196,33 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Bold',
   },
   cardDescription: {
     color: colors.neutral[500],
-    lineHeight: 22,
+    lineHeight: 20,
     fontFamily: 'Inter-Regular',
   },
   communityImpactSection: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['2xl'],
-    marginBottom: spacing['4xl'],
+    padding: spacing['3xl'],
     ...shadows.md,
+  },
+  sectionTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+    fontFamily: 'Inter-Bold',
   },
   communityImpactText: {
     color: colors.neutral[600],
     textAlign: 'center',
     fontWeight: typography.fontWeight.medium,
-    fontFamily: 'Inter-Medium',
-  },
-  statsSection: {
-    marginTop: spacing.lg,
-  },
-  sectionTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
     marginBottom: spacing['2xl'],
-    textAlign: 'center',
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Inter-Medium',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -250,18 +230,17 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    backgroundColor: colors.neutral[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
   },
   statContent: {
     alignItems: 'center',
-    padding: spacing['3xl'],
   },
   statNumber: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.primary[600],
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     fontFamily: 'Inter-Bold',
   },
   statLabel: {
