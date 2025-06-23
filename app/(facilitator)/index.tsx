@@ -4,160 +4,19 @@ import {
   StyleSheet,
   SafeAreaView,
   FlatList,
-  TouchableOpacity,
-  Image,
   Pressable,
 } from 'react-native';
-import { Text, Chip, Appbar, Button } from 'react-native-paper';
+import { Text, Appbar } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin, Clock, ArrowLeft, Gift, List, Map } from 'lucide-react-native';
+import { ArrowLeft, List, Map, MapPin } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import { useData, Mission } from '@/contexts/DataContext';
 import { MissionCardSkeleton } from '@/components/SkeletonLoader';
-
-interface MissionCardProps {
-  mission: Mission;
-  onPress: () => void;
-}
-
-function MissionCard({ mission, onPress }: MissionCardProps) {
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'high':
-        return colors.error[500];
-      case 'medium':
-        return colors.warning[500];
-      default:
-        return colors.success[500];
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Food':
-        return colors.success[500];
-      case 'Medicine':
-        return colors.error[500];
-      default:
-        return colors.info[500];
-    }
-  };
-
-  return (
-    <View style={styles.missionCard}>
-      {/* Route Map Preview */}
-      <View style={styles.routePreview}>
-        <Image
-          source={{
-            uri: 'https://images.pexels.com/photos/3243090/pexels-photo-3243090.jpeg?auto=compress&cs=tinysrgb&w=400&h=150&fit=crop',
-          }}
-          style={styles.routeImage}
-        />
-        <View style={styles.routeOverlay}>
-          <Text variant="bodySmall" style={styles.distanceText}>
-            {mission.distance} • Est. {mission.eta}
-          </Text>
-        </View>
-      </View>
-
-      {/* Mission Details */}
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <Text variant="titleLarge" style={styles.missionTitle}>
-            {mission.title}
-          </Text>
-          <View style={styles.chipContainer}>
-            <Chip
-              style={[
-                styles.typeChip,
-                { backgroundColor: getTypeColor(mission.type) },
-              ]}
-              textStyle={styles.chipText}
-            >
-              {mission.type}
-            </Chip>
-            <Chip
-              style={[
-                styles.urgencyChip,
-                { backgroundColor: getUrgencyColor(mission.urgency) },
-              ]}
-              textStyle={styles.chipText}
-            >
-              {mission.urgency.toUpperCase()}
-            </Chip>
-          </View>
-        </View>
-
-        <View style={styles.locationSection}>
-          <View style={styles.locationItem}>
-            <View style={styles.locationDot}>
-              <Gift size={16} color={colors.success[500]} />
-            </View>
-            <View style={styles.locationText}>
-              <Text variant="labelMedium" style={styles.locationLabel}>
-                PICKUP
-              </Text>
-              <Text variant="bodyMedium" style={styles.locationValue}>
-                {mission.pickupLocation}
-              </Text>
-              <Text variant="bodySmall" style={styles.contactText}>
-                Contact: {mission.pickupContact}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.routeLine} />
-
-          <View style={styles.locationItem}>
-            <View style={styles.locationDot}>
-              <MapPin size={16} color={colors.error[500]} />
-            </View>
-            <View style={styles.locationText}>
-              <Text variant="labelMedium" style={styles.locationLabel}>
-                DELIVERY
-              </Text>
-              <Text variant="bodyMedium" style={styles.locationValue}>
-                {mission.deliveryLocation}
-              </Text>
-              <Text variant="bodySmall" style={styles.contactText}>
-                Contact: {mission.deliveryContact}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.timeSection}>
-          <View style={styles.timeItem}>
-            <Clock size={16} color={colors.neutral[500]} />
-            <Text variant="bodySmall" style={styles.timeText}>
-              Pickup: {mission.pickupTime}
-            </Text>
-          </View>
-          <View style={styles.timeItem}>
-            <Clock size={16} color={colors.neutral[500]} />
-            <Text variant="bodySmall" style={styles.timeText}>
-              Delivery: {mission.deliveryTime}
-            </Text>
-          </View>
-        </View>
-
-        {/* Full-width Accept Button */}
-        <Button
-          mode="contained"
-          onPress={onPress}
-          style={styles.acceptButton}
-          contentStyle={styles.acceptButtonContent}
-        >
-          View Details & Accept
-        </Button>
-      </View>
-    </View>
-  );
-}
+import MissionCard from '@/components/MissionCard';
 
 export default function FacilitatorDashboard() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const { missions, isLoadingData, fetchData } = useData();
+  const { missions, isLoadingData, fetchData, acceptMission } = useData();
 
   useEffect(() => {
     // Fetch data when component mounts
@@ -168,10 +27,17 @@ export default function FacilitatorDashboard() {
     router.push(`/(facilitator)/mission/${missionId}`);
   };
 
+  const handleAcceptMission = (missionId: string) => {
+    acceptMission(missionId);
+    router.push(`/(facilitator)/mission/${missionId}`);
+  };
+
   const renderMission = ({ item }: { item: Mission }) => (
     <MissionCard
       mission={item}
       onPress={() => handleMissionPress(item.id)}
+      onAccept={() => handleAcceptMission(item.id)}
+      showAcceptButton={item.status === 'available'}
     />
   );
 
@@ -354,130 +220,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: spacing['4xl'],
-  },
-  missionCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing['2xl'],
-    ...shadows.md,
-    overflow: 'hidden',
-  },
-  routePreview: {
-    position: 'relative',
-  },
-  routeImage: {
-    width: '100%',
-    height: 120,
-    backgroundColor: colors.neutral[200],
-  },
-  routeOverlay: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    right: spacing.lg,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  distanceText: {
-    color: '#FFFFFF',
-    fontWeight: typography.fontWeight.semibold,
-    fontFamily: 'Inter-SemiBold',
-  },
-  cardContent: {
-    padding: spacing['3xl'],
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing['2xl'],
-  },
-  missionTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
-    flex: 1,
-    marginRight: spacing['2xl'],
-    fontFamily: 'Inter-Bold',
-    fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
-  },
-  chipContainer: {
-    gap: spacing.lg,
-  },
-  typeChip: {
-    alignSelf: 'flex-end',
-  },
-  urgencyChip: {
-    alignSelf: 'flex-end',
-  },
-  chipText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: typography.fontWeight.semibold,
-    fontFamily: 'Inter-SemiBold',
-  },
-  locationSection: {
-    marginBottom: spacing['2xl'],
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing['2xl'],
-  },
-  locationDot: {
-    marginTop: spacing.lg,
-    backgroundColor: colors.neutral[100],
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-  },
-  routeLine: {
-    width: 2,
-    height: spacing['2xl'],
-    backgroundColor: colors.neutral[300],
-    marginLeft: 21,
-    marginVertical: spacing.lg,
-  },
-  locationText: {
-    flex: 1,
-  },
-  locationLabel: {
-    color: colors.neutral[500],
-    fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.md,
-    fontFamily: 'Inter-SemiBold',
-  },
-  locationValue: {
-    color: colors.neutral[800],
-    fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.md,
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
-  },
-  contactText: {
-    color: colors.neutral[500],
-    fontFamily: 'Inter-Regular',
-  },
-  timeSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing['2xl'],
-  },
-  timeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  timeText: {
-    color: colors.neutral[600],
-    fontWeight: typography.fontWeight.medium,
-    fontFamily: 'Inter-Medium',
-  },
-  acceptButton: {
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[600],
-  },
-  acceptButtonContent: {
-    paddingVertical: spacing.lg,
   },
   emptyContainer: {
     alignItems: 'center',

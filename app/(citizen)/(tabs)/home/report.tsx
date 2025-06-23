@@ -23,6 +23,7 @@ import { VideoView, useVideoPlayer } from 'expo-video';
 import { MapPin, Video as VideoIcon, SkipForward, RotateCcw, Play, Pause, Trash2 } from 'lucide-react-native';
 import { useData } from '@/contexts/DataContext';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { AIStorytellerService } from '@/components/AIStorytellerService';
 
 // Conditionally import native-only modules
 let MapView: any = null;
@@ -214,27 +215,6 @@ export default function ReportScreen() {
     setCurrentStep('review');
   };
 
-  // Mock AI Storyteller function
-  const mockSubmitReport = async () => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    return {
-      letterText: `Dear Compassionate Citizen,
-
-Your report about the ${peopleCount} people in need has led to something beautiful. Because you took the time to notice and care, help is now on the way.
-
-Your vigilance and compassion will help connect them with our local partner organization, who will provide essential supplies and support. 
-
-Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
-
-Thank you for seeing what others might have overlooked, and for caring enough to act.
-
-With deep appreciation,
-The Sahayata Team`
-    };
-  };
-
   const handleFinalSubmit = async () => {
     setLoading(true);
     
@@ -242,22 +222,34 @@ The Sahayata Team`
       // Show AI Storyteller loading overlay
       setIsGeneratingStory(true);
       
-      // Call mock backend function
-      const result = await mockSubmitReport();
+      // Call AI Storyteller service
+      const storyResponse = await AIStorytellerService.generateReportStory(
+        parseInt(peopleCount),
+        markerCoordinate || undefined,
+        description || undefined,
+        recordedVideoUri || undefined
+      );
       
-      // Add activity to context
-      addActivity({
-        type: 'report',
+      // Create activity with AI-generated story
+      const newActivity = {
+        type: 'report' as const,
         title: 'Need Reported',
         subtitle: `Location: ${markerCoordinate ? `${markerCoordinate.latitude.toFixed(4)}, ${markerCoordinate.longitude.toFixed(4)}` : 'Unknown'}`,
-        status: 'pending',
+        status: 'pending' as const,
         peopleHelped: parseInt(peopleCount),
         location: markerCoordinate || undefined,
         description,
         videoUri: recordedVideoUri || undefined,
-        fullAiGeneratedLetter: result.letterText,
-        aiGeneratedLetterSnippet: '...help is now on the way because you took the time to notice and care.',
-      });
+      };
+
+      // Enhance with AI story
+      const enhancedActivity = AIStorytellerService.enhanceActivityWithStory(
+        { ...newActivity, id: '', date: '' },
+        storyResponse
+      );
+
+      // Add to context
+      addActivity(enhancedActivity);
 
       setIsGeneratingStory(false);
       

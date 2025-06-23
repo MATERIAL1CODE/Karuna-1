@@ -20,6 +20,7 @@ import { router } from 'expo-router';
 import { MapPin, ChevronDown } from 'lucide-react-native';
 import { useData } from '@/contexts/DataContext';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import { AIStorytellerService } from '@/components/AIStorytellerService';
 
 const resourceTypes = [
   'Cooked Meals',
@@ -45,30 +46,6 @@ export default function DonateScreen() {
   // AI Storyteller loading state
   const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
-  // Mock AI Storyteller function for donations
-  const mockSubmitDonation = async () => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    const estimatedPeopleHelped = resourceType === 'Cooked Meals' ? parseInt(quantity) || 1 : Math.ceil((parseInt(quantity) || 1) / 2);
-    
-    return {
-      letterText: `Dear Generous Community Member,
-
-We wanted to share a small story with you. Because of the ${quantity} ${resourceType.toLowerCase()} you donated, ${estimatedPeopleHelped} people didn't have to go without today. Your kindness provided immediate comfort and support when it was needed most.
-
-It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of hope and care.
-
-When our facilitator arrived with your donation, the relief and gratitude was profound. Your contribution didn't just provide essential resources—it restored faith that there are people who care, people who understand that we are all connected in this journey of life.
-
-From all of us at Sahayata, thank you for being the light in someone's day.
-
-With heartfelt gratitude,
-The Sahayata Team`,
-      peopleHelped: estimatedPeopleHelped
-    };
-  };
-
   const handleSubmit = async () => {
     if (!resourceType || !quantity || !pickupLocation || !pickupTime) {
       Alert.alert('Error', 'Please fill in all required fields');
@@ -81,22 +58,32 @@ The Sahayata Team`,
       // Show AI Storyteller loading overlay
       setIsGeneratingStory(true);
       
-      // Call mock backend function
-      const result = await mockSubmitDonation();
+      // Call AI Storyteller service
+      const storyResponse = await AIStorytellerService.generateDonationStory(
+        resourceType,
+        quantity,
+        notes || undefined
+      );
       
-      // Add activity to context
-      addActivity({
-        type: 'donation',
+      // Create activity with AI-generated story
+      const newActivity = {
+        type: 'donation' as const,
         title: 'Donation Logged',
         subtitle: `Item: ${quantity} ${resourceType}`,
-        status: 'pending',
-        peopleHelped: result.peopleHelped,
+        status: 'pending' as const,
         resourceType,
         quantity,
         description: notes,
-        fullAiGeneratedLetter: result.letterText,
-        aiGeneratedLetterSnippet: `...${result.peopleHelped} people didn't have to go without today because of your kindness.`,
-      });
+      };
+
+      // Enhance with AI story
+      const enhancedActivity = AIStorytellerService.enhanceActivityWithStory(
+        { ...newActivity, id: '', date: '' },
+        storyResponse
+      );
+
+      // Add to context
+      addActivity(enhancedActivity);
 
       setIsGeneratingStory(false);
 
