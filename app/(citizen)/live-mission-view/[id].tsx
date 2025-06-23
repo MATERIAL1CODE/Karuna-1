@@ -24,7 +24,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import Svg, { Path, Circle } from 'react-native-svg';
-import { Gift, Home, Truck, MapPin, Clock, CheckCircle } from 'lucide-react-native';
+import { Gift, Chrome as Home, Truck, MapPin, Clock, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 // Conditionally import native-only modules

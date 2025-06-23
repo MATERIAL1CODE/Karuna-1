@@ -19,7 +19,7 @@ import {
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Video } from 'expo-av';
-import { MapPin, User, Clock, Phone, AlertTriangle, VideoIcon, X, Play } from 'lucide-react-native';
+import { MapPin, User, Clock, Phone, TriangleAlert as AlertTriangle, Video as VideoIcon, X, Play } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import ReportIssueModal from '@/components/ReportIssueModal';
 
