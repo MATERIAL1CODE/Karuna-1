@@ -21,6 +21,8 @@ import { router } from 'expo-router';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { MapPin, Video as VideoIcon, SkipForward, RotateCcw, Play, Pause, Trash2 } from 'lucide-react-native';
+import { useData } from '@/contexts/DataContext';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 // Conditionally import native-only modules
 let MapView: any = null;
@@ -51,6 +53,7 @@ type ReportStep = 'details' | 'video' | 'review';
 
 export default function ReportScreen() {
   const theme = useTheme();
+  const { addActivity } = useData();
   
   // Existing state
   const [location, setLocation] = useState<any>(null);
@@ -75,6 +78,9 @@ export default function ReportScreen() {
   const [recordedVideoUri, setRecordedVideoUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+
+  // AI Storyteller loading state
+  const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
   const cameraRef = useRef<CameraView>(null);
   const recordingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -208,24 +214,60 @@ export default function ReportScreen() {
     setCurrentStep('review');
   };
 
+  // Mock AI Storyteller function
+  const mockSubmitReport = async () => {
+    // Simulate AI processing time
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    return {
+      letterText: `Dear Compassionate Citizen,
+
+Your report about the ${peopleCount} people in need has led to something beautiful. Because you took the time to notice and care, help is now on the way.
+
+Your vigilance and compassion will help connect them with our local partner organization, who will provide essential supplies and support. 
+
+Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
+
+Thank you for seeing what others might have overlooked, and for caring enough to act.
+
+With deep appreciation,
+The Sahayata Team`
+    };
+  };
+
   const handleFinalSubmit = async () => {
     setLoading(true);
+    
     try {
-      console.log('Submitting report:', {
-        location: markerCoordinate,
-        peopleCount,
+      // Show AI Storyteller loading overlay
+      setIsGeneratingStory(true);
+      
+      // Call mock backend function
+      const result = await mockSubmitReport();
+      
+      // Add activity to context
+      addActivity({
+        type: 'report',
+        title: 'Need Reported',
+        subtitle: `Location: ${markerCoordinate ? `${markerCoordinate.latitude.toFixed(4)}, ${markerCoordinate.longitude.toFixed(4)}` : 'Unknown'}`,
+        status: 'pending',
+        peopleHelped: parseInt(peopleCount),
+        location: markerCoordinate || undefined,
         description,
-        videoUri: recordedVideoUri,
+        videoUri: recordedVideoUri || undefined,
+        fullAiGeneratedLetter: result.letterText,
+        aiGeneratedLetterSnippet: '...help is now on the way because you took the time to notice and care.',
       });
 
+      setIsGeneratingStory(false);
+      
       Alert.alert(
-        'Report Submitted',
-        recordedVideoUri 
-          ? 'Thank you for reporting with video context. Our team will review this shortly. Once aid is delivered, you\'ll receive a personalized letter showing the impact of your compassion.'
-          : 'Thank you for reporting. Our team will review this shortly. Once aid is delivered, you\'ll receive a personalized letter showing the impact of your compassion.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        'Report Submitted Successfully!',
+        'Thank you for your compassion! Your report has been submitted and our team will coordinate assistance. You\'ll receive a personalized letter showing the impact of your kindness once aid is delivered.',
+        [{ text: 'View My Stories', onPress: () => router.push('/(citizen)/(tabs)/activity') }]
       );
     } catch (error) {
+      setIsGeneratingStory(false);
       Alert.alert('Error', 'Failed to submit report. Please try again.');
     } finally {
       setLoading(false);
@@ -674,6 +716,12 @@ export default function ReportScreen() {
           </View>
         </View>
       )}
+
+      {/* AI Storyteller Loading Overlay */}
+      <LoadingOverlay 
+        isVisible={isGeneratingStory}
+        message="Crafting your thank you story..."
+      />
     </SafeAreaView>
   );
 }

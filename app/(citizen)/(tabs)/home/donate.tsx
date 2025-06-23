@@ -18,6 +18,8 @@ import {
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, ChevronDown } from 'lucide-react-native';
+import { useData } from '@/contexts/DataContext';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 const resourceTypes = [
   'Cooked Meals',
@@ -31,6 +33,7 @@ const resourceTypes = [
 
 export default function DonateScreen() {
   const theme = useTheme();
+  const { addActivity } = useData();
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
@@ -39,6 +42,33 @@ export default function DonateScreen() {
   const [loading, setLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  // AI Storyteller loading state
+  const [isGeneratingStory, setIsGeneratingStory] = useState(false);
+
+  // Mock AI Storyteller function for donations
+  const mockSubmitDonation = async () => {
+    // Simulate AI processing time
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const estimatedPeopleHelped = resourceType === 'Cooked Meals' ? parseInt(quantity) || 1 : Math.ceil((parseInt(quantity) || 1) / 2);
+    
+    return {
+      letterText: `Dear Generous Community Member,
+
+We wanted to share a small story with you. Because of the ${quantity} ${resourceType.toLowerCase()} you donated, ${estimatedPeopleHelped} people didn't have to go without today. Your kindness provided immediate comfort and support when it was needed most.
+
+It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of hope and care.
+
+When our facilitator arrived with your donation, the relief and gratitude was profound. Your contribution didn't just provide essential resources—it restored faith that there are people who care, people who understand that we are all connected in this journey of life.
+
+From all of us at Sahayata, thank you for being the light in someone's day.
+
+With heartfelt gratitude,
+The Sahayata Team`,
+      peopleHelped: estimatedPeopleHelped
+    };
+  };
+
   const handleSubmit = async () => {
     if (!resourceType || !quantity || !pickupLocation || !pickupTime) {
       Alert.alert('Error', 'Please fill in all required fields');
@@ -46,21 +76,37 @@ export default function DonateScreen() {
     }
 
     setLoading(true);
+    
     try {
-      console.log('Submitting donation:', {
+      // Show AI Storyteller loading overlay
+      setIsGeneratingStory(true);
+      
+      // Call mock backend function
+      const result = await mockSubmitDonation();
+      
+      // Add activity to context
+      addActivity({
+        type: 'donation',
+        title: 'Donation Logged',
+        subtitle: `Item: ${quantity} ${resourceType}`,
+        status: 'pending',
+        peopleHelped: result.peopleHelped,
         resourceType,
         quantity,
-        pickupLocation,
-        pickupTime,
-        notes,
+        description: notes,
+        fullAiGeneratedLetter: result.letterText,
+        aiGeneratedLetterSnippet: `...${result.peopleHelped} people didn't have to go without today because of your kindness.`,
       });
 
+      setIsGeneratingStory(false);
+
       Alert.alert(
-        'Donation Logged',
+        'Donation Logged Successfully!',
         'Thank you for your generous donation! A facilitator will contact you soon. Once your donation is delivered, you\'ll receive a personalized letter of thanks showing the impact of your kindness.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        [{ text: 'View My Stories', onPress: () => router.push('/(citizen)/(tabs)/activity') }]
       );
     } catch (error) {
+      setIsGeneratingStory(false);
       Alert.alert('Error', 'Failed to log donation. Please try again.');
     } finally {
       setLoading(false);
@@ -204,6 +250,12 @@ export default function DonateScreen() {
             </Card.Content>
           </Card>
         </ScrollView>
+
+        {/* AI Storyteller Loading Overlay */}
+        <LoadingOverlay 
+          isVisible={isGeneratingStory}
+          message="Crafting your thank you story..."
+        />
       </SafeAreaView>
     </Provider>
   );

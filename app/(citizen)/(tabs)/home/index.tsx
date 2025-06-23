@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,8 +13,19 @@ import {
 import { Bell, MapPin, Gift, ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
+import { useAuth } from '@/contexts/AuthContext';
+import { useData } from '@/contexts/DataContext';
+import { SkeletonLoader, StatsCardSkeleton } from '@/components/SkeletonLoader';
 
 export default function CitizenDashboard() {
+  const { user } = useAuth();
+  const { communityImpactFeed, isLoadingData, fetchData, getTotalPeopleHelped } = useData();
+
+  useEffect(() => {
+    // Fetch data when component mounts
+    fetchData();
+  }, []);
+
   const handleReportPress = () => {
     router.push('/(citizen)/(tabs)/home/report');
   };
@@ -23,7 +34,7 @@ export default function CitizenDashboard() {
     router.push('/(citizen)/(tabs)/home/donate');
   };
 
-  const totalPeopleHelped = 1247; // Mock data
+  const totalPeopleHelped = getTotalPeopleHelped();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,7 +45,7 @@ export default function CitizenDashboard() {
         />
         <View style={styles.headerContent}>
           <Text variant="headlineSmall" style={styles.welcomeText}>
-            Hello, Friend! 👋
+            Hello, {user?.name || 'Friend'}! 👋
           </Text>
         </View>
         <Appbar.Action 
@@ -92,33 +103,42 @@ export default function CitizenDashboard() {
             Community Impact
           </Text>
           
-          <Text variant="bodyMedium" style={styles.communityImpactText}>
-            Together, our community has helped {totalPeopleHelped.toLocaleString()} people this month
-          </Text>
-          
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <View style={styles.statContent}>
-                <Text variant="headlineMedium" style={styles.statNumber}>
-                  1,247
-                </Text>
-                <Text variant="bodySmall" style={styles.statLabel}>
-                  People Helped
-                </Text>
-              </View>
-            </View>
+          {isLoadingData ? (
+            <>
+              <SkeletonLoader width="80%" height={20} style={{ marginBottom: 24 }} />
+              <StatsCardSkeleton />
+            </>
+          ) : (
+            <>
+              <Text variant="bodyMedium" style={styles.communityImpactText}>
+                Together, our community has helped {totalPeopleHelped.toLocaleString()} people this month
+              </Text>
+              
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <View style={styles.statContent}>
+                    <Text variant="headlineMedium" style={styles.statNumber}>
+                      {totalPeopleHelped.toLocaleString()}
+                    </Text>
+                    <Text variant="bodySmall" style={styles.statLabel}>
+                      People Helped
+                    </Text>
+                  </View>
+                </View>
 
-            <View style={styles.statCard}>
-              <View style={styles.statContent}>
-                <Text variant="headlineMedium" style={styles.statNumber}>
-                  89
-                </Text>
-                <Text variant="bodySmall" style={styles.statLabel}>
-                  Active Volunteers
-                </Text>
+                <View style={styles.statCard}>
+                  <View style={styles.statContent}>
+                    <Text variant="headlineMedium" style={styles.statNumber}>
+                      {communityImpactFeed.length}
+                    </Text>
+                    <Text variant="bodySmall" style={styles.statLabel}>
+                      Active Missions
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

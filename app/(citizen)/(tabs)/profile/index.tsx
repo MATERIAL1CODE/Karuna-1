@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -33,24 +33,45 @@ import {
   MapPin,
   Save
 } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { useData } from '@/contexts/DataContext';
+import { SkeletonLoader, StatsCardSkeleton } from '@/components/SkeletonLoader';
 
 export default function ProfileScreen() {
   const theme = useTheme();
+  const { user, updateUser } = useAuth();
+  const { isLoadingData, fetchData, getUserImpactStats } = useData();
   
   // Profile settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
-  const [name, setName] = useState('Community Member');
-  const [email, setEmail] = useState('member@example.com');
-  const [phone, setPhone] = useState('+91 98765 43210');
+  const [name, setName] = useState(user?.name || 'Community Member');
+  const [email, setEmail] = useState(user?.email || 'member@example.com');
+  const [phone, setPhone] = useState(user?.phone || '+91 98765 43210');
+
+  useEffect(() => {
+    // Fetch data when component mounts
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Update local state when user data changes
+    if (user) {
+      setName(user.name);
+      setEmail(user.email || 'member@example.com');
+      setPhone(user.phone || '+91 98765 43210');
+    }
+  }, [user]);
 
   const handleSave = () => {
-    // Handle save logic here
+    // Update user data in context
+    updateUser({ name, email, phone });
     console.log('Settings saved');
     // Show success feedback or navigate back
   };
 
+  const userStats = getUserImpactStats();
   const styles = createStyles(theme);
 
   return (
@@ -73,7 +94,7 @@ export default function ProfileScreen() {
             <User size={40} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
-            Community Member
+            {user?.name || 'Community Member'}
           </Text>
           <Text variant="bodyMedium" style={styles.role}>
             Citizen
@@ -86,41 +107,47 @@ export default function ProfileScreen() {
               Your Impact This Month
             </Text>
             
-            {/* Placeholder for line graph */}
-            <View style={styles.graphPlaceholder}>
-              <TrendingUp size={32} color={theme.colors.primary} />
-              <Text variant="bodySmall" style={styles.graphText}>
-                Impact trend over time
-              </Text>
-            </View>
-            
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.primaryContainer }]}>
-                  <Heart size={20} color={theme.colors.primary} />
+            {isLoadingData ? (
+              <StatsCardSkeleton />
+            ) : (
+              <>
+                {/* Placeholder for line graph */}
+                <View style={styles.graphPlaceholder}>
+                  <TrendingUp size={32} color={theme.colors.primary} />
+                  <Text variant="bodySmall" style={styles.graphText}>
+                    Impact trend over time
+                  </Text>
                 </View>
-                <Text variant="titleMedium" style={styles.statNumber}>12</Text>
-                <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
-              </View>
-              <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.secondaryContainer }]}>
-                  <Heart size={20} color={theme.colors.secondary} />
+                
+                <View style={styles.statsRow}>
+                  <View style={styles.statItem}>
+                    <View style={[styles.statIconContainer, { backgroundColor: theme.colors.primaryContainer }]}>
+                      <Heart size={20} color={theme.colors.primary} />
+                    </View>
+                    <Text variant="titleMedium" style={styles.statNumber}>{userStats.totalReports}</Text>
+                    <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <View style={[styles.statIconContainer, { backgroundColor: theme.colors.secondaryContainer }]}>
+                      <Heart size={20} color={theme.colors.secondary} />
+                    </View>
+                    <Text variant="titleMedium" style={styles.statNumber}>{userStats.totalDonations}</Text>
+                    <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <View style={[styles.statIconContainer, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                      <Heart size={20} color={theme.colors.tertiary} />
+                    </View>
+                    <Text variant="titleMedium" style={styles.statNumber}>{userStats.totalPeopleHelped}</Text>
+                    <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
+                  </View>
                 </View>
-                <Text variant="titleMedium" style={styles.statNumber}>8</Text>
-                <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
-              </View>
-              <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                  <Heart size={20} color={theme.colors.tertiary} />
-                </View>
-                <Text variant="titleMedium" style={styles.statNumber}>45</Text>
-                <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
-              </View>
-            </View>
-            
-            <Text variant="bodyMedium" style={styles.lifetimeTotal}>
-              You have helped a total of 150 people since joining.
-            </Text>
+                
+                <Text variant="bodyMedium" style={styles.lifetimeTotal}>
+                  You have helped a total of {userStats.totalPeopleHelped} people since joining.
+                </Text>
+              </>
+            )}
           </Card.Content>
         </Card>
 
@@ -129,9 +156,13 @@ export default function ProfileScreen() {
             <Text variant="titleMedium" style={styles.impactTitle}>
               Community Impact
             </Text>
-            <Text variant="bodyMedium" style={styles.impactText}>
-              Thank you for being an active member of our community! Your reports and donations have made a real difference in people's lives.
-            </Text>
+            {isLoadingData ? (
+              <SkeletonLoader width="100%" height={60} />
+            ) : (
+              <Text variant="bodyMedium" style={styles.impactText}>
+                Thank you for being an active member of our community! Your reports and donations have made a real difference in people's lives.
+              </Text>
+            )}
           </Card.Content>
         </Card>
 
@@ -140,20 +171,28 @@ export default function ProfileScreen() {
             <Text variant="titleMedium" style={styles.milestonesTitle}>
               Your Milestones
             </Text>
-            <View style={styles.badgesContainer}>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>🏆</Text>
-                <Text variant="bodySmall" style={styles.badgeLabel}>First Report</Text>
+            {isLoadingData ? (
+              <View style={styles.badgesContainer}>
+                <SkeletonLoader width={80} height={80} borderRadius={12} />
+                <SkeletonLoader width={80} height={80} borderRadius={12} />
+                <SkeletonLoader width={80} height={80} borderRadius={12} />
               </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>💝</Text>
-                <Text variant="bodySmall" style={styles.badgeLabel}>First Donation</Text>
+            ) : (
+              <View style={styles.badgesContainer}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>🏆</Text>
+                  <Text variant="bodySmall" style={styles.badgeLabel}>First Report</Text>
+                </View>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>💝</Text>
+                  <Text variant="bodySmall" style={styles.badgeLabel}>First Donation</Text>
+                </View>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>🌟</Text>
+                  <Text variant="bodySmall" style={styles.badgeLabel}>Community Helper</Text>
+                </View>
               </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>🌟</Text>
-                <Text variant="bodySmall" style={styles.badgeLabel}>Community Helper</Text>
-              </View>
-            </View>
+            )}
           </Card.Content>
         </Card>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,115 +15,8 @@ import {
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Gift, ArrowLeft, Eye, Mail, Award } from 'lucide-react-native';
-
-interface ActivityItem {
-  id: string;
-  type: 'report' | 'donation';
-  title: string;
-  subtitle: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  date: string;
-  peopleHelped?: number;
-  // New fields for AI-Powered Letter of Thanks
-  aiGeneratedLetterSnippet?: string;
-  fullAiGeneratedLetter?: string;
-  blockchainTransactionLink?: string;
-  ngoLogoUrl?: string;
-}
-
-const mockActivities: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'report',
-    title: 'Need Reported',
-    subtitle: 'Location: Nehru Place Metro Station',
-    status: 'in_progress',
-    date: '2 hours ago',
-    peopleHelped: 3,
-  },
-  {
-    id: '2',
-    type: 'donation',
-    title: 'Donation Logged',
-    subtitle: 'Item: 15 Cooked Meals',
-    status: 'completed',
-    date: '1 day ago',
-    peopleHelped: 15,
-    aiGeneratedLetterSnippet: '...a family of four didn\'t have to go to sleep hungry on a cold night.',
-    fullAiGeneratedLetter: `Dear Community Member,
-
-We wanted to share a small story with you. Because of the 15 cooked meals you donated, a family of four didn't have to go to sleep hungry on a cold night. Your kindness provided immediate comfort and nourishment when it was needed most.
-
-It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of warmth and hope on what could have been a difficult evening.
-
-The father, who works as a daily wage laborer, had not found work for three days. The mother, caring for two young children, was worried about how to feed her family. When our facilitator arrived with your donation, the relief and gratitude in their eyes was profound.
-
-Your contribution didn't just fill empty stomachs—it restored their faith that there are people who care, people who understand that we are all connected in this journey of life.
-
-From all of us at Sahayata, thank you for being the light in someone's darkness.
-
-With heartfelt gratitude,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  },
-  {
-    id: '3',
-    type: 'report',
-    title: 'Need Reported',
-    subtitle: 'Location: Lajpat Nagar Market',
-    status: 'completed',
-    date: '2 days ago',
-    peopleHelped: 5,
-    aiGeneratedLetterSnippet: '...your vigilance and compassion helped five people find shelter and warmth.',
-    fullAiGeneratedLetter: `Dear Compassionate Citizen,
-
-Your report about the family near Lajpat Nagar Market led to something beautiful. Because you took the time to notice and care, five people—including three children—found shelter and warmth during the recent cold spell.
-
-Your vigilance and compassion helped connect them with our local partner organization, who provided temporary accommodation and essential supplies. The children, ages 6, 8, and 12, are now safe and attending a nearby community center for daily meals and educational support.
-
-Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
-
-Thank you for seeing what others might have overlooked, and for caring enough to act.
-
-With deep appreciation,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  },
-  {
-    id: '4',
-    type: 'donation',
-    title: 'Donation Logged',
-    subtitle: 'Item: 10 Blankets',
-    status: 'pending',
-    date: '3 days ago',
-  },
-  {
-    id: '5',
-    type: 'report',
-    title: 'Need Reported',
-    subtitle: 'Location: Saket District Centre',
-    status: 'completed',
-    date: '1 week ago',
-    peopleHelped: 2,
-    aiGeneratedLetterSnippet: '...an elderly couple found dignity and care in their time of need.',
-    fullAiGeneratedLetter: `Dear Kind Soul,
-
-Your report about the elderly couple near Saket District Centre touched our hearts, and we wanted you to know the beautiful outcome of your compassion.
-
-The couple, married for 45 years, had been struggling after the husband's recent illness left them unable to work. Your alert led our team to connect them with medical assistance and ongoing support from our partner healthcare clinic.
-
-Today, they are receiving regular medical care, nutritious meals, and most importantly, they know they are not forgotten. The wife mentioned that knowing someone cared enough to report their situation gave them hope when they had almost lost it.
-
-Your awareness and action reminded them—and us—that humanity's greatest strength lies in how we care for one another.
-
-With sincere gratitude,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  },
-];
+import { useData, ActivityItem } from '@/contexts/DataContext';
+import { ActivityCardSkeleton } from '@/components/SkeletonLoader';
 
 interface ActivityItemCardProps {
   item: ActivityItem;
@@ -269,15 +162,27 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
 
 export default function ActivityScreen() {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const { activities, isLoadingData, fetchData, getUserImpactStats } = useData();
+
+  useEffect(() => {
+    // Fetch data when component mounts
+    fetchData();
+  }, []);
 
   const renderActivity = ({ item }: { item: ActivityItem }) => (
     <ActivityItemCard item={item} />
   );
 
-  const totalPeopleHelped = mockActivities
-    .filter(item => item.status === 'completed' && item.peopleHelped)
-    .reduce((sum, item) => sum + (item.peopleHelped || 0), 0);
+  const renderSkeletonLoader = () => (
+    <View>
+      <ActivityCardSkeleton />
+      <ActivityCardSkeleton />
+      <ActivityCardSkeleton />
+    </View>
+  );
+
+  const userStats = getUserImpactStats();
+  const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -294,29 +199,41 @@ export default function ActivityScreen() {
           <Text variant="titleMedium" style={styles.summaryTitle}>
             Your Impact Library
           </Text>
-          <Text variant="bodyMedium" style={styles.summaryText}>
-            You've helped {totalPeopleHelped} people through your contributions. Each completed mission becomes a personal story of your kindness.
-          </Text>
-        </View>
-
-        <FlatList
-          data={mockActivities}
-          renderItem={renderActivity}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Mail size={48} color={theme.colors.onSurfaceVariant} />
-              <Text variant="titleMedium" style={styles.emptyTitle}>
-                No stories yet
-              </Text>
-              <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                Your reports and donations will create beautiful stories of impact here.
+          {isLoadingData ? (
+            <View style={styles.loadingText}>
+              <Text variant="bodyMedium" style={styles.summaryText}>
+                Loading your impact stories...
               </Text>
             </View>
-          }
-        />
+          ) : (
+            <Text variant="bodyMedium" style={styles.summaryText}>
+              You've helped {userStats.totalPeopleHelped} people through your contributions. Each completed mission becomes a personal story of your kindness.
+            </Text>
+          )}
+        </View>
+
+        {isLoadingData ? (
+          renderSkeletonLoader()
+        ) : (
+          <FlatList
+            data={activities}
+            renderItem={renderActivity}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Mail size={48} color={theme.colors.onSurfaceVariant} />
+                <Text variant="titleMedium" style={styles.emptyTitle}>
+                  An Unwritten Story
+                </Text>
+                <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                  Your first act of kindness will create a beautiful story here. Start by reporting a need or making a donation.
+                </Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -361,6 +278,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
     lineHeight: 22,
+  },
+  loadingText: {
+    alignItems: 'center',
   },
   listContent: {
     paddingBottom: 40,
@@ -490,5 +410,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
     lineHeight: 22,
+    paddingHorizontal: 24,
   },
 });

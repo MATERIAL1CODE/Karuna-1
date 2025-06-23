@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,55 +12,11 @@ import { Text, Chip, Appbar, Button } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Clock, ArrowLeft, Gift, List, Map } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
-
-// Mock data for missions
-const mockMissions = [
-  {
-    id: '1',
-    title: 'Food for 4 People',
-    pickupLocation: "Anna's Cafe, Saket District Centre",
-    deliveryLocation: 'Underneath Lajpat Nagar Flyover',
-    pickupContact: 'Sarah Miller',
-    deliveryContact: 'Local Coordinator',
-    pickupTime: '2:00 PM',
-    deliveryTime: '3:00 PM',
-    type: 'Food',
-    urgency: 'high',
-    distance: '3.2 km',
-    eta: '45 mins',
-  },
-  {
-    id: '2',
-    title: 'Clothing for Family',
-    pickupLocation: 'Green Valley Mall, Sector 18',
-    deliveryLocation: 'Near Railway Station Platform 2',
-    pickupContact: 'Mike Johnson',
-    deliveryContact: 'Community Volunteer',
-    pickupTime: '4:00 PM',
-    deliveryTime: '5:00 PM',
-    type: 'Clothing',
-    urgency: 'medium',
-    distance: '5.1 km',
-    eta: '60 mins',
-  },
-  {
-    id: '3',
-    title: 'Medical Supplies',
-    pickupLocation: 'City Hospital Pharmacy',
-    deliveryLocation: 'Community Center, Block A',
-    pickupContact: 'Dr. Patel',
-    deliveryContact: 'Health Worker',
-    pickupTime: '10:00 AM',
-    deliveryTime: '11:00 AM',
-    type: 'Medicine',
-    urgency: 'high',
-    distance: '2.8 km',
-    eta: '35 mins',
-  },
-];
+import { useData, Mission } from '@/contexts/DataContext';
+import { MissionCardSkeleton } from '@/components/SkeletonLoader';
 
 interface MissionCardProps {
-  mission: typeof mockMissions[0];
+  mission: Mission;
   onPress: () => void;
 }
 
@@ -201,16 +157,30 @@ function MissionCard({ mission, onPress }: MissionCardProps) {
 
 export default function FacilitatorDashboard() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const { missions, isLoadingData, fetchData } = useData();
+
+  useEffect(() => {
+    // Fetch data when component mounts
+    fetchData();
+  }, []);
 
   const handleMissionPress = (missionId: string) => {
     router.push(`/(facilitator)/mission/${missionId}`);
   };
 
-  const renderMission = ({ item }: { item: typeof mockMissions[0] }) => (
+  const renderMission = ({ item }: { item: Mission }) => (
     <MissionCard
       mission={item}
       onPress={() => handleMissionPress(item.id)}
     />
+  );
+
+  const renderSkeletonLoader = () => (
+    <View>
+      <MissionCardSkeleton />
+      <MissionCardSkeleton />
+      <MissionCardSkeleton />
+    </View>
   );
 
   return (
@@ -259,33 +229,45 @@ export default function FacilitatorDashboard() {
         </View>
 
         <View style={styles.summaryCard}>
-          <Text variant="bodyLarge" style={styles.summaryText}>
-            {mockMissions.length} missions waiting for volunteers
-          </Text>
-          <Text variant="bodyMedium" style={styles.summarySubtext}>
-            Choose a mission that fits your schedule
-          </Text>
+          {isLoadingData ? (
+            <Text variant="bodyLarge" style={styles.summaryText}>
+              Loading available missions...
+            </Text>
+          ) : (
+            <>
+              <Text variant="bodyLarge" style={styles.summaryText}>
+                {missions.length} missions waiting for volunteers
+              </Text>
+              <Text variant="bodyMedium" style={styles.summarySubtext}>
+                Choose a mission that fits your schedule
+              </Text>
+            </>
+          )}
         </View>
 
         {viewMode === 'list' ? (
-          <FlatList
-            data={mockMissions}
-            renderItem={renderMission}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <MapPin size={48} color={colors.neutral[500]} />
-                <Text variant="titleMedium" style={styles.emptyTitle}>
-                  No available missions
-                </Text>
-                <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                  Check back later for new opportunities to help.
-                </Text>
-              </View>
-            }
-          />
+          isLoadingData ? (
+            renderSkeletonLoader()
+          ) : (
+            <FlatList
+              data={missions}
+              renderItem={renderMission}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <MapPin size={48} color={colors.neutral[500]} />
+                  <Text variant="titleMedium" style={styles.emptyTitle}>
+                    No available missions
+                  </Text>
+                  <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                    Check back later for new opportunities to help.
+                  </Text>
+                </View>
+              }
+            />
+          )
         ) : (
           <View style={styles.mapPlaceholder}>
             <Map size={48} color={colors.neutral[500]} />
