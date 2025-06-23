@@ -110,7 +110,7 @@ export default function CompletedMissionsScreen() {
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
           icon={() => <ArrowLeft size={24} color="#6B7280" />} 
-          onPress={() => router.replace('/')} 
+          onPress={() => router.replace('/(facilitator)')} 
         />
         <Appbar.Content title="Completed Missions" titleStyle={styles.headerTitle} />
       </Appbar.Header>

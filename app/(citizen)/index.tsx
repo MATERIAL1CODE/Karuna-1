@@ -64,7 +64,7 @@ export default function CitizenDashboard() {
         <Appbar.Header style={styles.header} elevated={false}>
           <Appbar.Action 
             icon={() => <ArrowLeft size={24} color="#FFFFFF" />} 
-            onPress={() => router.replace('/')} 
+            onPress={() => router.replace('/(home)')} 
           />
           <View style={styles.headerContent}>
             <Text variant="headlineSmall" style={styles.welcomeText}>

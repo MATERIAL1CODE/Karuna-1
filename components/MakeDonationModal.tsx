@@ -11,8 +11,6 @@ import {
   Menu,
 } from 'react-native-paper';
 import { X, ChevronDown } from 'lucide-react-native';
-import { useAppAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
 import { GlassModal } from '@/components/ui/GlassModal';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassInput } from '@/components/ui/GlassInput';
@@ -35,7 +33,6 @@ const resourceTypes = [
 ];
 
 export default function MakeDonationModal({ visible, onDismiss }: MakeDonationModalProps) {
-  const { profile } = useAppAuth();
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
@@ -58,31 +55,19 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
       return;
     }
 
-    if (!profile) {
-      Alert.alert('Error', 'Please sign in to make a donation');
-      return;
-    }
-
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('donations')
-        .insert([
-          {
-            user_id: profile.id,
-            resource_type: resourceType,
-            quantity,
-            pickup_location: pickupAddress,
-            notes,
-            status: 'available',
-          },
-        ]);
+      // Simulate donation submission
+      console.log('Submitting donation:', {
+        resourceType,
+        quantity,
+        pickupAddress,
+        pickupTime,
+        notes,
+      });
 
-      if (error) {
-        console.error('Error creating donation:', error);
-        Alert.alert('Error', 'Failed to log donation. Please try again.');
-        return;
-      }
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       Alert.alert(
         'Donation Logged',

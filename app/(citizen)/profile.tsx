@@ -22,7 +22,7 @@ export default function ProfileScreen() {
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
           icon={() => <ArrowLeft size={24} color="#6B7280" />} 
-          onPress={() => router.replace('/')} 
+          onPress={() => router.replace('/(home)')} 
         />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
       </Appbar.Header>
@@ -128,7 +128,7 @@ export default function ProfileScreen() {
 
         <Button
           mode="outlined"
-          onPress={() => router.replace('/')}
+          onPress={() => router.replace('/(home)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
           textColor="#4F46E5"

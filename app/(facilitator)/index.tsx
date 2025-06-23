@@ -207,7 +207,7 @@ export default function FacilitatorDashboard() {
         <Appbar.Header style={styles.header} elevated={false}>
           <Appbar.Action 
             icon={() => <ArrowLeft size={24} color="#FFFFFF" />} 
-            onPress={() => router.replace('/')} 
+            onPress={() => router.replace('/(home)')} 
           />
           <Appbar.Content title="Available Missions" titleStyle={styles.headerTitle} />
         </Appbar.Header>
