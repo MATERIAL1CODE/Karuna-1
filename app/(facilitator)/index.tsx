@@ -320,24 +320,24 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
   },
   viewToggle: {
     flexDirection: 'row',
     backgroundColor: colors.neutral[100],
     borderRadius: borderRadius.lg,
     padding: spacing.xs,
-    marginVertical: spacing.lg,
+    marginVertical: spacing['2xl'],
   },
   toggleButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
     borderRadius: borderRadius.md,
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   toggleButtonActive: {
     backgroundColor: colors.surface,
@@ -356,14 +356,14 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['2xl'],
-    marginBottom: spacing.lg,
+    padding: spacing['3xl'],
+    marginBottom: spacing['2xl'],
     ...shadows.md,
   },
   summaryText: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   summarySubtext: {
@@ -371,12 +371,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   listContent: {
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing['4xl'],
   },
   missionCard: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     ...shadows.md,
     overflow: 'hidden',
   },
@@ -390,12 +390,12 @@ const styles = StyleSheet.create({
   },
   routeOverlay: {
     position: 'absolute',
-    bottom: spacing.md,
-    right: spacing.md,
+    bottom: spacing.lg,
+    right: spacing.lg,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   distanceText: {
     color: '#FFFFFF',
@@ -403,24 +403,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   cardContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
   },
   missionTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
     flex: 1,
-    marginRight: spacing.lg,
+    marginRight: spacing['2xl'],
     fontFamily: 'Inter-Bold',
     fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
   },
   chipContainer: {
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   typeChip: {
     alignSelf: 'flex-end',
@@ -435,25 +435,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   locationSection: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
   },
   locationItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.md,
+    gap: spacing['2xl'],
   },
   locationDot: {
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
     backgroundColor: colors.neutral[100],
     borderRadius: borderRadius.md,
-    padding: spacing.sm,
+    padding: spacing.lg,
   },
   routeLine: {
     width: 2,
-    height: spacing.lg,
+    height: spacing['2xl'],
     backgroundColor: colors.neutral[300],
     marginLeft: 21,
-    marginVertical: spacing.sm,
+    marginVertical: spacing.lg,
   },
   locationText: {
     flex: 1,
@@ -461,13 +461,13 @@ const styles = StyleSheet.create({
   locationLabel: {
     color: colors.neutral[500],
     fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
     fontFamily: 'Inter-SemiBold',
   },
   locationValue: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
     fontFamily: 'Inter-SemiBold',
     fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
   },
@@ -478,12 +478,12 @@ const styles = StyleSheet.create({
   timeSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
   },
   timeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   timeText: {
     color: colors.neutral[600],
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   acceptButtonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -504,8 +504,8 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     color: colors.neutral[800],
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing['2xl'],
+    marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
@@ -520,13 +520,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    margin: spacing.lg,
+    margin: spacing['2xl'],
     ...shadows.md,
   },
   mapPlaceholderTitle: {
     color: colors.neutral[800],
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing['2xl'],
+    marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },

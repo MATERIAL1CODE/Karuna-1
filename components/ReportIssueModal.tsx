@@ -130,29 +130,29 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   description: {
     color: colors.neutral[600],
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['4xl'],
     fontFamily: 'Inter-Regular',
   },
   optionsList: {
-    gap: spacing.md,
+    gap: spacing['2xl'],
   },
   optionItem: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
+    gap: spacing['2xl'],
     ...shadows.md,
   },
   optionIcon: {
     backgroundColor: colors.error[100],
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   optionContent: {
     flex: 1,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontWeight: typography.fontWeight.semibold,
     color: colors.neutral[800],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   optionDescription: {

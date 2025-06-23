@@ -231,19 +231,19 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing['3xl'],
+    paddingHorizontal: spacing['2xl'],
   },
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['2xl'],
-    marginBottom: spacing['3xl'],
+    padding: spacing['3xl'],
+    marginBottom: spacing['2xl'],
     ...shadows.md,
   },
   summaryTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   summaryText: {
@@ -251,25 +251,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   listContent: {
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing['4xl'],
   },
   activityCard: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   cardContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.lg,
+    gap: spacing['2xl'],
   },
   iconContainer: {
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   activityInfo: {
     flex: 1,
@@ -278,23 +278,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   activityTitle: {
     fontWeight: typography.fontWeight.semibold,
     color: colors.neutral[800],
     flex: 1,
-    marginRight: spacing.md,
+    marginRight: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   activitySubtitle: {
     color: colors.neutral[500],
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Regular',
   },
   bottomRow: {
     flexDirection: 'column',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   activityDate: {
     color: colors.neutral[400],
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
   },
   viewStoryButton: {
     backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
   },
   viewStoryText: {
@@ -339,8 +339,8 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     color: colors.neutral[800],
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing['2xl'],
+    marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },

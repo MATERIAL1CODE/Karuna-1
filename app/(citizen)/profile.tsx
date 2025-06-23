@@ -42,7 +42,7 @@ export default function ProfileScreen() {
         </View>
 
         <Card style={styles.statsCard} mode="elevated">
-          <Card.Content>
+          <Card.Content style={styles.statsCardContent}>
             <Text variant="titleMedium" style={styles.statsTitle}>
               Your Impact This Month
             </Text>
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
         </Card>
 
         <Card style={styles.impactCard} mode="elevated">
-          <Card.Content>
+          <Card.Content style={styles.impactCardContent}>
             <Text variant="titleMedium" style={styles.impactTitle}>
               Community Impact
             </Text>
@@ -97,7 +97,7 @@ export default function ProfileScreen() {
         </Card>
 
         <Card style={styles.milestonesCard} mode="elevated">
-          <Card.Content>
+          <Card.Content style={styles.milestonesCardContent}>
             <Text variant="titleMedium" style={styles.milestonesTitle}>
               Your Milestones
             </Text>
@@ -129,8 +129,9 @@ export default function ProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="My Activity"
               description="View your reports and donations"
@@ -139,10 +140,11 @@ export default function ProfileScreen() {
               onPress={() => router.push('/(citizen)/activity')}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
             
             <Text variant="titleSmall" style={[styles.menuSectionTitle, styles.menuSectionTitleSpaced]}>Support</Text>
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="Help & Support"
               description="Get help or contact support"
@@ -151,8 +153,9 @@ export default function ProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="About Sahayata"
               description="Learn more about our mission"
@@ -161,6 +164,7 @@ export default function ProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
           </List.Section>
         </Card>
@@ -194,22 +198,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing['3xl'],
+    padding: spacing['2xl'],
   },
   profileHeader: {
     alignItems: 'center',
     marginBottom: spacing['4xl'],
+    paddingVertical: spacing['2xl'],
   },
   avatarContainer: {
     backgroundColor: colors.primary[100],
     borderRadius: 50,
-    padding: spacing['2xl'],
-    marginBottom: spacing.lg,
+    padding: spacing['3xl'],
+    marginBottom: spacing['2xl'],
   },
   name: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   role: {
@@ -219,14 +224,17 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
+  },
+  statsCardContent: {
+    padding: spacing['3xl'],
   },
   statsTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
   },
   graphPlaceholder: {
@@ -234,26 +242,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.neutral[50],
     borderRadius: borderRadius.lg,
-    padding: spacing['2xl'],
-    marginBottom: spacing['2xl'],
+    padding: spacing['3xl'],
+    marginBottom: spacing['3xl'],
   },
   graphText: {
     color: colors.neutral[500],
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
     fontFamily: 'Inter-Regular',
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
   },
   statItem: {
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   statIconContainer: {
     borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   statNumber: {
     fontWeight: typography.fontWeight.bold,
@@ -273,14 +281,17 @@ const styles = StyleSheet.create({
   },
   impactCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
+  },
+  impactCardContent: {
+    padding: spacing['3xl'],
   },
   impactTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   impactText: {
@@ -290,14 +301,17 @@ const styles = StyleSheet.create({
   },
   milestonesCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
+  },
+  milestonesCardContent: {
+    padding: spacing['3xl'],
   },
   milestonesTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   badgesContainer: {
@@ -308,12 +322,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.neutral[50],
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
     minWidth: 80,
   },
   badgeText: {
     fontSize: 24,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
   },
   badgeLabel: {
     color: colors.neutral[600],
@@ -322,19 +336,23 @@ const styles = StyleSheet.create({
   },
   menuCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['4xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   menuSectionTitle: {
     color: colors.neutral[700],
     fontWeight: typography.fontWeight.semibold,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
+    paddingTop: spacing['2xl'],
     fontFamily: 'Inter-SemiBold',
   },
   menuSectionTitleSpaced: {
-    paddingTop: spacing['2xl'],
+    paddingTop: spacing['3xl'],
+  },
+  menuItem: {
+    paddingHorizontal: spacing['2xl'],
+    paddingVertical: spacing.lg,
   },
   menuItemTitle: {
     color: colors.neutral[800],
@@ -346,11 +364,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
+  divider: {
+    marginHorizontal: spacing['2xl'],
+  },
   switchRoleButton: {
     borderColor: colors.primary[600],
     borderRadius: borderRadius.lg,
   },
   buttonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
 });

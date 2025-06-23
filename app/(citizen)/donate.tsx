@@ -102,7 +102,8 @@ export default function DonateScreen() {
                     style={styles.input}
                     outlineColor={colors.neutral[200]}
                     activeOutlineColor={colors.primary[600]}
-                    placeholderTextColor={colors.neutral[400]}
+                    placeholderTextColor={colors.neutral[500]}
+                    textColor={colors.neutral[800]}
                   />
                 }
                 contentStyle={styles.menuContent}
@@ -131,7 +132,8 @@ export default function DonateScreen() {
                 style={styles.input}
                 outlineColor={colors.neutral[200]}
                 activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[400]}
+                placeholderTextColor={colors.neutral[500]}
+                textColor={colors.neutral[800]}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -150,7 +152,8 @@ export default function DonateScreen() {
                 style={styles.input}
                 outlineColor={colors.neutral[200]}
                 activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[400]}
+                placeholderTextColor={colors.neutral[500]}
+                textColor={colors.neutral[800]}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -164,7 +167,8 @@ export default function DonateScreen() {
                 style={styles.input}
                 outlineColor={colors.neutral[200]}
                 activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[400]}
+                placeholderTextColor={colors.neutral[500]}
+                textColor={colors.neutral[800]}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -180,7 +184,8 @@ export default function DonateScreen() {
                 style={styles.textArea}
                 outlineColor={colors.neutral[200]}
                 activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[400]}
+                placeholderTextColor={colors.neutral[500]}
+                textColor={colors.neutral[800]}
               />
 
               <Button
@@ -218,7 +223,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   formCard: {
     backgroundColor: colors.surface,
@@ -230,22 +235,23 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     color: colors.neutral[800],
-    marginBottom: spacing.md,
-    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+    marginTop: spacing['2xl'],
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   input: {
-    marginBottom: spacing.md,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.surface,
   },
   textArea: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['4xl'],
     backgroundColor: colors.surface,
   },
   menuContent: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
+    marginTop: spacing.sm,
   },
   menuItemTitle: {
     color: colors.neutral[800],
@@ -256,6 +262,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   buttonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
 });

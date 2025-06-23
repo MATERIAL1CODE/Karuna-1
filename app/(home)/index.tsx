@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing['3xl'],
+    paddingHorizontal: spacing['2xl'],
     justifyContent: 'center',
   },
   header: {
@@ -108,18 +108,19 @@ const styles = StyleSheet.create({
   },
   welcomeSection: {
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
   },
   iconContainer: {
     backgroundColor: colors.primary[100],
     borderRadius: borderRadius['3xl'],
-    padding: spacing['3xl'],
-    marginBottom: spacing['3xl'],
+    padding: spacing['4xl'],
+    marginBottom: spacing['4xl'],
     ...shadows.md,
   },
   title: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.neutral[800],
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     textAlign: 'center',
     fontFamily: 'Inter-Bold',
   },
@@ -127,19 +128,19 @@ const styles = StyleSheet.create({
     color: colors.primary[600],
     textAlign: 'center',
     fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   description: {
     color: colors.neutral[500],
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
     fontFamily: 'Inter-Regular',
   },
   roleCards: {
-    gap: spacing['3xl'],
-    marginBottom: spacing['4xl'],
+    gap: spacing['4xl'],
+    marginBottom: spacing['6xl'],
   },
   roleCard: {
     backgroundColor: colors.surface,
@@ -159,26 +160,26 @@ const styles = StyleSheet.create({
   cardIcon: {
     backgroundColor: colors.neutral[50],
     borderRadius: borderRadius['3xl'],
-    padding: spacing['2xl'],
-    marginBottom: spacing['2xl'],
+    padding: spacing['3xl'],
+    marginBottom: spacing['3xl'],
   },
   cardTitle: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.bold,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   cardDescription: {
     color: colors.neutral[500],
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Regular',
   },
   features: {
     alignItems: 'flex-start',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   feature: {
     color: colors.neutral[600],

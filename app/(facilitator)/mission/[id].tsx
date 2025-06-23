@@ -293,23 +293,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   scrollContent: {
-    padding: spacing.lg,
+    padding: spacing['2xl'],
     paddingBottom: spacing['8xl'], // Extra space for fixed bottom actions
   },
   stateCard: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.primary[50],
     borderRadius: borderRadius.xl,
     borderWidth: 1,
     borderColor: colors.primary[200],
   },
   stateContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   stateTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.primary[800],
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   stateDescription: {
@@ -317,43 +317,43 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   focusCard: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   focusContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   focusTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: spacing.lg,
-    gap: spacing.lg,
+    marginBottom: spacing['2xl'],
+    gap: spacing['2xl'],
   },
   iconContainer: {
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   detailContent: {
     flex: 1,
   },
   detailLabel: {
     color: colors.neutral[500],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   detailValue: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
     fontFamily: 'Inter-SemiBold',
     fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
   },
@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
     ...shadows.md,
   },
   routeContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   routeTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   routeContainer: {
@@ -388,12 +388,12 @@ const styles = StyleSheet.create({
   },
   routeOverlay: {
     position: 'absolute',
-    bottom: spacing.lg,
-    left: spacing.lg,
+    bottom: spacing['2xl'],
+    left: spacing['2xl'],
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing['2xl'],
+    paddingVertical: spacing.lg,
   },
   routeText: {
     color: '#FFFFFF',
@@ -406,23 +406,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: colors.surface,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
     borderTopWidth: 1,
     borderTopColor: colors.neutral[200],
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   reportButton: {
     borderColor: colors.error[600],
     borderRadius: borderRadius.lg,
   },
   reportButtonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
   primaryButton: {
     backgroundColor: colors.primary[600],
     borderRadius: borderRadius.lg,
   },
   primaryButtonContent: {
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing['2xl'],
   },
 });

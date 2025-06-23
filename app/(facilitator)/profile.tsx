@@ -55,7 +55,7 @@ export default function FacilitatorProfileScreen() {
 
         {/* Impact Dashboard */}
         <Card style={styles.impactCard} mode="elevated">
-          <Card.Content>
+          <Card.Content style={styles.impactCardContent}>
             <Text variant="titleMedium" style={styles.impactTitle}>
               Impact Dashboard
             </Text>
@@ -98,7 +98,7 @@ export default function FacilitatorProfileScreen() {
 
         {/* Milestone Badges */}
         <Card style={styles.achievementsCard} mode="elevated">
-          <Card.Content>
+          <Card.Content style={styles.achievementsCardContent}>
             <Text variant="titleMedium" style={styles.achievementsTitle}>
               Achievements
             </Text>
@@ -150,8 +150,9 @@ export default function FacilitatorProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="Mission History"
               description="View all your completed missions"
@@ -160,10 +161,11 @@ export default function FacilitatorProfileScreen() {
               onPress={() => router.push('/(facilitator)/completed')}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
             
             <Text variant="titleSmall" style={[styles.menuSectionTitle, styles.menuSectionTitleSpaced]}>Support</Text>
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="Help & Support"
               description="Get help or contact support"
@@ -172,8 +174,9 @@ export default function FacilitatorProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
-            <Divider />
+            <Divider style={styles.divider} />
             <List.Item
               title="About Sahayata"
               description="Learn more about our mission"
@@ -182,6 +185,7 @@ export default function FacilitatorProfileScreen() {
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
           </List.Section>
         </Card>
@@ -215,29 +219,30 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing['3xl'],
+    padding: spacing['2xl'],
   },
   profileHeader: {
     alignItems: 'center',
     marginBottom: spacing['4xl'],
+    paddingVertical: spacing['2xl'],
   },
   avatarContainer: {
     backgroundColor: colors.primary[100],
     borderRadius: 50,
-    padding: spacing['2xl'],
-    marginBottom: spacing.lg,
+    padding: spacing['3xl'],
+    marginBottom: spacing['2xl'],
   },
   name: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   roleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.md,
+    gap: spacing.lg,
+    marginBottom: spacing.lg,
   },
   role: {
     color: colors.neutral[500],
@@ -250,7 +255,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   rating: {
     color: colors.warning[500],
@@ -259,24 +264,27 @@ const styles = StyleSheet.create({
   },
   impactCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
+  },
+  impactCardContent: {
+    padding: spacing['3xl'],
   },
   impactTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
   },
   heroMetric: {
     alignItems: 'center',
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
   },
   heroNumber: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.primary[600],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   heroLabel: {
@@ -287,7 +295,7 @@ const styles = StyleSheet.create({
   supportingMetrics: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
   },
   supportingMetric: {
     alignItems: 'center',
@@ -295,7 +303,7 @@ const styles = StyleSheet.create({
   supportingNumber: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   supportingLabel: {
@@ -311,21 +319,24 @@ const styles = StyleSheet.create({
   },
   achievementsCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
+  },
+  achievementsCardContent: {
+    padding: spacing['3xl'],
   },
   achievementsTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: spacing.lg,
+    gap: spacing['2xl'],
   },
   badgeItem: {
     alignItems: 'center',
@@ -333,8 +344,8 @@ const styles = StyleSheet.create({
   },
   badgeIcon: {
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+    padding: spacing['2xl'],
+    marginBottom: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
     width: 60,
@@ -350,19 +361,23 @@ const styles = StyleSheet.create({
   },
   menuCard: {
     backgroundColor: colors.surface,
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['4xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   menuSectionTitle: {
     color: colors.neutral[700],
     fontWeight: typography.fontWeight.semibold,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
+    paddingTop: spacing['2xl'],
     fontFamily: 'Inter-SemiBold',
   },
   menuSectionTitleSpaced: {
-    paddingTop: spacing['2xl'],
+    paddingTop: spacing['3xl'],
+  },
+  menuItem: {
+    paddingHorizontal: spacing['2xl'],
+    paddingVertical: spacing.lg,
   },
   menuItemTitle: {
     color: colors.neutral[800],
@@ -374,11 +389,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
+  divider: {
+    marginHorizontal: spacing['2xl'],
+  },
   switchRoleButton: {
     borderColor: colors.primary[600],
     borderRadius: borderRadius.lg,
   },
   buttonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
 });

@@ -239,26 +239,26 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
   },
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['3xl'],
-    marginVertical: spacing.lg,
+    padding: spacing['4xl'],
+    marginVertical: spacing['2xl'],
     ...shadows.md,
   },
   summaryTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     textAlign: 'center',
     fontFamily: 'Inter-Bold',
   },
   summaryStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
   },
   summaryStatItem: {
     alignItems: 'center',
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   summaryNumber: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.primary[600],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   summaryLabel: {
@@ -278,10 +278,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.md,
+    gap: spacing.lg,
     backgroundColor: colors.success[50],
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   trendText: {
     color: colors.success[700],
@@ -289,26 +289,26 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   listContent: {
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing['4xl'],
   },
   missionCard: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   cardContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.lg,
+    gap: spacing['2xl'],
   },
   iconContainer: {
     backgroundColor: colors.success[100],
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   missionInfo: {
     flex: 1,
@@ -317,13 +317,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   missionTitle: {
     fontWeight: typography.fontWeight.semibold,
     color: colors.neutral[800],
     flex: 1,
-    marginRight: spacing.md,
+    marginRight: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   typeChip: {
@@ -338,8 +338,8 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+    gap: spacing.lg,
+    marginBottom: spacing.lg,
   },
   locationText: {
     color: colors.neutral[500],
@@ -350,12 +350,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   timeText: {
     color: colors.neutral[500],
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   ratingLabel: {
     color: colors.neutral[500],
@@ -389,8 +389,8 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     color: colors.neutral[800],
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    marginTop: spacing['2xl'],
+    marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },

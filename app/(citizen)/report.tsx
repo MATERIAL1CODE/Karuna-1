@@ -202,7 +202,8 @@ export default function ReportScreen() {
             style={styles.input}
             outlineColor={colors.neutral[200]}
             activeOutlineColor={colors.primary[600]}
-            placeholderTextColor={colors.neutral[400]}
+            placeholderTextColor={colors.neutral[500]}
+            textColor={colors.neutral[800]}
           />
 
           <TextInput
@@ -216,7 +217,8 @@ export default function ReportScreen() {
             style={styles.textArea}
             outlineColor={colors.neutral[200]}
             activeOutlineColor={colors.primary[600]}
-            placeholderTextColor={colors.neutral[400]}
+            placeholderTextColor={colors.neutral[500]}
+            textColor={colors.neutral[800]}
           />
 
           <Button
@@ -270,13 +272,13 @@ const styles = StyleSheet.create({
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.semibold,
     textAlign: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-SemiBold',
   },
   webMapSubtext: {
     color: colors.neutral[500],
     textAlign: 'center',
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Regular',
   },
   webMapButton: {
@@ -284,12 +286,12 @@ const styles = StyleSheet.create({
   },
   mapOverlay: {
     position: 'absolute',
-    top: spacing.lg,
-    left: spacing.lg,
-    right: spacing.lg,
+    top: spacing['2xl'],
+    left: spacing['2xl'],
+    right: spacing['2xl'],
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
     ...shadows.md,
   },
   mapInstruction: {
@@ -299,26 +301,26 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   formCard: {
-    margin: spacing.lg,
+    margin: spacing['2xl'],
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   formContent: {
-    padding: spacing['2xl'],
+    padding: spacing['3xl'],
   },
   formTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   input: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     backgroundColor: colors.surface,
   },
   textArea: {
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     backgroundColor: colors.surface,
   },
   submitButton: {
@@ -326,6 +328,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[600],
   },
   buttonContent: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
 });

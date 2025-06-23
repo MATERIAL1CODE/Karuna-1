@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.background,
     elevation: 0,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   headerContent: {
     flex: 1,
-    paddingLeft: spacing.lg,
+    paddingLeft: spacing['2xl'],
   },
   welcomeText: {
     fontWeight: typography.fontWeight.bold,
@@ -145,17 +145,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing['3xl'],
+    padding: spacing['2xl'],
   },
   titleSection: {
     marginBottom: spacing['4xl'],
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
   },
   mainTitle: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.neutral[800],
     textAlign: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     lineHeight: 36,
     fontFamily: 'Inter-Bold',
   },
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   actionCards: {
-    gap: spacing.lg,
+    gap: spacing['2xl'],
     marginBottom: spacing['4xl'],
   },
   actionCard: {
@@ -177,12 +178,12 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing['2xl'],
-    gap: spacing.lg,
+    padding: spacing['3xl'],
+    gap: spacing['2xl'],
   },
   iconContainer: {
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   reportIconContainer: {
     backgroundColor: colors.primary[100],
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: colors.neutral[800],
     fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   cardDescription: {
@@ -207,13 +208,13 @@ const styles = StyleSheet.create({
   communityImpactSection: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing['3xl'],
+    padding: spacing['4xl'],
     ...shadows.md,
   },
   sectionTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    marginBottom: spacing['2xl'],
     textAlign: 'center',
     fontFamily: 'Inter-Bold',
   },
@@ -221,18 +222,18 @@ const styles = StyleSheet.create({
     color: colors.neutral[600],
     textAlign: 'center',
     fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Medium',
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: spacing.lg,
+    gap: spacing['2xl'],
   },
   statCard: {
     flex: 1,
     backgroundColor: colors.neutral[50],
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing['2xl'],
   },
   statContent: {
     alignItems: 'center',
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontWeight: typography.fontWeight.extrabold,
     color: colors.primary[600],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   statLabel: {
