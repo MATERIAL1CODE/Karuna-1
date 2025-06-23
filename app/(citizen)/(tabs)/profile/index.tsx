@@ -31,15 +31,11 @@ import {
   Smartphone,
   Mail,
   MapPin,
-  Save,
-  Moon,
-  Sun
+  Save
 } from 'lucide-react-native';
-import { useThemeContext } from '@/contexts/ThemeContext';
 
 export default function ProfileScreen() {
   const theme = useTheme();
-  const { isDark, toggleTheme } = useThemeContext();
   
   // Profile settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -214,32 +210,6 @@ export default function ProfileScreen() {
           </Card.Content>
         </Card>
 
-        {/* Appearance Settings */}
-        <Card style={styles.sectionCard} mode="elevated">
-          <Card.Content style={styles.cardContent}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              Appearance
-            </Text>
-            
-            <List.Item
-              title="Dark Mode"
-              description="Switch between light and dark themes"
-              left={() => isDark ? <Moon size={20} color={theme.colors.onSurfaceVariant} /> : <Sun size={20} color={theme.colors.onSurfaceVariant} />}
-              right={() => (
-                <Switch
-                  value={isDark}
-                  onValueChange={toggleTheme}
-                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
-                  thumbColor={isDark ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                />
-              )}
-              titleStyle={styles.listItemTitle}
-              descriptionStyle={styles.listItemDescription}
-              style={styles.listItem}
-            />
-          </Card.Content>
-        </Card>
-
         {/* Notification Settings */}
         <Card style={styles.sectionCard} mode="elevated">
           <Card.Content style={styles.cardContent}>
@@ -371,7 +341,8 @@ export default function ProfileScreen() {
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
-              descriptionStyle={styles.menuItem}
+              descriptionStyle={styles.menuItemDescription}
+              style={styles.menuItem}
             />
           </List.Section>
         </Card>

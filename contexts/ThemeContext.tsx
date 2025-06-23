@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { ColorSchemeName } from 'react-native';
 
 interface ThemeContextType {
   isDark: boolean;
@@ -14,26 +14,13 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [isDark, setIsDark] = useState(false);
-  const [colorScheme, setColorScheme] = useState<ColorSchemeName>(null);
+  // Always use light theme
+  const isDark = false;
+  const colorScheme: ColorSchemeName = 'light';
 
-  useEffect(() => {
-    // Get initial system theme
-    const systemColorScheme = Appearance.getColorScheme();
-    setColorScheme(systemColorScheme);
-    setIsDark(systemColorScheme === 'dark');
-
-    // Listen for system theme changes
-    const subscription = Appearance.addChangeListener(({ colorScheme: newColorScheme }) => {
-      setColorScheme(newColorScheme);
-      setIsDark(newColorScheme === 'dark');
-    });
-
-    return () => subscription?.remove();
-  }, []);
-
+  // No-op function since we don't support theme toggling
   const toggleTheme = () => {
-    setIsDark(prev => !prev);
+    // Do nothing - dark theme is disabled
   };
 
   const value: ThemeContextType = {

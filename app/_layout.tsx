@@ -7,15 +7,13 @@ import { Lora_400Regular, Lora_700Bold } from '@expo-google-fonts/lora';
 import { Merriweather_400Regular, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { lightTheme, darkTheme, createExtendedTheme } from '@/lib/themes';
-import { ThemeProvider, useThemeContext } from '@/contexts/ThemeContext';
+import { lightTheme, createExtendedTheme } from '@/lib/themes';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
-  const { isDark } = useThemeContext();
-  
   // Load Inter, Lora, and Merriweather fonts
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
@@ -40,7 +38,8 @@ function AppContent() {
     return null;
   }
 
-  const currentTheme = createExtendedTheme(isDark ? darkTheme : lightTheme);
+  // Always use light theme
+  const currentTheme = createExtendedTheme(lightTheme);
 
   return (
     <PaperProvider theme={currentTheme}>
@@ -51,7 +50,7 @@ function AppContent() {
         <Stack.Screen name="(facilitator)" />
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style={isDark ? "light" : "auto"} />
+      <StatusBar style="dark" />
     </PaperProvider>
   );
 }
