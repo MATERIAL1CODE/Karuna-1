@@ -345,7 +345,7 @@ export default function ProfileScreen() {
               description="View your reports and donations"
               left={() => <List.Icon icon="history" />}
               right={() => <List.Icon icon="chevron-right" />}
-              onPress={() => router.push('/(citizen)/activity')}
+              onPress={() => router.push('/(citizen)/(tabs)/activity')}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
               style={styles.menuItem}
@@ -371,8 +371,7 @@ export default function ProfileScreen() {
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
-              descriptionStyle={styles.menuItemDescription}
-              style={styles.menuItem}
+              descriptionStyle={styles.menuItem}
             />
           </List.Section>
         </Card>

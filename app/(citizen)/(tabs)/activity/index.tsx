@@ -186,15 +186,15 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
 
   const handlePress = () => {
     if (item.status === 'in_progress') {
-      router.push(`/(citizen)/live-mission-view/${item.id}`);
+      router.push(`/(citizen)/(tabs)/activity/live-mission-view/${item.id}`);
     } else if (item.status === 'completed' && item.fullAiGeneratedLetter) {
-      router.push(`/(citizen)/letter-of-thanks/${item.id}`);
+      router.push(`/(citizen)/(tabs)/activity/letter-of-thanks/${item.id}`);
     }
   };
 
   const handleViewStoryPress = () => {
     if (item.status === 'completed' && item.fullAiGeneratedLetter) {
-      router.push(`/(citizen)/letter-of-thanks/${item.id}`);
+      router.push(`/(citizen)/(tabs)/activity/letter-of-thanks/${item.id}`);
     }
   };
 

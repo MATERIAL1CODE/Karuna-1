@@ -228,7 +228,7 @@ export default function LetterOfThanksScreen() {
         <View style={styles.actionButtons}>
           <Button
             mode="outlined"
-            onPress={() => router.push('/(citizen)/donate')}
+            onPress={() => router.push('/(citizen)/(tabs)/home/donate')}
             style={styles.actionButton}
             contentStyle={styles.buttonContent}
             textColor={theme.colors.primary}
@@ -238,7 +238,7 @@ export default function LetterOfThanksScreen() {
           
           <Button
             mode="contained"
-            onPress={() => router.push('/(citizen)')}
+            onPress={() => router.push('/(citizen)/(tabs)/home')}
             style={styles.primaryActionButton}
             contentStyle={styles.buttonContent}
           >

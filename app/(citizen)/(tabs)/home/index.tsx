@@ -16,11 +16,11 @@ import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design
 
 export default function CitizenDashboard() {
   const handleReportPress = () => {
-    router.push('/(citizen)/report');
+    router.push('/(citizen)/(tabs)/home/report');
   };
 
   const handleDonationPress = () => {
-    router.push('/(citizen)/donate');
+    router.push('/(citizen)/(tabs)/home/donate');
   };
 
   const totalPeopleHelped = 1247; // Mock data
