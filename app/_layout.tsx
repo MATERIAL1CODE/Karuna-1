@@ -3,6 +3,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider } from 'react-native-paper';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { Lora_400Regular, Lora_700Bold } from '@expo-google-fonts/lora';
+import { Merriweather_400Regular, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { lightTheme, darkTheme, createExtendedTheme } from '@/lib/themes';
@@ -14,12 +16,16 @@ SplashScreen.preventAutoHideAsync();
 function AppContent() {
   const { isDark } = useThemeContext();
   
-  // Load Inter fonts
+  // Load Inter, Lora, and Merriweather fonts
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
     'Inter-Medium': Inter_500Medium,
     'Inter-SemiBold': Inter_600SemiBold,
     'Inter-Bold': Inter_700Bold,
+    'Lora-Regular': Lora_400Regular,
+    'Lora-Bold': Lora_700Bold,
+    'Merriweather-Regular': Merriweather_400Regular,
+    'Merriweather-Bold': Merriweather_700Bold,
   });
 
   // Hide splash screen once fonts are loaded

@@ -14,7 +14,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin, Gift, ArrowLeft, Eye } from 'lucide-react-native';
+import { MapPin, Gift, ArrowLeft, Eye, Mail, Award } from 'lucide-react-native';
 
 interface ActivityItem {
   id: string;
@@ -24,6 +24,11 @@ interface ActivityItem {
   status: 'pending' | 'in_progress' | 'completed';
   date: string;
   peopleHelped?: number;
+  // New fields for AI-Powered Letter of Thanks
+  aiGeneratedLetterSnippet?: string;
+  fullAiGeneratedLetter?: string;
+  blockchainTransactionLink?: string;
+  ngoLogoUrl?: string;
 }
 
 const mockActivities: ActivityItem[] = [
@@ -44,6 +49,23 @@ const mockActivities: ActivityItem[] = [
     status: 'completed',
     date: '1 day ago',
     peopleHelped: 15,
+    aiGeneratedLetterSnippet: '...a family of four didn\'t have to go to sleep hungry on a cold night.',
+    fullAiGeneratedLetter: `Dear Community Member,
+
+We wanted to share a small story with you. Because of the 15 cooked meals you donated, a family of four didn't have to go to sleep hungry on a cold night. Your kindness provided immediate comfort and nourishment when it was needed most.
+
+It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of warmth and hope on what could have been a difficult evening.
+
+The father, who works as a daily wage laborer, had not found work for three days. The mother, caring for two young children, was worried about how to feed her family. When our facilitator arrived with your donation, the relief and gratitude in their eyes was profound.
+
+Your contribution didn't just fill empty stomachs—it restored their faith that there are people who care, people who understand that we are all connected in this journey of life.
+
+From all of us at Sahayata, thank you for being the light in someone's darkness.
+
+With heartfelt gratitude,
+The Sahayata Team`,
+    blockchainTransactionLink: 'https://polygonscan.com/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
   },
   {
     id: '3',
@@ -53,6 +75,21 @@ const mockActivities: ActivityItem[] = [
     status: 'completed',
     date: '2 days ago',
     peopleHelped: 5,
+    aiGeneratedLetterSnippet: '...your vigilance and compassion helped five people find shelter and warmth.',
+    fullAiGeneratedLetter: `Dear Compassionate Citizen,
+
+Your report about the family near Lajpat Nagar Market led to something beautiful. Because you took the time to notice and care, five people—including three children—found shelter and warmth during the recent cold spell.
+
+Your vigilance and compassion helped connect them with our local partner organization, who provided temporary accommodation and essential supplies. The children, ages 6, 8, and 12, are now safe and attending a nearby community center for daily meals and educational support.
+
+Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
+
+Thank you for seeing what others might have overlooked, and for caring enough to act.
+
+With deep appreciation,
+The Sahayata Team`,
+    blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
   },
   {
     id: '4',
@@ -70,6 +107,21 @@ const mockActivities: ActivityItem[] = [
     status: 'completed',
     date: '1 week ago',
     peopleHelped: 2,
+    aiGeneratedLetterSnippet: '...an elderly couple found dignity and care in their time of need.',
+    fullAiGeneratedLetter: `Dear Kind Soul,
+
+Your report about the elderly couple near Saket District Centre touched our hearts, and we wanted you to know the beautiful outcome of your compassion.
+
+The couple, married for 45 years, had been struggling after the husband's recent illness left them unable to work. Your alert led our team to connect them with medical assistance and ongoing support from our partner healthcare clinic.
+
+Today, they are receiving regular medical care, nutritious meals, and most importantly, they know they are not forgotten. The wife mentioned that knowing someone cared enough to report their situation gave them hope when they had almost lost it.
+
+Your awareness and action reminded them—and us—that humanity's greatest strength lies in how we care for one another.
+
+With sincere gratitude,
+The Sahayata Team`,
+    blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
+    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
   },
 ];
 
@@ -102,9 +154,25 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
     }
   };
 
-  const IconComponent = item.type === 'report' ? MapPin : Gift;
+  // Use Mail/Award icons for completed items with AI letters, otherwise use original icons
+  const getIconComponent = () => {
+    if (item.status === 'completed' && item.aiGeneratedLetterSnippet) {
+      return item.type === 'report' ? Award : Mail;
+    }
+    return item.type === 'report' ? MapPin : Gift;
+  };
+
+  const IconComponent = getIconComponent();
   const iconColor = item.type === 'report' ? theme.colors.primary : theme.colors.success;
   const iconBgColor = item.type === 'report' ? theme.colors.primaryContainer : theme.colors.secondaryContainer;
+
+  const getDisplaySubtitle = () => {
+    // For completed items with AI letter snippet, show the snippet instead of original subtitle
+    if (item.status === 'completed' && item.aiGeneratedLetterSnippet) {
+      return item.aiGeneratedLetterSnippet;
+    }
+    return item.subtitle;
+  };
 
   const getHelpedText = () => {
     if (item.status === 'completed' && item.peopleHelped) {
@@ -119,13 +187,24 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
   const handlePress = () => {
     if (item.status === 'in_progress') {
       router.push(`/(citizen)/live-mission-view/${item.id}`);
+    } else if (item.status === 'completed' && item.fullAiGeneratedLetter) {
+      router.push(`/(citizen)/letter-of-thanks/${item.id}`);
+    }
+  };
+
+  const handleViewStoryPress = () => {
+    if (item.status === 'completed' && item.fullAiGeneratedLetter) {
+      router.push(`/(citizen)/letter-of-thanks/${item.id}`);
     }
   };
 
   const styles = createStyles(theme);
 
   return (
-    <Pressable onPress={handlePress} disabled={item.status !== 'in_progress'}>
+    <Pressable 
+      onPress={handlePress} 
+      disabled={item.status === 'pending' || (item.status === 'completed' && !item.fullAiGeneratedLetter)}
+    >
       <Card style={styles.activityCard} mode="elevated">
         <Card.Content style={styles.cardContent}>
           <View style={styles.cardHeader}>
@@ -157,8 +236,11 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
                   )}
                 </View>
               </View>
-              <Text variant="bodyMedium" style={styles.activitySubtitle}>
-                {item.subtitle}
+              <Text variant="bodyMedium" style={[
+                styles.activitySubtitle,
+                item.status === 'completed' && item.aiGeneratedLetterSnippet && styles.letterSnippet
+              ]}>
+                {getDisplaySubtitle()}
               </Text>
               <View style={styles.bottomRow}>
                 <Text variant="bodySmall" style={styles.activityDate}>
@@ -169,9 +251,9 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
                     <Text variant="bodySmall" style={styles.helpedText}>
                       {getHelpedText()}
                     </Text>
-                    {item.status === 'completed' && (
-                      <Pressable style={styles.viewStoryButton}>
-                        <Text style={styles.viewStoryText}>View Story</Text>
+                    {item.status === 'completed' && item.fullAiGeneratedLetter && (
+                      <Pressable style={styles.viewStoryButton} onPress={handleViewStoryPress}>
+                        <Text style={styles.viewStoryText}>Read Your Letter</Text>
                       </Pressable>
                     )}
                   </View>
@@ -204,16 +286,16 @@ export default function ActivityScreen() {
           icon={() => <ArrowLeft size={24} color={theme.colors.onSurfaceVariant} />} 
           onPress={() => router.back()} 
         />
-        <Appbar.Content title="My Activity" titleStyle={styles.headerTitle} />
+        <Appbar.Content title="My Stories" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
       <View style={styles.content}>
         <View style={styles.summaryCard}>
           <Text variant="titleMedium" style={styles.summaryTitle}>
-            Your Impact
+            Your Impact Library
           </Text>
           <Text variant="bodyMedium" style={styles.summaryText}>
-            You've helped {totalPeopleHelped} people through your contributions
+            You've helped {totalPeopleHelped} people through your contributions. Each completed mission becomes a personal story of your kindness.
           </Text>
         </View>
 
@@ -225,12 +307,12 @@ export default function ActivityScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MapPin size={48} color={theme.colors.onSurfaceVariant} />
+              <Mail size={48} color={theme.colors.onSurfaceVariant} />
               <Text variant="titleMedium" style={styles.emptyTitle}>
-                No activity yet
+                No stories yet
               </Text>
               <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                Your reports and donations will appear here.
+                Your reports and donations will create beautiful stories of impact here.
               </Text>
             </View>
           }
@@ -278,6 +360,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   summaryText: {
     color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
+    lineHeight: 22,
   },
   listContent: {
     paddingBottom: 40,
@@ -328,6 +411,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.onSurfaceVariant,
     marginBottom: 16,
     fontFamily: 'Inter-Regular',
+    lineHeight: 20,
+  },
+  letterSnippet: {
+    fontStyle: 'italic',
+    color: theme.colors.primary,
+    fontWeight: '500',
+    fontFamily: 'Inter-Medium',
   },
   bottomRow: {
     flexDirection: 'column',
@@ -357,8 +447,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   viewStoryText: {
     color: theme.colors.primary,
     fontSize: 12,
-    fontWeight: '500',
-    fontFamily: 'Inter-Medium',
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
   },
   statusChip: {
     alignSelf: 'flex-start',
@@ -399,5 +489,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
+    lineHeight: 22,
   },
 });

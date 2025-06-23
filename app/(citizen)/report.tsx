@@ -15,12 +15,12 @@ import {
   Appbar,
   Card,
   IconButton,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { MapPin, Video as VideoIcon, SkipForward, RotateCcw, Play, Pause, Trash2 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 // Conditionally import native-only modules
 let MapView: any = null;
@@ -50,6 +50,8 @@ interface Region {
 type ReportStep = 'details' | 'video' | 'review';
 
 export default function ReportScreen() {
+  const theme = useTheme();
+  
   // Existing state
   const [location, setLocation] = useState<any>(null);
   const [region, setRegion] = useState<Region>({
@@ -216,14 +218,11 @@ export default function ReportScreen() {
         videoUri: recordedVideoUri,
       });
 
-      // Here you would upload the video to Supabase Storage if available
-      // and associate it with the report
-
       Alert.alert(
         'Report Submitted',
         recordedVideoUri 
-          ? 'Thank you for reporting with video context. Our team will review this shortly.'
-          : 'Thank you for reporting. Our team will review this shortly.',
+          ? 'Thank you for reporting with video context. Our team will review this shortly. Once aid is delivered, you\'ll receive a personalized letter showing the impact of your compassion.'
+          : 'Thank you for reporting. Our team will review this shortly. Once aid is delivered, you\'ll receive a personalized letter showing the impact of your compassion.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (error) {
@@ -257,7 +256,7 @@ export default function ReportScreen() {
             mode="outlined"
             onPress={() => setMarkerCoordinate({ latitude: 28.6139, longitude: 77.2090 })}
             style={styles.webMapButton}
-            textColor={colors.primary[600]}
+            textColor={theme.colors.primary}
           >
             Place Pin
           </Button>
@@ -288,7 +287,7 @@ export default function ReportScreen() {
     if (Platform.OS === 'web') {
       return (
         <View style={styles.webCameraPlaceholder}>
-          <VideoIcon size={48} color={colors.neutral[500]} />
+          <VideoIcon size={48} color={theme.colors.onSurfaceVariant} />
           <Text variant="bodyLarge" style={styles.webCameraText}>
             Video recording available on mobile devices
           </Text>
@@ -296,7 +295,7 @@ export default function ReportScreen() {
             mode="outlined"
             onPress={() => setRecordedVideoUri('mock-video-uri')}
             style={styles.webCameraButton}
-            textColor={colors.primary[600]}
+            textColor={theme.colors.primary}
           >
             Simulate Video Recording
           </Button>
@@ -317,7 +316,7 @@ export default function ReportScreen() {
     if (!permission.granted) {
       return (
         <View style={styles.permissionContainer}>
-          <VideoIcon size={48} color={colors.neutral[500]} />
+          <VideoIcon size={48} color={theme.colors.onSurfaceVariant} />
           <Text variant="bodyLarge" style={styles.permissionText}>
             Camera access is needed to record video context
           </Text>
@@ -379,7 +378,7 @@ export default function ReportScreen() {
       return (
         <View style={styles.videoPreviewContainer}>
           <View style={styles.mockVideoPreview}>
-            <Play size={48} color={colors.primary[600]} />
+            <Play size={48} color={theme.colors.primary} />
             <Text variant="bodyMedium" style={styles.mockVideoText}>
               Video recorded successfully ({recordingDuration}s)
             </Text>
@@ -401,7 +400,7 @@ export default function ReportScreen() {
             Duration: {recordingDuration}s
           </Text>
           <IconButton
-            icon={() => <Trash2 size={20} color={colors.error[600]} />}
+            icon={() => <Trash2 size={20} color={theme.colors.error} />}
             onPress={deleteRecording}
             style={styles.deleteButton}
           />
@@ -465,6 +464,8 @@ export default function ReportScreen() {
     </View>
   );
 
+  const styles = createStyles(theme);
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header}>
@@ -504,10 +505,10 @@ export default function ReportScreen() {
                 keyboardType="numeric"
                 placeholder="e.g., 5"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <TextInput
@@ -519,10 +520,10 @@ export default function ReportScreen() {
                 numberOfLines={3}
                 placeholder="Add more details about the situation, specific needs, etc."
                 style={styles.textArea}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <Button
@@ -567,7 +568,7 @@ export default function ReportScreen() {
               mode="outlined"
               onPress={goBackToDetails}
               style={styles.backButton}
-              textColor={colors.neutral[600]}
+              textColor={theme.colors.onSurfaceVariant}
             >
               Back
             </Button>
@@ -655,7 +656,7 @@ export default function ReportScreen() {
               mode="outlined"
               onPress={goBackToVideo}
               style={styles.backButton}
-              textColor={colors.neutral[600]}
+              textColor={theme.colors.onSurfaceVariant}
             >
               Back
             </Button>
@@ -677,70 +678,70 @@ export default function ReportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    borderBottomColor: theme.colors.outline,
   },
   headerTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing['2xl'],
-    paddingHorizontal: spacing['2xl'],
-    backgroundColor: colors.surface,
+    paddingVertical: 24,
+    paddingHorizontal: 24,
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    borderBottomColor: theme.colors.outline,
   },
   stepContainer: {
     alignItems: 'center',
-    gap: spacing.lg,
+    gap: 16,
   },
   stepCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.neutral[200],
+    backgroundColor: theme.colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepCircleActive: {
-    backgroundColor: colors.primary[600],
+    backgroundColor: theme.colors.primary,
   },
   stepCircleCompleted: {
-    backgroundColor: colors.success[500],
+    backgroundColor: theme.colors.success,
   },
   stepNumber: {
-    color: colors.neutral[500],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.onSurfaceVariant,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   stepNumberActive: {
     color: '#FFFFFF',
   },
   stepLabel: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },
   stepLine: {
     flex: 1,
     height: 2,
-    backgroundColor: colors.neutral[200],
-    marginHorizontal: spacing.lg,
+    backgroundColor: theme.colors.outline,
+    marginHorizontal: 16,
   },
   stepLineActive: {
-    backgroundColor: colors.primary[600],
+    backgroundColor: theme.colors.primary,
   },
   mapContainer: {
     flex: 1,
@@ -754,108 +755,120 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral[100],
-    padding: spacing['5xl'],
+    backgroundColor: theme.colors.surfaceVariant,
+    padding: 48,
   },
   webMapText: {
-    color: colors.neutral[800],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.onSurface,
+    fontWeight: '600',
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 16,
     fontFamily: 'Inter-SemiBold',
   },
   webMapSubtext: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
-    marginBottom: spacing['3xl'],
+    marginBottom: 32,
     fontFamily: 'Inter-Regular',
   },
   webMapButton: {
-    borderColor: colors.primary[600],
+    borderColor: theme.colors.primary,
   },
   mapOverlay: {
     position: 'absolute',
-    top: spacing['2xl'],
-    left: spacing['2xl'],
-    right: spacing['2xl'],
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing['2xl'],
-    ...shadows.md,
+    top: 24,
+    left: 24,
+    right: 24,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    padding: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   mapInstruction: {
     textAlign: 'center',
-    color: colors.neutral[800],
-    fontWeight: typography.fontWeight.medium,
+    color: theme.colors.onSurface,
+    fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   formCard: {
-    margin: spacing['2xl'],
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    margin: 24,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   formContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   formTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
-    marginBottom: spacing['2xl'],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
+    marginBottom: 24,
     fontFamily: 'Inter-Bold',
   },
   input: {
-    marginBottom: spacing['2xl'],
-    backgroundColor: colors.surface,
+    marginBottom: 24,
+    backgroundColor: theme.colors.surface,
   },
   textArea: {
-    marginBottom: spacing['3xl'],
-    backgroundColor: colors.surface,
+    marginBottom: 32,
+    backgroundColor: theme.colors.surface,
   },
   nextButton: {
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[600],
+    borderRadius: 12,
+    backgroundColor: theme.colors.primary,
   },
   buttonContent: {
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
   videoStepContainer: {
     flex: 1,
-    padding: spacing['2xl'],
+    padding: 24,
   },
   videoCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing['2xl'],
-    ...shadows.md,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   videoCardContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   videoTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    fontWeight: '700',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
     fontFamily: 'Inter-Bold',
   },
   videoDescription: {
-    color: colors.neutral[600],
-    marginBottom: spacing['2xl'],
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 24,
     fontFamily: 'Inter-Regular',
   },
   privacyText: {
-    color: colors.success[600],
-    backgroundColor: colors.success[50],
-    padding: spacing['2xl'],
-    borderRadius: borderRadius.lg,
+    color: theme.colors.success,
+    backgroundColor: theme.colors.secondaryContainer,
+    padding: 24,
+    borderRadius: 12,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
   cameraContainer: {
     flex: 1,
-    borderRadius: borderRadius.xl,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
   },
   camera: {
     flex: 1,
@@ -869,12 +882,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing['2xl'],
+    padding: 24,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   recordingTimer: {
     color: '#FFFFFF',
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   flipButton: {
@@ -882,7 +895,7 @@ const styles = StyleSheet.create({
   },
   cameraControls: {
     alignItems: 'center',
-    paddingBottom: spacing['4xl'],
+    paddingBottom: 40,
   },
   recordButton: {
     width: 80,
@@ -901,7 +914,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: colors.error[500],
+    backgroundColor: theme.colors.error,
   },
   recordButtonInnerActive: {
     borderRadius: 8,
@@ -912,73 +925,73 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral[100],
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing['2xl'],
-    padding: spacing['4xl'],
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 16,
+    marginBottom: 24,
+    padding: 40,
   },
   webCameraText: {
-    color: colors.neutral[800],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.onSurface,
+    fontWeight: '600',
     textAlign: 'center',
-    marginTop: spacing['2xl'],
-    marginBottom: spacing['3xl'],
+    marginTop: 24,
+    marginBottom: 32,
     fontFamily: 'Inter-SemiBold',
   },
   webCameraButton: {
-    borderColor: colors.primary[600],
+    borderColor: theme.colors.primary,
   },
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral[50],
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing['2xl'],
-    padding: spacing['4xl'],
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 16,
+    marginBottom: 24,
+    padding: 40,
   },
   permissionText: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     textAlign: 'center',
-    marginVertical: spacing['2xl'],
+    marginVertical: 24,
     fontFamily: 'Inter-Regular',
   },
   permissionButton: {
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.lg,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
   },
   videoPreviewContainer: {
     flex: 1,
-    borderRadius: borderRadius.xl,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
     position: 'relative',
   },
   videoPreview: {
     flex: 1,
-    backgroundColor: colors.neutral[900],
+    backgroundColor: theme.colors.surfaceVariant,
   },
   mockVideoPreview: {
     flex: 1,
-    backgroundColor: colors.neutral[100],
+    backgroundColor: theme.colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing['2xl'],
+    gap: 24,
   },
   mockVideoText: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Regular',
   },
   videoPreviewOverlay: {
     position: 'absolute',
-    top: spacing['2xl'],
-    right: spacing['2xl'],
+    top: 24,
+    right: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
+    gap: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    borderRadius: 12,
+    padding: 16,
   },
   videoDuration: {
     color: '#FFFFFF',
@@ -990,63 +1003,67 @@ const styles = StyleSheet.create({
   },
   videoActions: {
     flexDirection: 'row',
-    gap: spacing['2xl'],
+    gap: 24,
   },
   backButton: {
     flex: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: borderRadius.lg,
+    borderColor: theme.colors.outline,
+    borderRadius: 12,
   },
   skipButton: {
     flex: 2,
-    backgroundColor: colors.neutral[600],
-    borderRadius: borderRadius.lg,
+    backgroundColor: theme.colors.onSurfaceVariant,
+    borderRadius: 12,
   },
   continueButton: {
     flex: 2,
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.lg,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
   },
   reviewContainer: {
     flex: 1,
-    padding: spacing['2xl'],
+    padding: 24,
   },
   reviewCard: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing['2xl'],
-    ...shadows.md,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   reviewContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   reviewTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
-    marginBottom: spacing['3xl'],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
+    marginBottom: 32,
     fontFamily: 'Inter-Bold',
   },
   reviewSection: {
-    marginBottom: spacing['3xl'],
+    marginBottom: 32,
   },
   reviewSectionTitle: {
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    fontWeight: '600',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
     fontFamily: 'Inter-SemiBold',
   },
   reviewText: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },
   reviewActions: {
     flexDirection: 'row',
-    gap: spacing['2xl'],
+    gap: 24,
   },
   submitButton: {
     flex: 2,
-    backgroundColor: colors.primary[600],
-    borderRadius: borderRadius.lg,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
   },
 });

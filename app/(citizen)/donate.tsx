@@ -14,10 +14,10 @@ import {
   Card,
   Menu,
   Provider,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, ChevronDown } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 const resourceTypes = [
   'Cooked Meals',
@@ -30,6 +30,7 @@ const resourceTypes = [
 ];
 
 export default function DonateScreen() {
+  const theme = useTheme();
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
@@ -56,7 +57,7 @@ export default function DonateScreen() {
 
       Alert.alert(
         'Donation Logged',
-        'Thank you for your generous donation! A facilitator will contact you soon.',
+        'Thank you for your generous donation! A facilitator will contact you soon. Once your donation is delivered, you\'ll receive a personalized letter of thanks showing the impact of your kindness.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (error) {
@@ -68,6 +69,8 @@ export default function DonateScreen() {
 
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
+
+  const styles = createStyles(theme);
 
   return (
     <Provider>
@@ -95,15 +98,15 @@ export default function DonateScreen() {
                     onPressIn={openMenu}
                     right={
                       <TextInput.Icon
-                        icon={() => <ChevronDown size={20} color={colors.neutral[500]} />}
+                        icon={() => <ChevronDown size={20} color={theme.colors.onSurfaceVariant} />}
                         onPress={openMenu}
                       />
                     }
                     style={styles.input}
-                    outlineColor={colors.neutral[200]}
-                    activeOutlineColor={colors.primary[600]}
-                    placeholderTextColor={colors.neutral[500]}
-                    textColor={colors.neutral[800]}
+                    outlineColor={theme.colors.outline}
+                    activeOutlineColor={theme.colors.primary}
+                    placeholderTextColor={theme.colors.onSurfaceVariant}
+                    textColor={theme.colors.onSurface}
                   />
                 }
                 contentStyle={styles.menuContent}
@@ -130,10 +133,10 @@ export default function DonateScreen() {
                 mode="outlined"
                 placeholder="e.g., 15 meals, 5 blankets"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -147,13 +150,13 @@ export default function DonateScreen() {
                 multiline
                 numberOfLines={2}
                 right={
-                  <TextInput.Icon icon={() => <MapPin size={20} color={colors.neutral[500]} />} />
+                  <TextInput.Icon icon={() => <MapPin size={20} color={theme.colors.onSurfaceVariant} />} />
                 }
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -165,10 +168,10 @@ export default function DonateScreen() {
                 mode="outlined"
                 placeholder="e.g., Today, 8-9 PM"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <Text variant="labelLarge" style={styles.fieldLabel}>
@@ -182,10 +185,10 @@ export default function DonateScreen() {
                 numberOfLines={4}
                 placeholder="e.g., perishable items, best time for pickup"
                 style={styles.textArea}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                placeholderTextColor={colors.neutral[500]}
-                textColor={colors.neutral[800]}
+                outlineColor={theme.colors.outline}
+                activeOutlineColor={theme.colors.primary}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                textColor={theme.colors.onSurface}
               />
 
               <Button
@@ -206,62 +209,66 @@ export default function DonateScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    borderBottomColor: theme.colors.outline,
   },
   headerTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing['2xl'],
+    padding: 24,
   },
   formCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   formContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   fieldLabel: {
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
-    marginTop: spacing['2xl'],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.onSurface,
+    marginBottom: 16,
+    marginTop: 24,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   input: {
-    marginBottom: spacing['2xl'],
-    backgroundColor: colors.surface,
+    marginBottom: 24,
+    backgroundColor: theme.colors.surface,
   },
   textArea: {
-    marginBottom: spacing['4xl'],
-    backgroundColor: colors.surface,
+    marginBottom: 40,
+    backgroundColor: theme.colors.surface,
   },
   menuContent: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    marginTop: spacing.sm,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    marginTop: 8,
   },
   menuItemTitle: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Regular',
   },
   submitButton: {
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.primary[600],
+    borderRadius: 12,
+    backgroundColor: theme.colors.primary,
   },
   buttonContent: {
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
 });
