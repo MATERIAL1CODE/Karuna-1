@@ -12,37 +12,13 @@ import {
 import { router } from 'expo-router';
 import { Heart, Users, MapPin } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring,
-} from 'react-native-reanimated';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomePage() {
-  const citizenCardScale = useSharedValue(1);
-  const facilitatorCardScale = useSharedValue(1);
-
-  const citizenCardAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: citizenCardScale.value }],
-  }));
-
-  const facilitatorCardAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: facilitatorCardScale.value }],
-  }));
-
   const handleCitizenPress = () => {
-    citizenCardScale.value = withSpring(0.95, {}, () => {
-      citizenCardScale.value = withSpring(1);
-    });
     router.push('/(citizen)');
   };
 
   const handleFacilitatorPress = () => {
-    facilitatorCardScale.value = withSpring(0.95, {}, () => {
-      facilitatorCardScale.value = withSpring(1);
-    });
     router.push('/(facilitator)');
   };
 
@@ -67,7 +43,7 @@ export default function HomePage() {
         </View>
 
         <View style={styles.roleCards}>
-          <AnimatedPressable onPress={handleCitizenPress} style={citizenCardAnimatedStyle}>
+          <Pressable onPress={handleCitizenPress}>
             <View style={[styles.roleCard, styles.citizenCard]}>
               <View style={styles.cardIcon}>
                 <MapPin size={40} color={colors.primary[600]} />
@@ -84,9 +60,9 @@ export default function HomePage() {
                 <Text style={styles.feature}>• Track your impact</Text>
               </View>
             </View>
-          </AnimatedPressable>
+          </Pressable>
 
-          <AnimatedPressable onPress={handleFacilitatorPress} style={facilitatorCardAnimatedStyle}>
+          <Pressable onPress={handleFacilitatorPress}>
             <View style={[styles.roleCard, styles.facilitatorCard]}>
               <View style={styles.cardIcon}>
                 <Users size={40} color={colors.success[500]} />
@@ -103,7 +79,7 @@ export default function HomePage() {
                 <Text style={styles.feature}>• Make direct impact</Text>
               </View>
             </View>
-          </AnimatedPressable>
+          </Pressable>
         </View>
 
         <View style={styles.footer}>
