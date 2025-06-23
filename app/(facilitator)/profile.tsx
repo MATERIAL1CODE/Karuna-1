@@ -15,6 +15,7 @@ import {
   Appbar,
   Badge,
   TextInput,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { 
@@ -33,11 +34,17 @@ import {
   Mail,
   MapPin,
   Save,
-  Truck
+  Truck,
+  Moon,
+  Sun
 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function FacilitatorProfileScreen() {
+  const theme = useTheme();
+  const { isDark, toggleTheme } = useThemeContext();
+  
   // Profile settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
@@ -53,16 +60,18 @@ export default function FacilitatorProfileScreen() {
     // Show success feedback or navigate back
   };
 
+  const styles = createStyles(theme, isDark);
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
+          icon={() => <ArrowLeft size={24} color={theme.colors.onSurface} />} 
           onPress={() => router.replace('/(home)')} 
         />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
         <Appbar.Action 
-          icon={() => <Save size={24} color={colors.primary[600]} />} 
+          icon={() => <Save size={24} color={theme.colors.primary} />} 
           onPress={handleSave} 
         />
       </Appbar.Header>
@@ -70,7 +79,7 @@ export default function FacilitatorProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <User size={40} color={colors.primary[600]} />
+            <User size={40} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
             Community Volunteer
@@ -79,12 +88,12 @@ export default function FacilitatorProfileScreen() {
             <Text variant="bodyMedium" style={styles.role}>
               Verified Facilitator
             </Text>
-            <Badge style={styles.badge} size={20}>
+            <Badge style={[styles.badge, { backgroundColor: theme.colors.secondary }]} size={20}>
               ACTIVE
             </Badge>
           </View>
           <View style={styles.ratingContainer}>
-            <Star size={16} color={colors.warning[500]} fill={colors.warning[500]} />
+            <Star size={16} color={theme.colors.tertiary} fill={theme.colors.tertiary} />
             <Text variant="bodyMedium" style={styles.rating}>
               4.9 Rating
             </Text>
@@ -142,7 +151,7 @@ export default function FacilitatorProfileScreen() {
             </Text>
             <View style={styles.badgesGrid}>
               <View style={styles.badgeItem}>
-                <View style={[styles.badgeIcon, { backgroundColor: colors.warning[100] }]}>
+                <View style={[styles.badgeIcon, { backgroundColor: theme.colors.tertiaryContainer }]}>
                   <Text style={styles.badgeEmoji}>🥉</Text>
                 </View>
                 <Text variant="bodySmall" style={styles.badgeLabel}>
@@ -150,7 +159,7 @@ export default function FacilitatorProfileScreen() {
                 </Text>
               </View>
               <View style={styles.badgeItem}>
-                <View style={[styles.badgeIcon, { backgroundColor: colors.success[100] }]}>
+                <View style={[styles.badgeIcon, { backgroundColor: theme.colors.secondaryContainer }]}>
                   <Text style={styles.badgeEmoji}>🥈</Text>
                 </View>
                 <Text variant="bodySmall" style={styles.badgeLabel}>
@@ -158,7 +167,7 @@ export default function FacilitatorProfileScreen() {
                 </Text>
               </View>
               <View style={styles.badgeItem}>
-                <View style={[styles.badgeIcon, { backgroundColor: colors.primary[100] }]}>
+                <View style={[styles.badgeIcon, { backgroundColor: theme.colors.primaryContainer }]}>
                   <Text style={styles.badgeEmoji}>🥇</Text>
                 </View>
                 <Text variant="bodySmall" style={styles.badgeLabel}>
@@ -166,7 +175,7 @@ export default function FacilitatorProfileScreen() {
                 </Text>
               </View>
               <View style={styles.badgeItem}>
-                <View style={[styles.badgeIcon, { backgroundColor: colors.purple[100] }]}>
+                <View style={[styles.badgeIcon, { backgroundColor: theme.colors.tertiaryContainer }]}>
                   <Text style={styles.badgeEmoji}>⭐</Text>
                 </View>
                 <Text variant="bodySmall" style={styles.badgeLabel}>
@@ -193,10 +202,8 @@ export default function FacilitatorProfileScreen() {
                 onChangeText={setName}
                 mode="outlined"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <User size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <User size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
 
@@ -210,10 +217,8 @@ export default function FacilitatorProfileScreen() {
                 mode="outlined"
                 keyboardType="email-address"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <Mail size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <Mail size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
 
@@ -227,12 +232,36 @@ export default function FacilitatorProfileScreen() {
                 mode="outlined"
                 keyboardType="phone-pad"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <Smartphone size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <Smartphone size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
+          </Card.Content>
+        </Card>
+
+        {/* Appearance Settings */}
+        <Card style={styles.sectionCard} mode="elevated">
+          <Card.Content style={styles.cardContent}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Appearance
+            </Text>
+            
+            <List.Item
+              title="Dark Mode"
+              description="Switch between light and dark themes"
+              left={() => isDark ? <Moon size={20} color={theme.colors.onSurfaceVariant} /> : <Sun size={20} color={theme.colors.onSurfaceVariant} />}
+              right={() => (
+                <Switch
+                  value={isDark}
+                  onValueChange={toggleTheme}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={isDark ? theme.colors.primary : theme.colors.onSurfaceVariant}
+                />
+              )}
+              titleStyle={styles.listItemTitle}
+              descriptionStyle={styles.listItemDescription}
+              style={styles.listItem}
+            />
           </Card.Content>
         </Card>
 
@@ -246,13 +275,13 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Push Notifications"
               description="Receive notifications about new missions"
-              left={() => <Bell size={20} color={colors.neutral[500]} />}
+              left={() => <Bell size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={notificationsEnabled}
                   onValueChange={setNotificationsEnabled}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={notificationsEnabled ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={notificationsEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -265,13 +294,13 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Mission Alerts"
               description="Get notified when new missions match your preferences"
-              left={() => <Truck size={20} color={colors.neutral[500]} />}
+              left={() => <Truck size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={missionAlerts}
                   onValueChange={setMissionAlerts}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={missionAlerts ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={missionAlerts ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -284,13 +313,13 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Email Notifications"
               description="Receive mission summaries and updates via email"
-              left={() => <Mail size={20} color={colors.neutral[500]} />}
+              left={() => <Mail size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={emailNotifications}
                   onValueChange={setEmailNotifications}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={emailNotifications ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={emailNotifications ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -310,13 +339,13 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Location Services"
               description="Allow app to access your location for missions"
-              left={() => <MapPin size={20} color={colors.neutral[500]} />}
+              left={() => <MapPin size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={locationEnabled}
                   onValueChange={setLocationEnabled}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={locationEnabled ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={locationEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -329,7 +358,7 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Data Privacy"
               description="Manage your data and privacy preferences"
-              left={() => <Shield size={20} color={colors.neutral[500]} />}
+              left={() => <Shield size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.listItemTitle}
@@ -342,7 +371,7 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Language"
               description="English (US)"
-              left={() => <Globe size={20} color={colors.neutral[500]} />}
+              left={() => <Globe size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.listItemTitle}
@@ -371,7 +400,7 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="Help & Support"
               description="Get help or contact support"
-              left={() => <HelpCircle size={20} color={colors.neutral[500]} />}
+              left={() => <HelpCircle size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -382,7 +411,7 @@ export default function FacilitatorProfileScreen() {
             <List.Item
               title="About Sahayata"
               description="Learn more about our mission"
-              left={() => <Info size={20} color={colors.neutral[500]} />}
+              left={() => <Info size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -397,7 +426,7 @@ export default function FacilitatorProfileScreen() {
           onPress={() => router.replace('/(citizen)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
-          textColor={colors.primary[600]}
+          textColor={theme.colors.primary}
         >
           Switch to Citizen Mode
         </Button>
@@ -416,18 +445,18 @@ export default function FacilitatorProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
     elevation: 0,
   },
   headerTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
@@ -439,14 +468,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['2xl'],
   },
   avatarContainer: {
-    backgroundColor: colors.primary[100],
+    backgroundColor: theme.colors.primaryContainer,
     borderRadius: 50,
     padding: spacing['3xl'],
     marginBottom: spacing['2xl'],
   },
   name: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
@@ -457,12 +486,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   role: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
   },
   badge: {
-    backgroundColor: colors.success[500],
+    backgroundColor: theme.colors.secondary,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -470,12 +499,12 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   rating: {
-    color: colors.warning[500],
+    color: theme.colors.tertiary,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   impactCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -485,7 +514,7 @@ const styles = StyleSheet.create({
   },
   impactTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
   },
@@ -495,12 +524,12 @@ const styles = StyleSheet.create({
   },
   heroNumber: {
     fontWeight: typography.fontWeight.extrabold,
-    color: colors.primary[600],
+    color: theme.colors.primary,
     marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   heroLabel: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
   },
@@ -514,23 +543,23 @@ const styles = StyleSheet.create({
   },
   supportingNumber: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   supportingLabel: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
   activeSince: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontStyle: 'italic',
     fontFamily: 'Inter-Regular',
   },
   achievementsCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -540,7 +569,7 @@ const styles = StyleSheet.create({
   },
   achievementsTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
@@ -567,12 +596,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   badgeLabel: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
   sectionCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -582,7 +611,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
@@ -590,39 +619,40 @@ const styles = StyleSheet.create({
     marginBottom: spacing['2xl'],
   },
   inputLabel: {
-    color: colors.neutral[700],
+    color: theme.colors.onSurface,
     marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
   },
   listItem: {
     paddingHorizontal: 0,
     paddingVertical: spacing.lg,
   },
   listItemTitle: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   listItemDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
   divider: {
     marginVertical: spacing.md,
+    backgroundColor: theme.colors.outline,
   },
   menuCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['4xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   menuSectionTitle: {
-    color: colors.neutral[700],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     paddingHorizontal: spacing['2xl'],
     paddingTop: spacing['2xl'],
@@ -636,17 +666,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   menuItemTitle: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   menuItemDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
   switchRoleButton: {
-    borderColor: colors.primary[600],
+    borderColor: theme.colors.primary,
     borderRadius: borderRadius.lg,
     marginBottom: spacing['2xl'],
   },
@@ -654,7 +684,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   saveButton: {
-    backgroundColor: colors.primary[600],
+    backgroundColor: theme.colors.primary,
     borderRadius: borderRadius.lg,
     marginTop: spacing['2xl'],
   },

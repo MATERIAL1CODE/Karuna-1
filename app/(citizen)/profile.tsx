@@ -14,6 +14,7 @@ import {
   Divider,
   Appbar,
   TextInput,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { 
@@ -30,11 +31,17 @@ import {
   Smartphone,
   Mail,
   MapPin,
-  Save
+  Save,
+  Moon,
+  Sun
 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function ProfileScreen() {
+  const theme = useTheme();
+  const { isDark, toggleTheme } = useThemeContext();
+  
   // Profile settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
@@ -49,16 +56,18 @@ export default function ProfileScreen() {
     // Show success feedback or navigate back
   };
 
+  const styles = createStyles(theme, isDark);
+
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
+          icon={() => <ArrowLeft size={24} color={theme.colors.onSurface} />} 
           onPress={() => router.replace('/(home)')} 
         />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
         <Appbar.Action 
-          icon={() => <Save size={24} color={colors.primary[600]} />} 
+          icon={() => <Save size={24} color={theme.colors.primary} />} 
           onPress={handleSave} 
         />
       </Appbar.Header>
@@ -66,7 +75,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <User size={40} color={colors.primary[600]} />
+            <User size={40} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
             Community Member
@@ -84,7 +93,7 @@ export default function ProfileScreen() {
             
             {/* Placeholder for line graph */}
             <View style={styles.graphPlaceholder}>
-              <TrendingUp size={32} color={colors.primary[600]} />
+              <TrendingUp size={32} color={theme.colors.primary} />
               <Text variant="bodySmall" style={styles.graphText}>
                 Impact trend over time
               </Text>
@@ -92,22 +101,22 @@ export default function ProfileScreen() {
             
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: colors.primary[100] }]}>
-                  <Heart size={20} color={colors.primary[600]} />
+                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.primaryContainer }]}>
+                  <Heart size={20} color={theme.colors.primary} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>12</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
               </View>
               <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: colors.success[100] }]}>
-                  <Heart size={20} color={colors.success[500]} />
+                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.secondaryContainer }]}>
+                  <Heart size={20} color={theme.colors.secondary} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>8</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
               </View>
               <View style={styles.statItem}>
-                <View style={[styles.statIconContainer, { backgroundColor: colors.warning[100] }]}>
-                  <Heart size={20} color={colors.warning[500]} />
+                <View style={[styles.statIconContainer, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                  <Heart size={20} color={theme.colors.tertiary} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>45</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
@@ -169,10 +178,8 @@ export default function ProfileScreen() {
                 onChangeText={setName}
                 mode="outlined"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <User size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <User size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
 
@@ -186,10 +193,8 @@ export default function ProfileScreen() {
                 mode="outlined"
                 keyboardType="email-address"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <Mail size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <Mail size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
 
@@ -203,12 +208,36 @@ export default function ProfileScreen() {
                 mode="outlined"
                 keyboardType="phone-pad"
                 style={styles.input}
-                outlineColor={colors.neutral[200]}
-                activeOutlineColor={colors.primary[600]}
-                textColor={colors.neutral[800]}
-                left={<TextInput.Icon icon={() => <Smartphone size={20} color={colors.neutral[500]} />} />}
+                textColor={theme.colors.onSurface}
+                left={<TextInput.Icon icon={() => <Smartphone size={20} color={theme.colors.onSurfaceVariant} />} />}
               />
             </View>
+          </Card.Content>
+        </Card>
+
+        {/* Appearance Settings */}
+        <Card style={styles.sectionCard} mode="elevated">
+          <Card.Content style={styles.cardContent}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Appearance
+            </Text>
+            
+            <List.Item
+              title="Dark Mode"
+              description="Switch between light and dark themes"
+              left={() => isDark ? <Moon size={20} color={theme.colors.onSurfaceVariant} /> : <Sun size={20} color={theme.colors.onSurfaceVariant} />}
+              right={() => (
+                <Switch
+                  value={isDark}
+                  onValueChange={toggleTheme}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={isDark ? theme.colors.primary : theme.colors.onSurfaceVariant}
+                />
+              )}
+              titleStyle={styles.listItemTitle}
+              descriptionStyle={styles.listItemDescription}
+              style={styles.listItem}
+            />
           </Card.Content>
         </Card>
 
@@ -222,13 +251,13 @@ export default function ProfileScreen() {
             <List.Item
               title="Push Notifications"
               description="Receive notifications about new opportunities"
-              left={() => <Bell size={20} color={colors.neutral[500]} />}
+              left={() => <Bell size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={notificationsEnabled}
                   onValueChange={setNotificationsEnabled}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={notificationsEnabled ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={notificationsEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -241,13 +270,13 @@ export default function ProfileScreen() {
             <List.Item
               title="Email Notifications"
               description="Receive weekly impact summaries via email"
-              left={() => <Mail size={20} color={colors.neutral[500]} />}
+              left={() => <Mail size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={emailNotifications}
                   onValueChange={setEmailNotifications}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={emailNotifications ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={emailNotifications ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -267,13 +296,13 @@ export default function ProfileScreen() {
             <List.Item
               title="Location Services"
               description="Allow app to access your location for reporting"
-              left={() => <MapPin size={20} color={colors.neutral[500]} />}
+              left={() => <MapPin size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => (
                 <Switch
                   value={locationEnabled}
                   onValueChange={setLocationEnabled}
-                  trackColor={{ false: colors.neutral[300], true: colors.primary[200] }}
-                  thumbColor={locationEnabled ? colors.primary[600] : colors.neutral[400]}
+                  trackColor={{ false: theme.colors.outline, true: theme.colors.primaryContainer }}
+                  thumbColor={locationEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 />
               )}
               titleStyle={styles.listItemTitle}
@@ -286,7 +315,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Data Privacy"
               description="Manage your data and privacy preferences"
-              left={() => <Shield size={20} color={colors.neutral[500]} />}
+              left={() => <Shield size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.listItemTitle}
@@ -299,7 +328,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Language"
               description="English (US)"
-              left={() => <Globe size={20} color={colors.neutral[500]} />}
+              left={() => <Globe size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.listItemTitle}
@@ -328,7 +357,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Help & Support"
               description="Get help or contact support"
-              left={() => <HelpCircle size={20} color={colors.neutral[500]} />}
+              left={() => <HelpCircle size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -339,7 +368,7 @@ export default function ProfileScreen() {
             <List.Item
               title="About Sahayata"
               description="Learn more about our mission"
-              left={() => <Info size={20} color={colors.neutral[500]} />}
+              left={() => <Info size={20} color={theme.colors.onSurfaceVariant} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -354,7 +383,7 @@ export default function ProfileScreen() {
           onPress={() => router.replace('/(facilitator)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
-          textColor={colors.primary[600]}
+          textColor={theme.colors.primary}
         >
           Switch to Facilitator Mode
         </Button>
@@ -373,18 +402,18 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
     elevation: 0,
   },
   headerTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
@@ -396,24 +425,24 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['2xl'],
   },
   avatarContainer: {
-    backgroundColor: colors.primary[100],
+    backgroundColor: theme.colors.primaryContainer,
     borderRadius: 50,
     padding: spacing['3xl'],
     marginBottom: spacing['2xl'],
   },
   name: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing.lg,
     fontFamily: 'Inter-Bold',
   },
   role: {
-    color: colors.primary[600],
+    color: theme.colors.primary,
     fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
   },
   statsCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -423,20 +452,20 @@ const styles = StyleSheet.create({
   },
   statsTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
   },
   graphPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.neutral[50],
+    backgroundColor: theme.colors.surfaceVariant,
     borderRadius: borderRadius.lg,
     padding: spacing['3xl'],
     marginBottom: spacing['3xl'],
   },
   graphText: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     marginTop: spacing.lg,
     fontFamily: 'Inter-Regular',
   },
@@ -455,22 +484,22 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   statLabel: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
   lifetimeTotal: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontStyle: 'italic',
     fontFamily: 'Inter-Regular',
   },
   impactCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -480,17 +509,17 @@ const styles = StyleSheet.create({
   },
   impactTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
   impactText: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
     fontFamily: 'Inter-Regular',
   },
   milestonesCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -500,7 +529,7 @@ const styles = StyleSheet.create({
   },
   milestonesTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
@@ -510,7 +539,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignItems: 'center',
-    backgroundColor: colors.neutral[50],
+    backgroundColor: theme.colors.surfaceVariant,
     borderRadius: borderRadius.lg,
     padding: spacing['2xl'],
     minWidth: 80,
@@ -520,12 +549,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   badgeLabel: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
   sectionCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['2xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
@@ -535,7 +564,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Bold',
   },
@@ -543,39 +572,40 @@ const styles = StyleSheet.create({
     marginBottom: spacing['2xl'],
   },
   inputLabel: {
-    color: colors.neutral[700],
+    color: theme.colors.onSurface,
     marginBottom: spacing.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
   },
   listItem: {
     paddingHorizontal: 0,
     paddingVertical: spacing.lg,
   },
   listItemTitle: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   listItemDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
   divider: {
     marginVertical: spacing.md,
+    backgroundColor: theme.colors.outline,
   },
   menuCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     marginBottom: spacing['4xl'],
     borderRadius: borderRadius.xl,
     ...shadows.md,
   },
   menuSectionTitle: {
-    color: colors.neutral[700],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     paddingHorizontal: spacing['2xl'],
     paddingTop: spacing['2xl'],
@@ -589,17 +619,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   menuItemTitle: {
-    color: colors.neutral[800],
+    color: theme.colors.onSurface,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   menuItemDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
   switchRoleButton: {
-    borderColor: colors.primary[600],
+    borderColor: theme.colors.primary,
     borderRadius: borderRadius.lg,
     marginBottom: spacing['2xl'],
   },
@@ -607,7 +637,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   saveButton: {
-    backgroundColor: colors.primary[600],
+    backgroundColor: theme.colors.primary,
     borderRadius: borderRadius.lg,
     marginTop: spacing['2xl'],
   },
