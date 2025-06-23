@@ -11,12 +11,14 @@ import { router } from 'expo-router';
 import { ArrowLeft, List, Map, MapPin } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import { useData, Mission } from '@/contexts/DataContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { MissionCardSkeleton } from '@/components/SkeletonLoader';
 import MissionCard from '@/components/MissionCard';
 
 export default function FacilitatorDashboard() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const { missions, isLoadingData, fetchData, acceptMission } = useData();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Fetch data when component mounts
@@ -28,8 +30,10 @@ export default function FacilitatorDashboard() {
   };
 
   const handleAcceptMission = (missionId: string) => {
-    acceptMission(missionId);
-    router.push(`/(facilitator)/mission/${missionId}`);
+    if (user) {
+      acceptMission(missionId, user.id || 'facilitator_current', user.name);
+      router.push(`/(facilitator)/mission/${missionId}`);
+    }
   };
 
   const renderMission = ({ item }: { item: Mission }) => (
@@ -105,7 +109,7 @@ export default function FacilitatorDashboard() {
                 {missions.length} missions waiting for volunteers
               </Text>
               <Text variant="bodyMedium" style={styles.summarySubtext}>
-                Choose a mission that fits your schedule
+                Choose a mission that fits your schedule and help make a difference
               </Text>
             </>
           )}
@@ -128,7 +132,7 @@ export default function FacilitatorDashboard() {
                     No available missions
                   </Text>
                   <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                    Check back later for new opportunities to help.
+                    Check back later for new opportunities to help your community.
                   </Text>
                 </View>
               }

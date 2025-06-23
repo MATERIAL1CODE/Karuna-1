@@ -15,105 +15,23 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ExternalLink, Shield, Heart } from 'lucide-react-native';
+import { ArrowLeft, ExternalLink, Shield, Heart, User, Calendar } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
-
-interface LetterData {
-  id: string;
-  fullAiGeneratedLetter: string;
-  blockchainTransactionLink?: string;
-  ngoLogoUrl?: string;
-  recipientName?: string;
-  type: 'report' | 'donation';
-  peopleHelped?: number;
-  date: string;
-}
-
-// Mock data source for letters (in a real app, this would come from your backend)
-const mockLetterData: Record<string, LetterData> = {
-  '2': {
-    id: '2',
-    fullAiGeneratedLetter: `Dear Community Member,
-
-We wanted to share a small story with you. Because of the 15 cooked meals you donated, a family of four didn't have to go to sleep hungry on a cold night. Your kindness provided immediate comfort and nourishment when it was needed most.
-
-It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of warmth and hope on what could have been a difficult evening.
-
-The father, who works as a daily wage laborer, had not found work for three days. The mother, caring for two young children, was worried about how to feed her family. When our facilitator arrived with your donation, the relief and gratitude in their eyes was profound.
-
-Your contribution didn't just fill empty stomachs—it restored their faith that there are people who care, people who understand that we are all connected in this journey of life.
-
-From all of us at Sahayata, thank you for being the light in someone's darkness.
-
-With heartfelt gratitude,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    recipientName: 'Community Member',
-    type: 'donation',
-    peopleHelped: 15,
-    date: '1 day ago',
-  },
-  '3': {
-    id: '3',
-    fullAiGeneratedLetter: `Dear Compassionate Citizen,
-
-Your report about the family near Lajpat Nagar Market led to something beautiful. Because you took the time to notice and care, five people—including three children—found shelter and warmth during the recent cold spell.
-
-Your vigilance and compassion helped connect them with our local partner organization, who provided temporary accommodation and essential supplies. The children, ages 6, 8, and 12, are now safe and attending a nearby community center for daily meals and educational support.
-
-Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
-
-Thank you for seeing what others might have overlooked, and for caring enough to act.
-
-With deep appreciation,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    recipientName: 'Compassionate Citizen',
-    type: 'report',
-    peopleHelped: 5,
-    date: '2 days ago',
-  },
-  '5': {
-    id: '5',
-    fullAiGeneratedLetter: `Dear Kind Soul,
-
-Your report about the elderly couple near Saket District Centre touched our hearts, and we wanted you to know the beautiful outcome of your compassion.
-
-The couple, married for 45 years, had been struggling after the husband's recent illness left them unable to work. Your alert led our team to connect them with medical assistance and ongoing support from our partner healthcare clinic.
-
-Today, they are receiving regular medical care, nutritious meals, and most importantly, they know they are not forgotten. The wife mentioned that knowing someone cared enough to report their situation gave them hope when they had almost lost it.
-
-Your awareness and action reminded them—and us—that humanity's greatest strength lies in how we care for one another.
-
-With sincere gratitude,
-The Sahayata Team`,
-    blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
-    ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    recipientName: 'Kind Soul',
-    type: 'report',
-    peopleHelped: 2,
-    date: '1 week ago',
-  },
-};
+import { useData } from '@/contexts/DataContext';
 
 export default function LetterOfThanksScreen() {
   const { id } = useLocalSearchParams();
   const theme = useTheme();
-  const [letterData, setLetterData] = useState<LetterData | null>(null);
+  const { activities } = useData();
+  const [letterData, setLetterData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching letter data
-    const fetchLetterData = () => {
-      const data = mockLetterData[id as string];
-      setLetterData(data || null);
-      setLoading(false);
-    };
-
-    fetchLetterData();
-  }, [id]);
+    // Find the activity by ID
+    const activity = activities.find(a => a.id === id);
+    setLetterData(activity || null);
+    setLoading(false);
+  }, [id, activities]);
 
   const handleBlockchainVerification = async () => {
     if (letterData?.blockchainTransactionLink) {
@@ -139,7 +57,7 @@ export default function LetterOfThanksScreen() {
     );
   }
 
-  if (!letterData) {
+  if (!letterData || !letterData.fullFacilitatorStory) {
     return (
       <SafeAreaView style={styles.container}>
         <Appbar.Header style={styles.header}>
@@ -162,7 +80,7 @@ export default function LetterOfThanksScreen() {
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Your Letter of Thanks" titleStyle={styles.headerTitle} />
+        <Appbar.Content title="Your Thank You Letter" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -172,11 +90,27 @@ export default function LetterOfThanksScreen() {
             <Heart size={32} color={theme.colors.primary} />
           </View>
           <Text variant="headlineSmall" style={styles.letterHeaderTitle}>
-            A Personal Letter of Thanks
+            A Personal Thank You Letter
           </Text>
           <Text variant="bodyMedium" style={styles.letterHeaderSubtitle}>
             Your {letterData.type === 'donation' ? 'donation' : 'report'} helped {letterData.peopleHelped} people • {letterData.date}
           </Text>
+          
+          {/* Facilitator Info */}
+          <View style={styles.facilitatorInfo}>
+            <User size={20} color={theme.colors.primary} />
+            <Text variant="bodyMedium" style={styles.facilitatorText}>
+              Written by {letterData.facilitatorName}
+            </Text>
+            {letterData.completedAt && (
+              <>
+                <Calendar size={16} color={theme.colors.onSurfaceVariant} />
+                <Text variant="bodySmall" style={styles.completedText}>
+                  {new Date(letterData.completedAt).toLocaleDateString()}
+                </Text>
+              </>
+            )}
+          </View>
         </View>
 
         {/* Letter Content */}
@@ -186,7 +120,7 @@ export default function LetterOfThanksScreen() {
             {/* Letter content */}
             <View style={styles.letterContent}>
               <Text style={styles.letterText}>
-                {letterData.fullAiGeneratedLetter}
+                {letterData.fullFacilitatorStory}
               </Text>
             </View>
 
@@ -208,6 +142,19 @@ export default function LetterOfThanksScreen() {
                     Making a Difference Together
                   </Text>
                 </View>
+              </View>
+
+              {/* Facilitator signature */}
+              <View style={styles.facilitatorSignature}>
+                <Text variant="bodyMedium" style={styles.signatureText}>
+                  With heartfelt gratitude,
+                </Text>
+                <Text variant="titleMedium" style={styles.facilitatorSignatureName}>
+                  {letterData.facilitatorName}
+                </Text>
+                <Text variant="bodySmall" style={styles.facilitatorTitle}>
+                  Sahayata Facilitator
+                </Text>
               </View>
 
               {/* Blockchain verification */}
@@ -249,7 +196,7 @@ export default function LetterOfThanksScreen() {
         {/* Impact reminder */}
         <View style={styles.impactReminder}>
           <Text variant="bodyMedium" style={styles.impactText}>
-            Every act of kindness creates ripples of positive change. Thank you for being part of our community of compassion.
+            This letter was personally written by your facilitator who witnessed the impact of your kindness firsthand. Every act of compassion creates ripples of positive change.
           </Text>
         </View>
       </ScrollView>
@@ -325,6 +272,25 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
+    marginBottom: 16,
+  },
+  facilitatorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: theme.colors.surfaceVariant,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  facilitatorText: {
+    color: theme.colors.onSurface,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+  },
+  completedText: {
+    color: theme.colors.onSurfaceVariant,
+    fontFamily: 'Inter-Regular',
   },
   letterContainer: {
     marginBottom: 32,
@@ -338,7 +304,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 20,
-    // Subtle paper texture effect
     borderWidth: 1,
     borderColor: theme.colors.outline,
   },
@@ -349,7 +314,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     lineHeight: 28,
     color: theme.colors.onSurface,
-    fontFamily: 'Lora-Regular', // Using Lora for elegant letter typography
+    fontFamily: 'Lora-Regular',
     textAlign: 'left',
   },
   signatureSection: {
@@ -379,6 +344,24 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 4,
   },
   organizationTagline: {
+    color: theme.colors.onSurfaceVariant,
+    fontFamily: 'Inter-Regular',
+  },
+  facilitatorSignature: {
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  signatureText: {
+    color: theme.colors.onSurfaceVariant,
+    fontStyle: 'italic',
+    fontFamily: 'Inter-Regular',
+  },
+  facilitatorSignatureName: {
+    color: theme.colors.onSurface,
+    fontWeight: '700',
+    fontFamily: 'Inter-Bold',
+  },
+  facilitatorTitle: {
     color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },

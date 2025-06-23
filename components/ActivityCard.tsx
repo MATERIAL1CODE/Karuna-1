@@ -11,7 +11,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MapPin, Gift, Eye, Mail, Award } from 'lucide-react-native';
+import { MapPin, Gift, Eye, Mail, Award, User } from 'lucide-react-native';
 import { ActivityItem } from '@/contexts/DataContext';
 
 interface ActivityCardProps {
@@ -44,9 +44,9 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
     }
   };
 
-  // Use Mail/Award icons for completed items with AI letters, otherwise use original icons
+  // Use Mail/Award icons for completed items with facilitator stories, otherwise use original icons
   const getIconComponent = () => {
-    if (item.status === 'completed' && item.aiGeneratedLetterSnippet) {
+    if (item.status === 'completed' && item.fullFacilitatorStory) {
       return item.type === 'report' ? Award : Mail;
     }
     return item.type === 'report' ? MapPin : Gift;
@@ -57,9 +57,9 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
   const iconBgColor = item.type === 'report' ? theme.colors.primaryContainer : theme.colors.secondaryContainer;
 
   const getDisplaySubtitle = () => {
-    // For completed items with AI letter snippet, show the snippet instead of original subtitle
-    if (item.status === 'completed' && item.aiGeneratedLetterSnippet) {
-      return item.aiGeneratedLetterSnippet;
+    // For completed items with facilitator story snippet, show the snippet instead of original subtitle
+    if (item.status === 'completed' && item.facilitatorStorySnippet) {
+      return item.facilitatorStorySnippet;
     }
     return item.subtitle;
   };
@@ -82,13 +82,13 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
 
     if (item.status === 'in_progress') {
       router.push(`/(citizen)/(tabs)/activity/live-mission-view/${item.id}`);
-    } else if (item.status === 'completed' && item.fullAiGeneratedLetter) {
+    } else if (item.status === 'completed' && item.fullFacilitatorStory) {
       router.push(`/(citizen)/(tabs)/activity/letter-of-thanks/${item.id}`);
     }
   };
 
   const handleViewStoryPress = () => {
-    if (item.status === 'completed' && item.fullAiGeneratedLetter) {
+    if (item.status === 'completed' && item.fullFacilitatorStory) {
       router.push(`/(citizen)/(tabs)/activity/letter-of-thanks/${item.id}`);
     }
   };
@@ -98,7 +98,7 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
   return (
     <Pressable 
       onPress={handlePress} 
-      disabled={item.status === 'pending' || (item.status === 'completed' && !item.fullAiGeneratedLetter)}
+      disabled={item.status === 'pending' || (item.status === 'completed' && !item.fullFacilitatorStory)}
     >
       <Card style={styles.activityCard} mode="elevated">
         <Card.Content style={styles.cardContent}>
@@ -133,10 +133,21 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
               </View>
               <Text variant="bodyMedium" style={[
                 styles.activitySubtitle,
-                item.status === 'completed' && item.aiGeneratedLetterSnippet && styles.letterSnippet
+                item.status === 'completed' && item.facilitatorStorySnippet && styles.storySnippet
               ]}>
                 {getDisplaySubtitle()}
               </Text>
+              
+              {/* Show facilitator info for completed items */}
+              {item.status === 'completed' && item.facilitatorName && (
+                <View style={styles.facilitatorInfo}>
+                  <User size={14} color={theme.colors.onSurfaceVariant} />
+                  <Text variant="bodySmall" style={styles.facilitatorText}>
+                    Facilitated by {item.facilitatorName}
+                  </Text>
+                </View>
+              )}
+
               <View style={styles.bottomRow}>
                 <Text variant="bodySmall" style={styles.activityDate}>
                   {item.date}
@@ -146,9 +157,9 @@ export default function ActivityCard({ item, onPress }: ActivityCardProps) {
                     <Text variant="bodySmall" style={styles.helpedText}>
                       {getHelpedText()}
                     </Text>
-                    {item.status === 'completed' && item.fullAiGeneratedLetter && (
+                    {item.status === 'completed' && item.fullFacilitatorStory && (
                       <Pressable style={styles.viewStoryButton} onPress={handleViewStoryPress}>
-                        <Text style={styles.viewStoryText}>Read Your Letter</Text>
+                        <Text style={styles.viewStoryText}>Read Thank You Letter</Text>
                       </Pressable>
                     )}
                   </View>
@@ -211,9 +222,25 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontFamily: 'Inter-Regular',
     lineHeight: 20,
   },
-  letterSnippet: {
+  storySnippet: {
     fontStyle: 'italic',
     color: theme.colors.primary,
+    fontWeight: '500',
+    fontFamily: 'Inter-Medium',
+  },
+  facilitatorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+    backgroundColor: theme.colors.surfaceVariant,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  facilitatorText: {
+    color: theme.colors.onSurfaceVariant,
     fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },

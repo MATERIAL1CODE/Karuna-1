@@ -10,8 +10,10 @@ export interface ActivityItem {
   status: 'pending' | 'in_progress' | 'completed';
   date: string;
   peopleHelped?: number;
-  aiGeneratedLetterSnippet?: string;
-  fullAiGeneratedLetter?: string;
+  facilitatorStorySnippet?: string;
+  fullFacilitatorStory?: string;
+  facilitatorName?: string;
+  facilitatorId?: string;
   blockchainTransactionLink?: string;
   ngoLogoUrl?: string;
   location?: {
@@ -22,6 +24,8 @@ export interface ActivityItem {
   quantity?: string;
   description?: string;
   videoUri?: string;
+  completedAt?: string;
+  missionId?: string;
 }
 
 export interface CommunityImpactItem {
@@ -31,6 +35,8 @@ export interface CommunityImpactItem {
   peopleHelped: number;
   date: string;
   type: 'report' | 'donation' | 'mission';
+  facilitatorName?: string;
+  storySnippet?: string;
 }
 
 export interface Mission {
@@ -47,6 +53,23 @@ export interface Mission {
   distance: string;
   eta: string;
   status: 'available' | 'accepted' | 'in_progress' | 'completed';
+  citizenActivityId?: string; // Link to the original report/donation
+  facilitatorId?: string;
+  facilitatorName?: string;
+  completedAt?: string;
+  thankYouStory?: string;
+}
+
+export interface ThankYouStory {
+  id: string;
+  missionId: string;
+  activityId: string;
+  facilitatorId: string;
+  facilitatorName: string;
+  story: string;
+  peopleHelped: number;
+  createdAt: string;
+  isPublic: boolean;
 }
 
 interface DataContextType {
@@ -60,6 +83,9 @@ interface DataContextType {
   missions: Mission[];
   completedMissions: Mission[];
   
+  // Thank you stories
+  thankYouStories: ThankYouStory[];
+  
   // Loading states
   isLoadingData: boolean;
   
@@ -67,8 +93,9 @@ interface DataContextType {
   fetchData: () => Promise<void>;
   addActivity: (newActivity: Omit<ActivityItem, 'id' | 'date'>) => void;
   updateActivityStatus: (id: string, status: ActivityItem['status'], additionalData?: Partial<ActivityItem>) => void;
-  acceptMission: (missionId: string) => void;
-  completeMission: (missionId: string) => void;
+  acceptMission: (missionId: string, facilitatorId: string, facilitatorName: string) => void;
+  completeMission: (missionId: string, thankYouStory: string, peopleHelped: number) => void;
+  submitThankYouStory: (missionId: string, story: string, peopleHelped: number, isPublic?: boolean) => void;
   
   // Statistics
   getTotalPeopleHelped: () => number;
@@ -91,6 +118,7 @@ export function DataProvider({ children }: DataProviderProps) {
   const [communityImpactFeed, setCommunityImpactFeed] = useState<CommunityImpactItem[]>([]);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [completedMissions, setCompletedMissions] = useState<Mission[]>([]);
+  const [thankYouStories, setThankYouStories] = useState<ThankYouStory[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   const fetchData = async () => {
@@ -102,7 +130,7 @@ export function DataProvider({ children }: DataProviderProps) {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Mock activities data with enhanced stories
+    // Mock activities data with facilitator-written stories
     const mockActivities: ActivityItem[] = [
       {
         id: '1',
@@ -112,6 +140,7 @@ export function DataProvider({ children }: DataProviderProps) {
         status: 'in_progress',
         date: '2 hours ago',
         peopleHelped: 3,
+        missionId: 'mission_1',
       },
       {
         id: '2',
@@ -121,23 +150,28 @@ export function DataProvider({ children }: DataProviderProps) {
         status: 'completed',
         date: '1 day ago',
         peopleHelped: 15,
-        aiGeneratedLetterSnippet: '...a family of four didn\'t have to go to sleep hungry on a cold night.',
-        fullAiGeneratedLetter: `Dear Community Member,
+        facilitatorName: 'Priya Sharma',
+        facilitatorId: 'facilitator_1',
+        facilitatorStorySnippet: '...the family was so grateful, the children smiled for the first time in days.',
+        fullFacilitatorStory: `Dear Generous Donor,
 
-We wanted to share a small story with you. Because of the 15 cooked meals you donated, a family of four didn't have to go to sleep hungry on a cold night. Your kindness provided immediate comfort and nourishment when it was needed most.
+I had the privilege of delivering your 15 cooked meals to a family of four who had been struggling for the past week. When I arrived at their small shelter near the construction site, I could see the worry in the mother's eyes fade away as she realized help had arrived.
 
-It was a simple act for you, but for them, it provided real comfort and dignity. Your generosity was a tangible source of warmth and hope on what could have been a difficult evening.
+The father, who works as a daily laborer, hadn't found work for several days due to the recent rains. The mother was caring for two young children, ages 6 and 8, and an elderly grandmother. Your donation meant they could have a proper meal after going without food for almost two days.
 
-The father, who works as a daily wage laborer, had not found work for three days. The mother, caring for two young children, was worried about how to feed her family. When our facilitator arrived with your donation, the relief and gratitude in their eyes was profound.
+What touched me most was when the little girl asked her mother if they could save some food for tomorrow, showing how uncertain their next meal was. Your kindness not only filled their stomachs but also gave them hope that there are people who care.
 
-Your contribution didn't just fill empty stomachs—it restored their faith that there are people who care, people who understand that we are all connected in this journey of life.
+The grandmother blessed you with tears in her eyes, and the children smiled for the first time in days. Your simple act of generosity created a moment of joy and relief that this family will remember forever.
 
-From all of us at Sahayata, thank you for being the light in someone's darkness.
+Thank you for trusting me to deliver your kindness. It's moments like these that remind me why I became a facilitator.
 
 With heartfelt gratitude,
-The Sahayata Team`,
+Priya Sharma
+Sahayata Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+        completedAt: '2024-01-15T14:30:00Z',
+        missionId: 'mission_2',
       },
       {
         id: '3',
@@ -147,21 +181,30 @@ The Sahayata Team`,
         status: 'completed',
         date: '2 days ago',
         peopleHelped: 5,
-        aiGeneratedLetterSnippet: '...your vigilance and compassion helped five people find shelter and warmth.',
-        fullAiGeneratedLetter: `Dear Compassionate Citizen,
+        facilitatorName: 'Rajesh Kumar',
+        facilitatorId: 'facilitator_2',
+        facilitatorStorySnippet: '...the children are now safe and attending school regularly.',
+        fullFacilitatorStory: `Dear Compassionate Reporter,
 
-Your report about the family near Lajpat Nagar Market led to something beautiful. Because you took the time to notice and care, five people—including three children—found shelter and warmth during the recent cold spell.
+Your alert about the family near Lajpat Nagar Market led to one of the most heartwarming rescues I've been part of. When I reached the location you described, I found a mother with three children (ages 6, 8, and 12) and an elderly man who had been living under a makeshift shelter.
 
-Your vigilance and compassion helped connect them with our local partner organization, who provided temporary accommodation and essential supplies. The children, ages 6, 8, and 12, are now safe and attending a nearby community center for daily meals and educational support.
+The family had been displaced after their rented room was flooded during the monsoon. They had been surviving on the streets for over a week, with the children missing school and the elderly man needing medical attention for his diabetes.
 
-Sometimes the smallest acts of awareness create the biggest ripples of change. Your report was that first ripple.
+Thanks to your detailed report, I was able to coordinate with our partner NGO to provide immediate shelter at a nearby community center. We also arranged for medical care for the grandfather and ensured the children could continue their education.
 
-Thank you for seeing what others might have overlooked, and for caring enough to act.
+Today, I'm happy to share that the family has been moved to temporary housing, the children are attending school regularly, and the grandfather is receiving proper medical care. The mother has also found work at a nearby textile unit.
+
+The eldest child, Aarti, asked me to thank the "angel" who noticed them and cared enough to report their situation. Your vigilance and compassion literally changed the trajectory of this family's life.
+
+Sometimes the smallest acts of awareness create the biggest changes. Thank you for being their voice when they couldn't speak for themselves.
 
 With deep appreciation,
-The Sahayata Team`,
+Rajesh Kumar
+Sahayata Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+        completedAt: '2024-01-14T16:45:00Z',
+        missionId: 'mission_3',
       },
       {
         id: '4',
@@ -180,25 +223,36 @@ The Sahayata Team`,
         status: 'completed',
         date: '1 week ago',
         peopleHelped: 2,
-        aiGeneratedLetterSnippet: '...knowing someone cared enough to report their situation gave them hope.',
-        fullAiGeneratedLetter: `Dear Kind Soul,
+        facilitatorName: 'Anita Verma',
+        facilitatorId: 'facilitator_3',
+        facilitatorStorySnippet: '...they now have regular meals and medical care, and most importantly, hope.',
+        fullFacilitatorStory: `Dear Kind Soul,
 
-Your report about the elderly couple near Saket District Centre touched our hearts, and we wanted you to know the beautiful outcome of your compassion.
+Your report about the elderly couple near Saket District Centre touched my heart, and I wanted to personally share the beautiful outcome of your compassion.
 
-The couple, married for 45 years, had been struggling after the husband's recent illness left them unable to work. Your alert led our team to connect them with medical assistance and ongoing support from our partner healthcare clinic.
+When I met Mr. and Mrs. Gupta, both in their 70s, they had been sitting outside the metro station for three days. Mr. Gupta had recently been discharged from the hospital after a heart procedure, and they had exhausted their savings on medical bills. With no family support, they were literally on the streets.
 
-Today, they are receiving regular medical care, nutritious meals, and most importantly, they know they are not forgotten. The wife mentioned that knowing someone cared enough to report their situation gave them hope when they had almost lost it.
+Your detailed description helped me locate them quickly. Mrs. Gupta was trying to shield her husband from the cold wind, and both looked exhausted and defeated. When I approached them and mentioned that someone had reported their situation out of concern, Mrs. Gupta started crying - not from sadness, but from relief that someone had noticed them.
 
-Your awareness and action reminded them—and us—that humanity's greatest strength lies in how we care for one another.
+I immediately arranged for them to stay at our partner senior care facility. We also connected them with a government scheme for elderly healthcare and ensured they receive daily meals. Mr. Gupta's medication is now being provided free of cost through our medical partner.
+
+Yesterday, when I visited them, Mrs. Gupta was teaching other residents how to knit, and Mr. Gupta was sharing stories with the children who visit the center. They asked me to find the person who reported them because they wanted to thank them personally.
+
+Mrs. Gupta said, "Tell them that when we had lost all hope, their kindness reminded us that we are not forgotten." Your awareness and action didn't just save their lives - it restored their dignity and gave them a community.
+
+Thank you for seeing them when the world seemed to look away.
 
 With sincere gratitude,
-The Sahayata Team`,
+Anita Verma
+Sahayata Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+        completedAt: '2024-01-08T11:20:00Z',
+        missionId: 'mission_4',
       },
     ];
 
-    // Enhanced community impact feed
+    // Enhanced community impact feed with facilitator stories
     const mockCommunityImpact: CommunityImpactItem[] = [
       {
         id: '1',
@@ -207,6 +261,8 @@ The Sahayata Team`,
         peopleHelped: 500,
         date: '3 hours ago',
         type: 'mission',
+        facilitatorName: 'Team of 12 Facilitators',
+        storySnippet: 'Families were reunited with hope as warm meals reached every shelter...',
       },
       {
         id: '2',
@@ -215,6 +271,8 @@ The Sahayata Team`,
         peopleHelped: 75,
         date: '1 day ago',
         type: 'donation',
+        facilitatorName: 'Meera Patel',
+        storySnippet: 'The warmth in their eyes was worth more than any blanket...',
       },
       {
         id: '3',
@@ -223,6 +281,8 @@ The Sahayata Team`,
         peopleHelped: 12,
         date: '2 days ago',
         type: 'report',
+        facilitatorName: 'Dr. Suresh Reddy',
+        storySnippet: 'Timely intervention saved lives and restored health to the community...',
       },
       {
         id: '4',
@@ -231,6 +291,8 @@ The Sahayata Team`,
         peopleHelped: 150,
         date: '3 days ago',
         type: 'donation',
+        facilitatorName: 'Kavita Singh',
+        storySnippet: 'Children\'s faces lit up with dreams of a brighter future...',
       },
       {
         id: '5',
@@ -239,6 +301,8 @@ The Sahayata Team`,
         peopleHelped: 200,
         date: '1 week ago',
         type: 'mission',
+        facilitatorName: 'Community Volunteers',
+        storySnippet: 'Every meal served was a reminder that no one eats alone...',
       },
     ];
 
@@ -258,6 +322,7 @@ The Sahayata Team`,
         distance: '3.2 km',
         eta: '45 mins',
         status: 'available',
+        citizenActivityId: '1',
       },
       {
         id: '2',
@@ -273,6 +338,7 @@ The Sahayata Team`,
         distance: '5.1 km',
         eta: '60 mins',
         status: 'available',
+        citizenActivityId: '4',
       },
       {
         id: '3',
@@ -291,7 +357,7 @@ The Sahayata Team`,
       },
     ];
 
-    // Enhanced completed missions
+    // Enhanced completed missions with thank you stories
     const mockCompletedMissions: Mission[] = [
       {
         id: 'c1',
@@ -307,6 +373,11 @@ The Sahayata Team`,
         distance: '2.5 km',
         eta: '30 mins',
         status: 'completed',
+        facilitatorId: 'facilitator_1',
+        facilitatorName: 'Priya Sharma',
+        completedAt: '2024-01-15T14:30:00Z',
+        citizenActivityId: '2',
+        thankYouStory: 'Successfully delivered meals to grateful families...',
       },
       {
         id: 'c2',
@@ -322,6 +393,36 @@ The Sahayata Team`,
         distance: '4.2 km',
         eta: '45 mins',
         status: 'completed',
+        facilitatorId: 'facilitator_2',
+        facilitatorName: 'Rajesh Kumar',
+        completedAt: '2024-01-14T11:00:00Z',
+        thankYouStory: 'Ensured elderly residents received their vital medications...',
+      },
+    ];
+
+    // Mock thank you stories
+    const mockThankYouStories: ThankYouStory[] = [
+      {
+        id: 'story_1',
+        missionId: 'c1',
+        activityId: '2',
+        facilitatorId: 'facilitator_1',
+        facilitatorName: 'Priya Sharma',
+        story: 'The family was so grateful, the children smiled for the first time in days...',
+        peopleHelped: 15,
+        createdAt: '2024-01-15T14:30:00Z',
+        isPublic: true,
+      },
+      {
+        id: 'story_2',
+        missionId: 'c2',
+        activityId: '3',
+        facilitatorId: 'facilitator_2',
+        facilitatorName: 'Rajesh Kumar',
+        story: 'The children are now safe and attending school regularly...',
+        peopleHelped: 5,
+        createdAt: '2024-01-14T16:45:00Z',
+        isPublic: true,
       },
     ];
 
@@ -329,6 +430,7 @@ The Sahayata Team`,
     setCommunityImpactFeed(mockCommunityImpact);
     setMissions(mockMissions);
     setCompletedMissions(mockCompletedMissions);
+    setThankYouStories(mockThankYouStories);
     setIsLoadingData(false);
 
     // Track successful data fetch
@@ -336,6 +438,7 @@ The Sahayata Team`,
       activitiesCount: mockActivities.length,
       missionsCount: mockMissions.length,
       impactItemsCount: mockCommunityImpact.length,
+      storiesCount: mockThankYouStories.length,
     });
   };
 
@@ -390,8 +493,8 @@ The Sahayata Team`,
             peopleHelped: updatedActivity.peopleHelped,
           });
 
-          // Send notification for completed activities
-          if (status === 'completed' && additionalData?.fullAiGeneratedLetter) {
+          // Send notification for completed activities with facilitator stories
+          if (status === 'completed' && additionalData?.fullFacilitatorStory) {
             NotificationService.sendImpactStoryNotification(
               activity.type,
               updatedActivity.peopleHelped || 1
@@ -405,13 +508,13 @@ The Sahayata Team`,
     );
   };
 
-  const acceptMission = (missionId: string) => {
+  const acceptMission = (missionId: string, facilitatorId: string, facilitatorName: string) => {
     const mission = missions.find(m => m.id === missionId);
     if (mission) {
       setMissions(prev => 
         prev.map(m => 
           m.id === missionId 
-            ? { ...m, status: 'accepted' }
+            ? { ...m, status: 'accepted', facilitatorId, facilitatorName }
             : m
         )
       );
@@ -421,37 +524,87 @@ The Sahayata Team`,
         missionId,
         missionType: mission.type,
         distance: mission.distance,
+        facilitatorId,
       });
 
       // Send notification
       NotificationService.sendMissionUpdateNotification(
         mission.title,
         'accepted',
-        'You'
+        facilitatorName
       );
     }
   };
 
-  const completeMission = (missionId: string) => {
+  const completeMission = (missionId: string, thankYouStory: string, peopleHelped: number) => {
     const mission = missions.find(m => m.id === missionId);
     if (mission) {
-      const completedMission = { ...mission, status: 'completed' as const };
+      const completedMission = { 
+        ...mission, 
+        status: 'completed' as const,
+        thankYouStory,
+        completedAt: new Date().toISOString(),
+      };
+      
       setCompletedMissions(prev => [completedMission, ...prev]);
       setMissions(prev => prev.filter(m => m.id !== missionId));
+
+      // Update the related activity with facilitator story
+      if (mission.citizenActivityId) {
+        updateActivityStatus(mission.citizenActivityId, 'completed', {
+          facilitatorName: mission.facilitatorName,
+          facilitatorId: mission.facilitatorId,
+          facilitatorStorySnippet: thankYouStory.substring(0, 100) + '...',
+          fullFacilitatorStory: thankYouStory,
+          peopleHelped,
+          completedAt: new Date().toISOString(),
+          missionId,
+        });
+      }
 
       // Track mission completion
       AnalyticsService.trackMissionEvent('mission_completed', {
         missionId,
         missionType: mission.type,
         distance: mission.distance,
+        facilitatorId: mission.facilitatorId,
+        peopleHelped,
       });
 
       // Send notification
       NotificationService.sendMissionUpdateNotification(
         mission.title,
         'completed',
-        'You'
+        mission.facilitatorName || 'Facilitator'
       );
+    }
+  };
+
+  const submitThankYouStory = (missionId: string, story: string, peopleHelped: number, isPublic: boolean = true) => {
+    const mission = completedMissions.find(m => m.id === missionId);
+    if (mission) {
+      const newStory: ThankYouStory = {
+        id: `story_${Date.now()}`,
+        missionId,
+        activityId: mission.citizenActivityId || '',
+        facilitatorId: mission.facilitatorId || '',
+        facilitatorName: mission.facilitatorName || '',
+        story,
+        peopleHelped,
+        createdAt: new Date().toISOString(),
+        isPublic,
+      };
+
+      setThankYouStories(prev => [newStory, ...prev]);
+
+      // Track story submission
+      AnalyticsService.trackUserAction('thank_you_story_submitted', {
+        missionId,
+        facilitatorId: mission.facilitatorId,
+        peopleHelped,
+        isPublic,
+        storyLength: story.length,
+      });
     }
   };
 
@@ -479,12 +632,14 @@ The Sahayata Team`,
     communityImpactFeed,
     missions,
     completedMissions,
+    thankYouStories,
     isLoadingData,
     fetchData,
     addActivity,
     updateActivityStatus,
     acceptMission,
     completeMission,
+    submitThankYouStory,
     getTotalPeopleHelped,
     getUserImpactStats,
   };

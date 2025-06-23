@@ -8,6 +8,7 @@ import {
   Alert,
   Modal,
   Platform,
+  TextInput,
 } from 'react-native';
 import {
   Text,
@@ -19,9 +20,10 @@ import {
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { MapPin, User, Clock, Phone, TriangleAlert as AlertTriangle, Video as VideoIcon, X, Play } from 'lucide-react-native';
+import { MapPin, User, Clock, Phone, TriangleAlert as AlertTriangle, Video as VideoIcon, X, Play, Edit3, Send } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import ReportIssueModal from '@/components/ReportIssueModal';
+import { useData } from '@/contexts/DataContext';
 
 type MissionState = 'accepted' | 'enRoutePickup' | 'arrivedPickup' | 'enRouteDelivery' | 'arrivedDelivery' | 'completed';
 
@@ -29,16 +31,20 @@ type MissionState = 'accepted' | 'enRoutePickup' | 'arrivedPickup' | 'enRouteDel
 const mockMissionData = {
   id: '1',
   title: 'Food for 4 People',
-  videoUri: Platform.OS === 'web' ? null : 'mock-video-uri', // Simulate video availability
+  videoUri: Platform.OS === 'web' ? null : 'mock-video-uri',
   videoDuration: 12,
   hasVideo: true,
 };
 
 export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams();
+  const { completeMission } = useData();
   const [missionState, setMissionState] = useState<MissionState>('accepted');
   const [reportIssueVisible, setReportIssueVisible] = useState(false);
   const [videoModalVisible, setVideoModalVisible] = useState(false);
+  const [thankYouModalVisible, setThankYouModalVisible] = useState(false);
+  const [thankYouStory, setThankYouStory] = useState('');
+  const [peopleHelped, setPeopleHelped] = useState('4');
 
   // Video player for modal
   const player = useVideoPlayer(mockMissionData.videoUri || '', (player) => {
@@ -74,7 +80,7 @@ export default function MissionDetailScreen() {
       case 'enRouteDelivery':
         return 'En route to delivery location. Tap "Confirm Delivery" when you arrive.';
       case 'arrivedDelivery':
-        return 'Delivery confirmed. Tap "Complete Mission" to finish.';
+        return 'Delivery confirmed. Ready to complete mission and write thank you story.';
       default:
         return 'Mission completed successfully!';
     }
@@ -95,12 +101,7 @@ export default function MissionDetailScreen() {
         setMissionState('arrivedDelivery');
         break;
       case 'arrivedDelivery':
-        setMissionState('completed');
-        Alert.alert(
-          'Mission Completed!',
-          'Thank you for your service! Your impact has been recorded.',
-          [{ text: 'Return to Dashboard', onPress: () => router.back() }]
-        );
+        setThankYouModalVisible(true);
         break;
     }
   };
@@ -116,6 +117,128 @@ export default function MissionDetailScreen() {
       setVideoModalVisible(true);
     }
   };
+
+  const handleSubmitThankYouStory = () => {
+    if (!thankYouStory.trim()) {
+      Alert.alert('Error', 'Please write a thank you story before completing the mission.');
+      return;
+    }
+
+    if (!peopleHelped || parseInt(peopleHelped) <= 0) {
+      Alert.alert('Error', 'Please enter the number of people helped.');
+      return;
+    }
+
+    // Complete the mission with the thank you story
+    completeMission(id as string, thankYouStory, parseInt(peopleHelped));
+    
+    setMissionState('completed');
+    setThankYouModalVisible(false);
+    
+    Alert.alert(
+      'Mission Completed!',
+      'Thank you for your service! Your thank you story has been sent to the donor/reporter.',
+      [{ text: 'Return to Dashboard', onPress: () => router.back() }]
+    );
+  };
+
+  const ThankYouStoryModal = () => (
+    <Modal
+      visible={thankYouModalVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={() => setThankYouModalVisible(false)}
+    >
+      <View style={styles.thankYouModal}>
+        <View style={styles.thankYouModalHeader}>
+          <Text variant="titleLarge" style={styles.thankYouModalTitle}>
+            Write Thank You Story
+          </Text>
+          <IconButton
+            icon={() => <X size={24} color={colors.neutral[800]} />}
+            onPress={() => setThankYouModalVisible(false)}
+          />
+        </View>
+        
+        <ScrollView style={styles.thankYouModalContent}>
+          <Text variant="bodyMedium" style={styles.thankYouModalDescription}>
+            Share the impact of this mission with the donor/reporter. Your personal story will help them understand how their kindness made a difference.
+          </Text>
+          
+          <View style={styles.inputGroup}>
+            <Text variant="labelLarge" style={styles.inputLabel}>
+              Number of People Helped *
+            </Text>
+            <TextInput
+              style={styles.numberInput}
+              value={peopleHelped}
+              onChangeText={setPeopleHelped}
+              keyboardType="numeric"
+              placeholder="Enter number"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text variant="labelLarge" style={styles.inputLabel}>
+              Your Thank You Story *
+            </Text>
+            <Text variant="bodySmall" style={styles.inputHint}>
+              Describe what you witnessed, how the people reacted, and the impact of this donation/report. Be personal and authentic.
+            </Text>
+            <TextInput
+              style={styles.storyInput}
+              value={thankYouStory}
+              onChangeText={setThankYouStory}
+              multiline
+              numberOfLines={10}
+              placeholder="Dear Generous Donor/Compassionate Reporter,
+
+I had the privilege of delivering your help today, and I wanted to share what I witnessed...
+
+(Describe the situation, the people's reaction, and the impact)"
+              textAlignVertical="top"
+            />
+          </View>
+
+          <View style={styles.storyTips}>
+            <Text variant="titleSmall" style={styles.tipsTitle}>
+              💡 Writing Tips:
+            </Text>
+            <Text variant="bodySmall" style={styles.tipText}>
+              • Be specific about what you saw and experienced
+            </Text>
+            <Text variant="bodySmall" style={styles.tipText}>
+              • Mention how the people reacted to receiving help
+            </Text>
+            <Text variant="bodySmall" style={styles.tipText}>
+              • Share any meaningful moments or conversations
+            </Text>
+            <Text variant="bodySmall" style={styles.tipText}>
+              • Express gratitude on behalf of those helped
+            </Text>
+          </View>
+        </ScrollView>
+
+        <View style={styles.thankYouModalActions}>
+          <Button
+            mode="outlined"
+            onPress={() => setThankYouModalVisible(false)}
+            style={styles.cancelButton}
+          >
+            Cancel
+          </Button>
+          <Button
+            mode="contained"
+            onPress={handleSubmitThankYouStory}
+            style={styles.submitStoryButton}
+            icon={() => <Send size={20} color="#FFFFFF" />}
+          >
+            Complete Mission
+          </Button>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const VideoModal = () => (
     <Modal
@@ -318,6 +441,23 @@ export default function MissionDetailScreen() {
           </Card>
         )}
 
+        {/* Thank You Story Reminder for arrivedDelivery state */}
+        {missionState === 'arrivedDelivery' && (
+          <Card style={styles.storyReminderCard} mode="elevated">
+            <Card.Content style={styles.storyReminderContent}>
+              <View style={styles.storyReminderHeader}>
+                <Edit3 size={24} color={colors.primary[600]} />
+                <Text variant="titleMedium" style={styles.storyReminderTitle}>
+                  Ready to Complete Mission
+                </Text>
+              </View>
+              <Text variant="bodyMedium" style={styles.storyReminderText}>
+                After completing the delivery, you'll write a personal thank you story to share with the donor/reporter. This helps them understand the real impact of their kindness.
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
+
         {/* Route Preview - Always visible */}
         <Card style={styles.routeCard} mode="elevated">
           <Card.Content style={styles.routeContent}>
@@ -374,6 +514,7 @@ export default function MissionDetailScreen() {
       />
 
       <VideoModal />
+      <ThankYouStoryModal />
     </SafeAreaView>
   );
 }
@@ -396,7 +537,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing['2xl'],
-    paddingBottom: spacing['8xl'], // Extra space for fixed bottom actions
+    paddingBottom: spacing['8xl'],
   },
   stateCard: {
     marginBottom: spacing['2xl'],
@@ -485,11 +626,37 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     marginBottom: spacing.md,
     fontFamily: 'Inter-SemiBold',
-    fontSize: 18, // Mission Critical Info - 18px, Semi-Bold
+    fontSize: 18,
   },
   addressText: {
     color: colors.neutral[500],
     lineHeight: 18,
+    fontFamily: 'Inter-Regular',
+  },
+  storyReminderCard: {
+    marginBottom: spacing['2xl'],
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.primary[200],
+  },
+  storyReminderContent: {
+    padding: spacing['3xl'],
+  },
+  storyReminderHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['2xl'],
+    marginBottom: spacing['2xl'],
+  },
+  storyReminderTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[800],
+    fontFamily: 'Inter-Bold',
+  },
+  storyReminderText: {
+    color: colors.primary[700],
+    lineHeight: 22,
     fontFamily: 'Inter-Regular',
   },
   routeCard: {
@@ -554,6 +721,101 @@ const styles = StyleSheet.create({
   },
   primaryButtonContent: {
     paddingVertical: spacing['2xl'],
+  },
+  thankYouModal: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  thankYouModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing['3xl'],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral[200],
+  },
+  thankYouModalTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
+  },
+  thankYouModalContent: {
+    flex: 1,
+    padding: spacing['3xl'],
+  },
+  thankYouModalDescription: {
+    color: colors.neutral[600],
+    marginBottom: spacing['3xl'],
+    lineHeight: 22,
+    fontFamily: 'Inter-Regular',
+  },
+  inputGroup: {
+    marginBottom: spacing['3xl'],
+  },
+  inputLabel: {
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
+  },
+  inputHint: {
+    color: colors.neutral[500],
+    marginBottom: spacing['2xl'],
+    lineHeight: 18,
+    fontFamily: 'Inter-Regular',
+  },
+  numberInput: {
+    borderWidth: 1,
+    borderColor: colors.neutral[300],
+    borderRadius: borderRadius.lg,
+    padding: spacing['2xl'],
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    backgroundColor: colors.surface,
+  },
+  storyInput: {
+    borderWidth: 1,
+    borderColor: colors.neutral[300],
+    borderRadius: borderRadius.lg,
+    padding: spacing['2xl'],
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    backgroundColor: colors.surface,
+    minHeight: 200,
+  },
+  storyTips: {
+    backgroundColor: colors.primary[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing['3xl'],
+    marginBottom: spacing['3xl'],
+  },
+  tipsTitle: {
+    color: colors.primary[800],
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Bold',
+  },
+  tipText: {
+    color: colors.primary[700],
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Regular',
+  },
+  thankYouModalActions: {
+    flexDirection: 'row',
+    gap: spacing['2xl'],
+    padding: spacing['3xl'],
+    borderTopWidth: 1,
+    borderTopColor: colors.neutral[200],
+  },
+  cancelButton: {
+    flex: 1,
+    borderColor: colors.neutral[300],
+    borderRadius: borderRadius.lg,
+  },
+  submitStoryButton: {
+    flex: 2,
+    backgroundColor: colors.primary[600],
+    borderRadius: borderRadius.lg,
   },
   videoModal: {
     flex: 1,
