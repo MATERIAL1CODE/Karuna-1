@@ -11,8 +11,7 @@ import {
 import { Text, Chip, Appbar } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Clock, ArrowLeft } from 'lucide-react-native';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { colors, spacing, borderRadius } from '@/lib/design-tokens';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 // Mock data for missions
 const mockMissions = [
@@ -87,7 +86,7 @@ function MissionCard({ mission, onPress }: MissionCardProps) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <GlassCard variant="elevated" style={styles.missionCard}>
+      <View style={styles.missionCard}>
         <View style={styles.cardHeader}>
           <Text variant="titleLarge" style={styles.missionTitle}>
             {mission.title}
@@ -180,7 +179,7 @@ function MissionCard({ mission, onPress }: MissionCardProps) {
             </Text>
           </View>
         </View>
-      </GlassCard>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -213,14 +212,14 @@ export default function FacilitatorDashboard() {
         </Appbar.Header>
 
         <View style={styles.content}>
-          <GlassCard variant="standard" style={styles.summaryCard}>
+          <View style={styles.summaryCard}>
             <Text variant="bodyLarge" style={styles.summaryText}>
               {mockMissions.length} missions waiting for volunteers
             </Text>
             <Text variant="bodyMedium" style={styles.summarySubtext}>
               Choose a mission that fits your schedule
             </Text>
-          </GlassCard>
+          </View>
 
           <FlatList
             data={mockMissions}
@@ -230,7 +229,7 @@ export default function FacilitatorDashboard() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <MapPin size={48} color="rgba(255, 255, 255, 0.7)" />
+                <MapPin size={48} color={colors.neutral[500]} />
                 <Text variant="titleMedium" style={styles.emptyTitle}>
                   No available missions
                 </Text>
@@ -259,7 +258,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   headerTitle: {
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     color: '#FFFFFF',
     fontFamily: 'Inter-Bold',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
@@ -271,11 +270,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing['3xl'],
   },
   summaryCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing['2xl'],
     marginBottom: spacing['3xl'],
+    ...shadows.md,
   },
   summaryText: {
     color: colors.neutral[800],
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     marginBottom: spacing.sm,
     fontFamily: 'Inter-SemiBold',
   },
@@ -287,7 +290,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing['3xl'],
   },
   missionCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing['2xl'],
     marginBottom: spacing['2xl'],
+    ...shadows.md,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -296,7 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing['2xl'],
   },
   missionTitle: {
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
     flex: 1,
     marginRight: spacing.lg,
@@ -314,7 +321,7 @@ const styles = StyleSheet.create({
   chipText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   locationSection: {
@@ -345,13 +352,13 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     color: colors.neutral[500],
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     marginBottom: spacing.sm,
     fontFamily: 'Inter-SemiBold',
   },
   locationValue: {
     color: colors.neutral[800],
-    fontWeight: '500',
+    fontWeight: typography.fontWeight.medium,
     marginBottom: spacing.xs,
     fontFamily: 'Inter-Medium',
   },
@@ -381,7 +388,7 @@ const styles = StyleSheet.create({
   },
   distanceText: {
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
   },
   timeSection: {
@@ -395,7 +402,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     color: colors.neutral[600],
-    fontWeight: '500',
+    fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
   },
   emptyContainer: {
@@ -404,21 +411,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['8xl'],
   },
   emptyTitle: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.neutral[800],
     marginTop: spacing.lg,
     marginBottom: spacing.md,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   emptySubtitle: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: colors.neutral[500],
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
 });

@@ -4,6 +4,7 @@ import {
   StyleSheet,
   SafeAreaView,
   FlatList,
+  Pressable,
 } from 'react-native';
 import {
   Text,
@@ -13,6 +14,7 @@ import {
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Gift, ArrowLeft } from 'lucide-react-native';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 interface ActivityItem {
   id: string;
@@ -79,11 +81,11 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return '#10B981';
+        return colors.success[500];
       case 'in_progress':
-        return '#F59E0B';
+        return colors.warning[500];
       default:
-        return '#64748B';
+        return colors.neutral[500];
     }
   };
 
@@ -99,13 +101,24 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
   };
 
   const IconComponent = item.type === 'report' ? MapPin : Gift;
-  const iconColor = item.type === 'report' ? '#4F46E5' : '#10B981';
+  const iconColor = item.type === 'report' ? colors.primary[600] : colors.success[500];
+  const iconBgColor = item.type === 'report' ? colors.primary[100] : colors.success[100];
+
+  const getHelpedText = () => {
+    if (item.status === 'completed' && item.peopleHelped) {
+      if (item.type === 'report') {
+        return `Your report led to aid for ${item.peopleHelped} people.`;
+      }
+      return `${item.peopleHelped} people helped`;
+    }
+    return null;
+  };
 
   return (
     <Card style={styles.activityCard} mode="elevated">
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
             <IconComponent size={24} color={iconColor} />
           </View>
           <View style={styles.activityInfo}>
@@ -130,10 +143,17 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
               <Text variant="bodySmall" style={styles.activityDate}>
                 {item.date}
               </Text>
-              {item.peopleHelped && item.status === 'completed' && (
-                <Text variant="bodySmall" style={styles.helpedText}>
-                  {item.peopleHelped} people helped
-                </Text>
+              {getHelpedText() && (
+                <View style={styles.helpedContainer}>
+                  <Text variant="bodySmall" style={styles.helpedText}>
+                    {getHelpedText()}
+                  </Text>
+                  {item.status === 'completed' && (
+                    <Pressable style={styles.viewStoryButton}>
+                      <Text style={styles.viewStoryText}>View Story</Text>
+                    </Pressable>
+                  )}
+                </View>
               )}
             </View>
           </View>
@@ -156,7 +176,7 @@ export default function ActivityScreen() {
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
           onPress={() => router.back()} 
         />
         <Appbar.Content title="My Activity" titleStyle={styles.headerTitle} />
@@ -180,7 +200,7 @@ export default function ActivityScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MapPin size={48} color="#64748B" />
+              <MapPin size={48} color={colors.neutral[500]} />
               <Text variant="titleMedium" style={styles.emptyTitle}>
                 No activity yet
               </Text>
@@ -198,60 +218,58 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     elevation: 0,
   },
   headerTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing['3xl'],
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing['2xl'],
+    marginBottom: spacing['3xl'],
+    ...shadows.md,
   },
   summaryTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.md,
+    fontFamily: 'Inter-Bold',
   },
   summaryText: {
-    color: '#64748B',
+    color: colors.neutral[500],
+    fontFamily: 'Inter-Regular',
   },
   listContent: {
-    paddingBottom: 24,
+    paddingBottom: spacing['3xl'],
   },
   activityCard: {
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   cardContent: {
-    padding: 20,
+    padding: spacing['2xl'],
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: spacing.lg,
   },
   iconContainer: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
   },
   activityInfo: {
     flex: 1,
@@ -260,29 +278,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
   activityTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neutral[800],
     flex: 1,
-    marginRight: 8,
+    marginRight: spacing.md,
+    fontFamily: 'Inter-SemiBold',
   },
   activitySubtitle: {
-    color: '#64748B',
-    marginBottom: 8,
+    color: colors.neutral[500],
+    marginBottom: spacing.md,
+    fontFamily: 'Inter-Regular',
   },
   bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    gap: spacing.sm,
   },
   activityDate: {
-    color: '#9CA3AF',
+    color: colors.neutral[400],
+    fontFamily: 'Inter-Regular',
+  },
+  helpedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   helpedText: {
-    color: '#10B981',
-    fontWeight: '600',
+    color: colors.success[500],
+    fontWeight: typography.fontWeight.semibold,
+    flex: 1,
+    fontFamily: 'Inter-SemiBold',
+  },
+  viewStoryButton: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
+  viewStoryText: {
+    color: colors.primary[600],
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   statusChip: {
     alignSelf: 'flex-start',
@@ -290,21 +329,24 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: spacing['8xl'],
   },
   emptyTitle: {
-    color: '#1E293B',
-    marginTop: 16,
-    marginBottom: 8,
-    fontWeight: '600',
+    color: colors.neutral[800],
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   emptySubtitle: {
-    color: '#64748B',
+    color: colors.neutral[500],
     textAlign: 'center',
+    fontFamily: 'Inter-Regular',
   },
 });

@@ -14,14 +14,15 @@ import {
   Appbar,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { User, Heart, Settings, ArrowLeft, CircleHelp as HelpCircle, Info } from 'lucide-react-native';
+import { User, Heart, Settings, ArrowLeft, CircleHelp as HelpCircle, Info, TrendingUp } from 'lucide-react-native';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color="#6B7280" />} 
+          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
           onPress={() => router.replace('/(home)')} 
         />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
@@ -30,7 +31,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <User size={40} color="#4F46E5" />
+            <User size={40} color={colors.primary[600]} />
           </View>
           <Text variant="headlineSmall" style={styles.name}>
             Community Member
@@ -45,29 +46,42 @@ export default function ProfileScreen() {
             <Text variant="titleMedium" style={styles.statsTitle}>
               Your Impact This Month
             </Text>
+            
+            {/* Placeholder for line graph */}
+            <View style={styles.graphPlaceholder}>
+              <TrendingUp size={32} color={colors.primary[600]} />
+              <Text variant="bodySmall" style={styles.graphText}>
+                Impact trend over time
+              </Text>
+            </View>
+            
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <View style={styles.statIconContainer}>
-                  <Heart size={20} color="#4F46E5" />
+                <View style={[styles.statIconContainer, { backgroundColor: colors.primary[100] }]}>
+                  <Heart size={20} color={colors.primary[600]} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>12</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Reports</Text>
               </View>
               <View style={styles.statItem}>
-                <View style={styles.statIconContainer}>
-                  <Heart size={20} color="#10B981" />
+                <View style={[styles.statIconContainer, { backgroundColor: colors.success[100] }]}>
+                  <Heart size={20} color={colors.success[500]} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>8</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>Donations</Text>
               </View>
               <View style={styles.statItem}>
-                <View style={styles.statIconContainer}>
-                  <Heart size={20} color="#F59E0B" />
+                <View style={[styles.statIconContainer, { backgroundColor: colors.warning[100] }]}>
+                  <Heart size={20} color={colors.warning[500]} />
                 </View>
                 <Text variant="titleMedium" style={styles.statNumber}>45</Text>
                 <Text variant="bodySmall" style={styles.statLabel}>People Helped</Text>
               </View>
             </View>
+            
+            <Text variant="bodyMedium" style={styles.lifetimeTotal}>
+              You have helped a total of 150 people since joining.
+            </Text>
           </Card.Content>
         </Card>
 
@@ -82,12 +96,35 @@ export default function ProfileScreen() {
           </Card.Content>
         </Card>
 
+        <Card style={styles.milestonesCard} mode="elevated">
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.milestonesTitle}>
+              Your Milestones
+            </Text>
+            <View style={styles.badgesContainer}>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>🏆</Text>
+                <Text variant="bodySmall" style={styles.badgeLabel}>First Report</Text>
+              </View>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>💝</Text>
+                <Text variant="bodySmall" style={styles.badgeLabel}>First Donation</Text>
+              </View>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>🌟</Text>
+                <Text variant="bodySmall" style={styles.badgeLabel}>Community Helper</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
         <Card style={styles.menuCard} mode="elevated">
           <List.Section>
+            <Text variant="titleSmall" style={styles.menuSectionTitle}>Account</Text>
             <List.Item
               title="Account Settings"
               description="Update your profile and preferences"
-              left={() => <Settings size={20} color="#64748B" />}
+              left={() => <Settings size={20} color={colors.neutral[500]} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -103,11 +140,13 @@ export default function ProfileScreen() {
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
             />
+            
+            <Text variant="titleSmall" style={[styles.menuSectionTitle, styles.menuSectionTitleSpaced]}>Support</Text>
             <Divider />
             <List.Item
               title="Help & Support"
               description="Get help or contact support"
-              left={() => <HelpCircle size={20} color="#64748B" />}
+              left={() => <HelpCircle size={20} color={colors.neutral[500]} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -115,9 +154,9 @@ export default function ProfileScreen() {
             />
             <Divider />
             <List.Item
-              title="About Impact"
+              title="About Sahayata"
               description="Learn more about our mission"
-              left={() => <Info size={20} color="#64748B" />}
+              left={() => <Info size={20} color={colors.neutral[500]} />}
               right={() => <List.Icon icon="chevron-right" />}
               onPress={() => {}}
               titleStyle={styles.menuItemTitle}
@@ -131,7 +170,7 @@ export default function ProfileScreen() {
           onPress={() => router.replace('/(facilitator)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
-          textColor="#4F46E5"
+          textColor={colors.primary[600]}
         >
           Switch to Facilitator Mode
         </Button>
@@ -143,104 +182,175 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     elevation: 0,
   },
   headerTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: 24,
+    padding: spacing['3xl'],
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: spacing['4xl'],
   },
   avatarContainer: {
-    backgroundColor: '#EBF4FF',
+    backgroundColor: colors.primary[100],
     borderRadius: 50,
-    padding: 20,
-    marginBottom: 16,
+    padding: spacing['2xl'],
+    marginBottom: spacing.lg,
   },
   name: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 4,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.sm,
+    fontFamily: 'Inter-Bold',
   },
   role: {
-    color: '#4F46E5',
-    fontWeight: '500',
+    color: colors.primary[600],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   statsCard: {
-    backgroundColor: '#FFFFFF',
-    marginBottom: 16,
-    borderRadius: 16,
-    elevation: 2,
+    backgroundColor: colors.surface,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   statsTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 20,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Bold',
+  },
+  graphPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.neutral[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing['2xl'],
+    marginBottom: spacing['2xl'],
+  },
+  graphText: {
+    color: colors.neutral[500],
+    marginTop: spacing.md,
+    fontFamily: 'Inter-Regular',
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    marginBottom: spacing.lg,
   },
   statItem: {
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.md,
   },
   statIconContainer: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    padding: 8,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
   },
   statNumber: {
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-Bold',
   },
   statLabel: {
-    color: '#64748B',
+    color: colors.neutral[500],
     textAlign: 'center',
+    fontFamily: 'Inter-Regular',
+  },
+  lifetimeTotal: {
+    color: colors.neutral[600],
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontFamily: 'Inter-Regular',
   },
   impactCard: {
-    backgroundColor: '#FFFFFF',
-    marginBottom: 16,
-    borderRadius: 16,
-    elevation: 2,
+    backgroundColor: colors.surface,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   impactTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 12,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Bold',
   },
   impactText: {
-    color: '#64748B',
+    color: colors.neutral[500],
     lineHeight: 20,
+    fontFamily: 'Inter-Regular',
+  },
+  milestonesCard: {
+    backgroundColor: colors.surface,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
+  },
+  milestonesTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Bold',
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  badge: {
+    alignItems: 'center',
+    backgroundColor: colors.neutral[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    minWidth: 80,
+  },
+  badgeText: {
+    fontSize: 24,
+    marginBottom: spacing.sm,
+  },
+  badgeLabel: {
+    color: colors.neutral[600],
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
   },
   menuCard: {
-    backgroundColor: '#FFFFFF',
-    marginBottom: 24,
-    borderRadius: 16,
-    elevation: 2,
+    backgroundColor: colors.surface,
+    marginBottom: spacing['3xl'],
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
+  },
+  menuSectionTitle: {
+    color: colors.neutral[700],
+    fontWeight: typography.fontWeight.semibold,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    fontFamily: 'Inter-SemiBold',
+  },
+  menuSectionTitleSpaced: {
+    paddingTop: spacing['2xl'],
   },
   menuItemTitle: {
-    color: '#1E293B',
-    fontWeight: '600',
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   menuItemDescription: {
-    color: '#64748B',
+    color: colors.neutral[500],
     fontSize: 12,
+    fontFamily: 'Inter-Regular',
   },
   switchRoleButton: {
-    borderColor: '#4F46E5',
-    borderRadius: 12,
+    borderColor: colors.primary[600],
+    borderRadius: borderRadius.lg,
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: spacing.md,
   },
 });

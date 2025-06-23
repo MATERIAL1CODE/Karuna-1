@@ -16,6 +16,7 @@ import {
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MapPin, User, Clock, Phone } from 'lucide-react-native';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function MissionDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -75,8 +76,8 @@ export default function MissionDetailScreen() {
             </Text>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <MapPin size={20} color="#10B981" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.success[100] }]}>
+                <MapPin size={20} color={colors.success[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -92,8 +93,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <User size={20} color="#10B981" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.success[100] }]}>
+                <User size={20} color={colors.success[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -106,8 +107,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <Clock size={20} color="#10B981" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.success[100] }]}>
+                <Clock size={20} color={colors.success[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -120,8 +121,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <Phone size={20} color="#10B981" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.success[100] }]}>
+                <Phone size={20} color={colors.success[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -142,8 +143,8 @@ export default function MissionDetailScreen() {
             </Text>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <MapPin size={20} color="#EF4444" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.error[100] }]}>
+                <MapPin size={20} color={colors.error[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -159,8 +160,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <User size={20} color="#EF4444" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.error[100] }]}>
+                <User size={20} color={colors.error[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -173,8 +174,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <Clock size={20} color="#EF4444" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.error[100] }]}>
+                <Clock size={20} color={colors.error[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -187,8 +188,8 @@ export default function MissionDetailScreen() {
             </View>
 
             <View style={styles.detailRow}>
-              <View style={styles.iconContainer}>
-                <Phone size={20} color="#EF4444" />
+              <View style={[styles.iconContainer, { backgroundColor: colors.error[100] }]}>
+                <Phone size={20} color={colors.error[500]} />
               </View>
               <View style={styles.detailContent}>
                 <Text variant="labelMedium" style={styles.detailLabel}>
@@ -239,126 +240,135 @@ export default function MissionDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.neutral[200],
   },
   headerTitle: {
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-SemiBold',
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing.lg,
   },
   titleCard: {
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    elevation: 4,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius['2xl'],
+    ...shadows.md,
   },
   titleContent: {
-    padding: 24,
+    padding: spacing['3xl'],
   },
   missionTitle: {
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 12,
+    fontWeight: typography.fontWeight.extrabold,
+    color: colors.neutral[800],
+    marginBottom: spacing.lg,
+    fontFamily: 'Inter-Bold',
   },
   chipRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.md,
+    marginBottom: spacing.lg,
   },
   foodChip: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.success[500],
   },
   urgentChip: {
-    backgroundColor: '#EF4444',
+    backgroundColor: colors.error[500],
   },
   chipText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   description: {
-    color: '#64748B',
+    color: colors.neutral[500],
     lineHeight: 22,
+    fontFamily: 'Inter-Regular',
   },
   section: {
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    ...shadows.md,
   },
   sectionContent: {
-    padding: 20,
+    padding: spacing['2xl'],
   },
   sectionTitle: {
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 20,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Bold',
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 20,
-    gap: 16,
+    marginBottom: spacing['2xl'],
+    gap: spacing.lg,
   },
   iconContainer: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
   },
   detailContent: {
     flex: 1,
   },
   detailLabel: {
-    color: '#64748B',
-    marginBottom: 4,
-    fontWeight: '600',
+    color: colors.neutral[500],
+    marginBottom: spacing.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   detailValue: {
-    color: '#1E293B',
-    fontWeight: '600',
-    marginBottom: 2,
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.semibold,
+    marginBottom: spacing.xs,
+    fontFamily: 'Inter-SemiBold',
   },
   addressText: {
-    color: '#64748B',
+    color: colors.neutral[500],
     lineHeight: 18,
+    fontFamily: 'Inter-Regular',
   },
   routeContainer: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     position: 'relative',
   },
   routeImage: {
     width: '100%',
     height: 200,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: colors.neutral[200],
   },
   routeOverlay: {
     position: 'absolute',
-    bottom: 12,
-    left: 12,
+    bottom: spacing.lg,
+    left: spacing.lg,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   routeText: {
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
   acceptButton: {
-    borderRadius: 16,
-    marginTop: 16,
-    marginBottom: 32,
+    borderRadius: borderRadius.xl,
+    marginTop: spacing.lg,
+    marginBottom: spacing['4xl'],
+    backgroundColor: colors.primary[600],
   },
   buttonContent: {
-    paddingVertical: 12,
+    paddingVertical: spacing.lg,
   },
 });

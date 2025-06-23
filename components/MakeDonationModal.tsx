@@ -4,18 +4,18 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Modal,
+  Pressable,
 } from 'react-native';
 import {
   Text,
   Appbar,
   Menu,
+  TextInput,
+  Button,
 } from 'react-native-paper';
 import { X, ChevronDown } from 'lucide-react-native';
-import { GlassModal } from '@/components/ui/GlassModal';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { GlassInput } from '@/components/ui/GlassInput';
-import { GlassButton } from '@/components/ui/GlassButton';
-import { colors, spacing } from '@/lib/design-tokens';
+import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 interface MakeDonationModalProps {
   visible: boolean;
@@ -33,6 +33,7 @@ const resourceTypes = [
 ];
 
 export default function MakeDonationModal({ visible, onDismiss }: MakeDonationModalProps) {
+  const [step, setStep] = useState(1);
   const [resourceType, setResourceType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
@@ -42,6 +43,7 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
   const [menuVisible, setMenuVisible] = useState(false);
 
   const resetForm = () => {
+    setStep(1);
     setResourceType('');
     setQuantity('');
     setPickupAddress('');
@@ -49,8 +51,20 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
     setNotes('');
   };
 
+  const handleNext = () => {
+    if (!resourceType || !quantity) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    setStep(1);
+  };
+
   const handleSubmit = async () => {
-    if (!resourceType || !quantity || !pickupAddress || !pickupTime) {
+    if (!pickupAddress || !pickupTime) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -84,14 +98,15 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
     }
   };
 
-  const isFormValid = resourceType && quantity && pickupAddress && pickupTime;
+  const isStep1Valid = resourceType && quantity;
+  const isStep2Valid = pickupAddress && pickupTime;
 
   return (
-    <GlassModal
+    <Modal
       visible={visible}
-      onClose={onDismiss}
       animationType="slide"
-      style={styles.modalContent}
+      presentationStyle="pageSheet"
+      onRequestClose={onDismiss}
     >
       <View style={styles.modal}>
         <Appbar.Header style={styles.modalHeader}>
@@ -103,103 +118,173 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
         </Appbar.Header>
 
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <GlassCard variant="elevated" style={styles.formCard}>
+          <View style={styles.formCard}>
             <Text variant="titleMedium" style={styles.formTitle}>
-              Donation Details
+              {step === 1 ? 'What are you donating?' : 'Where can we pick it up?'}
             </Text>
 
-            <Text variant="labelLarge" style={styles.fieldLabel}>
-              Resource Type *
-            </Text>
-            <Menu
-              visible={menuVisible}
-              onDismiss={() => setMenuVisible(false)}
-              anchor={
-                <GlassInput
-                  value={resourceType}
-                  placeholder="Select resource type"
-                  editable={false}
-                  onPressIn={() => setMenuVisible(true)}
-                  rightIcon={<ChevronDown size={20} color={colors.neutral[500]} />}
+            {step === 1 ? (
+              <>
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Resource Type *
+                </Text>
+                <Menu
+                  visible={menuVisible}
+                  onDismiss={() => setMenuVisible(false)}
+                  anchor={
+                    <TextInput
+                      value={resourceType}
+                      mode="outlined"
+                      placeholder="Select resource type"
+                      editable={false}
+                      onPressIn={() => setMenuVisible(true)}
+                      right={
+                        <TextInput.Icon
+                          icon={() => <ChevronDown size={20} color={colors.neutral[500]} />}
+                          onPress={() => setMenuVisible(true)}
+                        />
+                      }
+                      style={styles.input}
+                      outlineColor={colors.neutral[200]}
+                      activeOutlineColor={colors.primary[600]}
+                      placeholderTextColor={colors.neutral[400]}
+                    />
+                  }
+                  contentStyle={styles.menuContent}
+                >
+                  {resourceTypes.map((type) => (
+                    <Menu.Item
+                      key={type}
+                      onPress={() => {
+                        setResourceType(type);
+                        setMenuVisible(false);
+                      }}
+                      title={type}
+                      titleStyle={styles.menuItemTitle}
+                    />
+                  ))}
+                </Menu>
+
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Quantity (approx.) *
+                </Text>
+                <TextInput
+                  value={quantity}
+                  onChangeText={setQuantity}
+                  mode="outlined"
+                  placeholder="e.g., 15 meals, 5 blankets"
+                  style={styles.input}
+                  outlineColor={colors.neutral[200]}
+                  activeOutlineColor={colors.primary[600]}
+                  placeholderTextColor={colors.neutral[400]}
                 />
-              }
-              contentStyle={styles.menuContent}
-            >
-              {resourceTypes.map((type) => (
-                <Menu.Item
-                  key={type}
-                  onPress={() => {
-                    setResourceType(type);
-                    setMenuVisible(false);
-                  }}
-                  title={type}
-                  titleStyle={styles.menuItemTitle}
+              </>
+            ) : (
+              <>
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Pickup Address *
+                </Text>
+                <TextInput
+                  value={pickupAddress}
+                  onChangeText={setPickupAddress}
+                  mode="outlined"
+                  placeholder="Enter your address"
+                  multiline
+                  numberOfLines={2}
+                  style={styles.input}
+                  outlineColor={colors.neutral[200]}
+                  activeOutlineColor={colors.primary[600]}
+                  placeholderTextColor={colors.neutral[400]}
                 />
-              ))}
-            </Menu>
 
-            <GlassInput
-              label="Quantity (approx.) *"
-              value={quantity}
-              onChangeText={setQuantity}
-              placeholder="e.g., 15 meals, 5 blankets"
-            />
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Pickup Time *
+                </Text>
+                <TextInput
+                  value={pickupTime}
+                  onChangeText={setPickupTime}
+                  mode="outlined"
+                  placeholder="e.g., Today, 8-9 PM"
+                  style={styles.input}
+                  outlineColor={colors.neutral[200]}
+                  activeOutlineColor={colors.primary[600]}
+                  placeholderTextColor={colors.neutral[400]}
+                />
 
-            <GlassInput
-              label="Pickup Address *"
-              value={pickupAddress}
-              onChangeText={setPickupAddress}
-              placeholder="Enter your address"
-              multiline
-              numberOfLines={2}
-            />
+                <Text variant="labelLarge" style={styles.fieldLabel}>
+                  Additional Notes (Optional)
+                </Text>
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  mode="outlined"
+                  multiline
+                  numberOfLines={3}
+                  placeholder="e.g., perishable items, best time for pickup"
+                  style={styles.textArea}
+                  outlineColor={colors.neutral[200]}
+                  activeOutlineColor={colors.primary[600]}
+                  placeholderTextColor={colors.neutral[400]}
+                />
+              </>
+            )}
 
-            <GlassInput
-              label="Pickup Time *"
-              value={pickupTime}
-              onChangeText={setPickupTime}
-              placeholder="e.g., Today, 8-9 PM"
-            />
-
-            <GlassInput
-              label="Additional Notes (Optional)"
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={3}
-              placeholder="e.g., perishable items, best time for pickup"
-            />
-
-            <GlassButton
-              title="Log Donation"
-              onPress={handleSubmit}
-              loading={loading}
-              disabled={loading || !isFormValid}
-              variant="primary"
-              size="lg"
-              style={styles.submitButton}
-            />
-          </GlassCard>
+            <View style={styles.buttonContainer}>
+              {step === 2 && (
+                <Button
+                  mode="outlined"
+                  onPress={handleBack}
+                  style={[styles.button, styles.backButton]}
+                  contentStyle={styles.buttonContent}
+                  textColor={colors.neutral[600]}
+                >
+                  Back
+                </Button>
+              )}
+              
+              {step === 1 ? (
+                <Button
+                  mode="contained"
+                  onPress={handleNext}
+                  disabled={!isStep1Valid}
+                  style={[styles.button, styles.nextButton]}
+                  contentStyle={styles.buttonContent}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  loading={loading}
+                  disabled={loading || !isStep2Valid}
+                  style={[styles.button, styles.submitButton]}
+                  contentStyle={styles.buttonContent}
+                >
+                  Log Donation
+                </Button>
+              )}
+            </View>
+          </View>
         </ScrollView>
       </View>
-    </GlassModal>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContent: {
-    margin: 0,
-    padding: 0,
-  },
   modal: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   modalHeader: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surface,
     elevation: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral[200],
   },
   modalTitle: {
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
     fontFamily: 'Inter-Bold',
   },
@@ -207,10 +292,13 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   formCard: {
-    marginBottom: spacing['2xl'],
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing['3xl'],
+    ...shadows.md,
   },
   formTitle: {
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     color: colors.neutral[800],
     marginBottom: spacing['3xl'],
     fontFamily: 'Inter-Bold',
@@ -219,18 +307,43 @@ const styles = StyleSheet.create({
     color: colors.neutral[800],
     marginBottom: spacing.md,
     marginTop: spacing.md,
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: 'Inter-SemiBold',
+  },
+  input: {
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+  },
+  textArea: {
+    marginBottom: spacing['3xl'],
+    backgroundColor: colors.surface,
   },
   menuContent: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
   },
   menuItemTitle: {
     color: colors.neutral[800],
     fontFamily: 'Inter-Regular',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: spacing.lg,
+  },
+  button: {
+    borderRadius: borderRadius.lg,
+    flex: 1,
+  },
+  backButton: {
+    borderColor: colors.neutral[300],
+  },
+  nextButton: {
+    backgroundColor: colors.primary[600],
+  },
   submitButton: {
-    marginTop: spacing.lg,
+    backgroundColor: colors.primary[600],
+  },
+  buttonContent: {
+    paddingVertical: spacing.md,
   },
 });

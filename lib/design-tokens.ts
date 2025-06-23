@@ -1,6 +1,6 @@
 /**
- * Design Tokens for Impact App
- * Phase 1: Design System Implementation
+ * Design Tokens for Sahayata App
+ * Professional Design System Implementation
  */
 
 export const colors = {
@@ -88,38 +88,27 @@ export const colors = {
     900: '#4C1D95',
   },
   
-  // Neutral/Gray
+  // Neutral/Gray - Updated for professional look
   neutral: {
-    50: '#F8FAFC',
+    50: '#F9FAFB',
     100: '#F1F5F9',
     200: '#E2E8F0',
     300: '#CBD5E1',
     400: '#94A3B8',
-    500: '#64748B',
+    500: '#6B7280',
     600: '#475569',
     700: '#334155',
-    800: '#1E293B',
+    800: '#1F2937',
     900: '#0F172A',
   },
   
-  // Glassmorphism specific
-  glass: {
-    light: 'rgba(255, 255, 255, 0.15)',
-    medium: 'rgba(255, 255, 255, 0.25)',
-    strong: 'rgba(255, 255, 255, 0.35)',
-    dark: 'rgba(0, 0, 0, 0.15)',
-    border: 'rgba(255, 255, 255, 0.2)',
-    borderStrong: 'rgba(255, 255, 255, 0.3)',
-    shadow: 'rgba(0, 0, 0, 0.1)',
-  },
-  
   // Semantic colors
-  background: '#F8FAFC',
+  background: '#F9FAFB',
   surface: '#FFFFFF',
   surfaceVariant: '#F1F5F9',
-  onBackground: '#1E293B',
-  onSurface: '#1E293B',
-  onSurfaceVariant: '#64748B',
+  onBackground: '#1F2937',
+  onSurface: '#1F2937',
+  onSurfaceVariant: '#6B7280',
   outline: '#E2E8F0',
   outlineVariant: '#CBD5E1',
 } as const;
@@ -207,10 +196,10 @@ export const shadows = {
     elevation: 2,
   },
   md: {
-    shadowColor: '#000',
+    shadowColor: '#1F2937',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 4,
   },
   lg: {
@@ -234,30 +223,6 @@ export const shadows = {
     shadowRadius: 50,
     elevation: 16,
   },
-  // Glassmorphism shadows
-  glass: {
-    light: {
-      shadowColor: 'rgba(31, 38, 135, 0.37)',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 32,
-      elevation: 8,
-    },
-    medium: {
-      shadowColor: 'rgba(31, 38, 135, 0.5)',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 32,
-      elevation: 12,
-    },
-    strong: {
-      shadowColor: 'rgba(31, 38, 135, 0.7)',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 32,
-      elevation: 16,
-    },
-  },
 } as const;
 
 export const animations = {
@@ -276,30 +241,6 @@ export const animations = {
     scaleHover: 1.02,
     scalePress: 0.98,
     translateY: -2,
-  },
-} as const;
-
-export const glassmorphism = {
-  standard: {
-    backgroundColor: colors.glass.light,
-    borderWidth: 1,
-    borderColor: colors.glass.border,
-    borderRadius: borderRadius.xl,
-    ...shadows.glass.light,
-  },
-  elevated: {
-    backgroundColor: colors.glass.medium,
-    borderWidth: 1,
-    borderColor: colors.glass.borderStrong,
-    borderRadius: borderRadius['2xl'],
-    ...shadows.glass.medium,
-  },
-  strong: {
-    backgroundColor: colors.glass.strong,
-    borderWidth: 1,
-    borderColor: colors.glass.borderStrong,
-    borderRadius: borderRadius['2xl'],
-    ...shadows.glass.strong,
   },
 } as const;
 
@@ -355,5 +296,4 @@ export type BorderRadius = typeof borderRadius;
 export type Typography = typeof typography;
 export type Shadows = typeof shadows;
 export type Animations = typeof animations;
-export type Glassmorphism = typeof glassmorphism;
 export type Components = typeof components;

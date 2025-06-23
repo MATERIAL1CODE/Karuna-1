@@ -47,16 +47,6 @@ export const theme = {
     success: colors.success[500],
     warning: colors.warning[500],
     info: colors.info[500],
-    
-    // Glass colors
-    glass: {
-      light: colors.glass.light,
-      medium: colors.glass.medium,
-      strong: colors.glass.strong,
-      dark: colors.glass.dark,
-      border: colors.glass.border,
-      borderStrong: colors.glass.borderStrong,
-    },
   },
   fonts: {
     ...DefaultTheme.fonts,
@@ -64,19 +54,19 @@ export const theme = {
       fontFamily: typography.fontFamily.primary,
       fontSize: typography.fontSize['7xl'],
       lineHeight: typography.lineHeight['7xl'],
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.extrabold,
     },
     displayMedium: {
       fontFamily: typography.fontFamily.primary,
       fontSize: typography.fontSize['6xl'],
       lineHeight: typography.lineHeight['6xl'],
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.extrabold,
     },
     displaySmall: {
       fontFamily: typography.fontFamily.primary,
       fontSize: typography.fontSize['5xl'],
       lineHeight: typography.lineHeight['5xl'],
-      fontWeight: typography.fontWeight.bold,
+      fontWeight: typography.fontWeight.extrabold,
     },
     headlineLarge: {
       fontFamily: typography.fontFamily.primary,
@@ -197,10 +187,10 @@ export const extendedTheme = {
       elevation: 2,
     },
     md: {
-      shadowColor: '#000',
+      shadowColor: '#1F2937',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
       elevation: 4,
     },
     lg: {
@@ -216,47 +206,6 @@ export const extendedTheme = {
       shadowOpacity: 0.1,
       shadowRadius: 25,
       elevation: 12,
-    },
-    glass: {
-      light: {
-        shadowColor: 'rgba(31, 38, 135, 0.37)',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 1,
-        shadowRadius: 32,
-        elevation: 8,
-      },
-      medium: {
-        shadowColor: 'rgba(31, 38, 135, 0.5)',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 1,
-        shadowRadius: 32,
-        elevation: 12,
-      },
-    },
-  },
-  glassmorphism: {
-    standard: {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      borderRadius: 16,
-    },
-    elevated: {
-      backgroundColor: 'rgba(255, 255, 255, 0.25)',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.3)',
-      borderRadius: 20,
-    },
-  },
-  animations: {
-    timing: {
-      fast: 150,
-      medium: 250,
-      slow: 350,
-    },
-    transforms: {
-      scaleHover: 1.02,
-      scalePress: 0.98,
     },
   },
 };
