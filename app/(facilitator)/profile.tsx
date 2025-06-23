@@ -147,7 +147,7 @@ export default function FacilitatorProfileScreen() {
               description="Update your profile and preferences"
               left={() => <Settings size={20} color={colors.neutral[500]} />}
               right={() => <List.Icon icon="chevron-right" />}
-              onPress={() => {}}
+              onPress={() => router.push('/(facilitator)/settings')}
               titleStyle={styles.menuItemTitle}
               descriptionStyle={styles.menuItemDescription}
               style={styles.menuItem}
