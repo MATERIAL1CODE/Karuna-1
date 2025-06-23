@@ -12,16 +12,20 @@ import {
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { Heart, Users, MapPin } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
   const theme = useTheme();
+  const { login } = useAuth();
   const styles = createStyles(theme);
 
-  const handleCitizenPress = () => {
+  const handleCitizenPress = async () => {
+    await login('citizen');
     router.push('/(citizen)/(tabs)/home');
   };
 
-  const handleFacilitatorPress = () => {
+  const handleFacilitatorPress = async () => {
+    await login('facilitator');
     router.push('/(facilitator)');
   };
 

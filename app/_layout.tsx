@@ -9,6 +9,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { lightTheme, createExtendedTheme } from '@/lib/themes';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { DataProvider } from '@/contexts/DataContext';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -60,7 +62,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <DataProvider>
+          <AppContent />
+        </DataProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
