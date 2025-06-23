@@ -12,7 +12,7 @@ import {
   List,
   useTheme,
 } from 'react-native-paper';
-import { X, AlertTriangle, MapPin, Package, Users, Shield } from 'lucide-react-native';
+import { X, TriangleAlert as AlertTriangle, MapPin, Package, Users, Shield } from 'lucide-react-native';
 
 interface ReportIssueModalProps {
   visible: boolean;
