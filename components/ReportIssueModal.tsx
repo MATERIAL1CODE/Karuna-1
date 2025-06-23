@@ -10,9 +10,9 @@ import {
   Text,
   Appbar,
   List,
+  useTheme,
 } from 'react-native-paper';
 import { X, AlertTriangle, MapPin, Package, Users, Shield } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 interface ReportIssueModalProps {
   visible: boolean;
@@ -53,6 +53,9 @@ const issueOptions = [
 ];
 
 export default function ReportIssueModal({ visible, onDismiss }: ReportIssueModalProps) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   const handleIssueSelect = (issueId: string, issueTitle: string) => {
     Alert.alert(
       'Issue Reported',
@@ -72,7 +75,7 @@ export default function ReportIssueModal({ visible, onDismiss }: ReportIssueModa
         <Appbar.Header style={styles.modalHeader}>
           <Appbar.Content title="Report Issue" titleStyle={styles.modalTitle} />
           <Appbar.Action 
-            icon={() => <X size={24} color={colors.neutral[800]} />} 
+            icon={() => <X size={24} color={theme.colors.onSurface} />} 
             onPress={onDismiss} 
           />
         </Appbar.Header>
@@ -92,7 +95,7 @@ export default function ReportIssueModal({ visible, onDismiss }: ReportIssueModa
                   onPress={() => handleIssueSelect(option.id, option.title)}
                 >
                   <View style={styles.optionIcon}>
-                    <IconComponent size={24} color={colors.error[600]} />
+                    <IconComponent size={24} color={theme.colors.error} />
                   </View>
                   <View style={styles.optionContent}>
                     <Text variant="titleMedium" style={styles.optionTitle}>
@@ -112,59 +115,63 @@ export default function ReportIssueModal({ visible, onDismiss }: ReportIssueModa
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   modal: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     elevation: 0,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    borderBottomColor: theme.colors.outline,
   },
   modalTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   content: {
     flex: 1,
-    padding: spacing['3xl'],
+    padding: 32,
   },
   description: {
-    color: colors.neutral[600],
-    marginBottom: spacing['4xl'],
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 40,
     fontFamily: 'Inter-Regular',
   },
   optionsList: {
-    gap: spacing['2xl'],
+    gap: 24,
   },
   optionItem: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    padding: spacing['3xl'],
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    padding: 32,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing['2xl'],
-    ...shadows.md,
+    gap: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   optionIcon: {
-    backgroundColor: colors.error[100],
-    borderRadius: borderRadius.lg,
-    padding: spacing['2xl'],
+    backgroundColor: theme.colors.errorContainer,
+    borderRadius: 12,
+    padding: 24,
   },
   optionContent: {
     flex: 1,
   },
   optionTitle: {
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    fontWeight: '600',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
     fontFamily: 'Inter-SemiBold',
   },
   optionDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },
 });

@@ -39,7 +39,6 @@ import {
   Sun
 } from 'lucide-react-native';
 import { useThemeContext } from '@/contexts/ThemeContext';
-import { spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function FacilitatorProfileScreen() {
   const theme = useTheme();
@@ -60,7 +59,7 @@ export default function FacilitatorProfileScreen() {
     // Show success feedback or navigate back
   };
 
-  const styles = createStyles(theme, isDark);
+  const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -445,7 +444,7 @@ export default function FacilitatorProfileScreen() {
   );
 }
 
-const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -455,39 +454,40 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     elevation: 0,
   },
   headerTitle: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   scrollContent: {
-    padding: spacing['2xl'],
+    padding: 24,
+    paddingBottom: 40,
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: spacing['4xl'],
-    paddingVertical: spacing['2xl'],
+    marginBottom: 32,
+    paddingVertical: 24,
   },
   avatarContainer: {
     backgroundColor: theme.colors.primaryContainer,
     borderRadius: 50,
-    padding: spacing['3xl'],
-    marginBottom: spacing['2xl'],
+    padding: 32,
+    marginBottom: 24,
   },
   name: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
-    marginBottom: spacing.lg,
+    marginBottom: 16,
     fontFamily: 'Inter-Bold',
   },
   roleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
-    marginBottom: spacing.lg,
+    gap: 16,
+    marginBottom: 16,
   },
   role: {
     color: theme.colors.onSurfaceVariant,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   badge: {
@@ -496,55 +496,59 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
+    gap: 16,
   },
   rating: {
     color: theme.colors.tertiary,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   impactCard: {
     backgroundColor: theme.colors.surface,
-    marginBottom: spacing['2xl'],
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    marginBottom: 24,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   impactCardContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   impactTitle: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
-    marginBottom: spacing['3xl'],
+    marginBottom: 32,
     fontFamily: 'Inter-Bold',
   },
   heroMetric: {
     alignItems: 'center',
-    marginBottom: spacing['3xl'],
+    marginBottom: 32,
   },
   heroNumber: {
-    fontWeight: typography.fontWeight.extrabold,
+    fontWeight: '800',
     color: theme.colors.primary,
-    marginBottom: spacing.lg,
+    marginBottom: 16,
     fontFamily: 'Inter-Bold',
   },
   heroLabel: {
     color: theme.colors.onSurfaceVariant,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   supportingMetrics: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
   },
   supportingMetric: {
     alignItems: 'center',
   },
   supportingNumber: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
-    marginBottom: spacing.lg,
+    marginBottom: 16,
     fontFamily: 'Inter-Bold',
   },
   supportingLabel: {
@@ -560,33 +564,37 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   achievementsCard: {
     backgroundColor: theme.colors.surface,
-    marginBottom: spacing['2xl'],
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    marginBottom: 24,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   achievementsCardContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   achievementsTitle: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
     fontFamily: 'Inter-Bold',
   },
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: spacing['2xl'],
+    gap: 24,
   },
   badgeItem: {
     alignItems: 'center',
     width: '22%',
   },
   badgeIcon: {
-    borderRadius: borderRadius.lg,
-    padding: spacing['2xl'],
-    marginBottom: spacing.lg,
+    borderRadius: 12,
+    padding: 24,
+    marginBottom: 16,
     alignItems: 'center',
     justifyContent: 'center',
     width: 60,
@@ -602,26 +610,30 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: theme.colors.surface,
-    marginBottom: spacing['2xl'],
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    marginBottom: 24,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   cardContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   sectionTitle: {
-    fontWeight: typography.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.onSurface,
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
     fontFamily: 'Inter-Bold',
   },
   inputGroup: {
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
   },
   inputLabel: {
     color: theme.colors.onSurface,
-    marginBottom: spacing.lg,
-    fontWeight: typography.fontWeight.semibold,
+    marginBottom: 16,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   input: {
@@ -629,11 +641,11 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   listItem: {
     paddingHorizontal: 0,
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
   listItemTitle: {
     color: theme.colors.onSurface,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   listItemDescription: {
@@ -642,32 +654,36 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   divider: {
-    marginVertical: spacing.md,
+    marginVertical: 12,
     backgroundColor: theme.colors.outline,
   },
   menuCard: {
     backgroundColor: theme.colors.surface,
-    marginBottom: spacing['4xl'],
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    marginBottom: 40,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   menuSectionTitle: {
     color: theme.colors.onSurface,
-    fontWeight: typography.fontWeight.semibold,
-    paddingHorizontal: spacing['2xl'],
-    paddingTop: spacing['2xl'],
+    fontWeight: '600',
+    paddingHorizontal: 24,
+    paddingTop: 24,
     fontFamily: 'Inter-SemiBold',
   },
   menuSectionTitleSpaced: {
-    paddingTop: spacing['3xl'],
+    paddingTop: 32,
   },
   menuItem: {
-    paddingHorizontal: spacing['2xl'],
-    paddingVertical: spacing.lg,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
   menuItemTitle: {
     color: theme.colors.onSurface,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   menuItemDescription: {
@@ -677,18 +693,18 @@ const createStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   switchRoleButton: {
     borderColor: theme.colors.primary,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing['2xl'],
+    borderRadius: 12,
+    marginBottom: 24,
   },
   buttonContent: {
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
   saveButton: {
     backgroundColor: theme.colors.primary,
-    borderRadius: borderRadius.lg,
-    marginTop: spacing['2xl'],
+    borderRadius: 12,
+    marginTop: 24,
   },
   saveButtonContent: {
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
 });

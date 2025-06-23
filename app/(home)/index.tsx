@@ -8,12 +8,15 @@ import {
 } from 'react-native';
 import {
   Text,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { Heart, Users, MapPin } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 export default function HomePage() {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   const handleCitizenPress = () => {
     router.push('/(citizen)');
   };
@@ -28,7 +31,7 @@ export default function HomePage() {
         <View style={styles.header}>
           <View style={styles.welcomeSection}>
             <View style={styles.iconContainer}>
-              <Heart size={48} color={colors.primary[600]} />
+              <Heart size={48} color={theme.colors.primary} />
             </View>
             <Text variant="displayMedium" style={styles.title}>
               Welcome to Sahayata
@@ -46,7 +49,7 @@ export default function HomePage() {
           <Pressable onPress={handleCitizenPress}>
             <View style={[styles.roleCard, styles.citizenCard]}>
               <View style={styles.cardIcon}>
-                <MapPin size={40} color={colors.primary[600]} />
+                <MapPin size={40} color={theme.colors.primary} />
               </View>
               <Text variant="headlineSmall" style={styles.cardTitle}>
                 Citizen Mode
@@ -65,7 +68,7 @@ export default function HomePage() {
           <Pressable onPress={handleFacilitatorPress}>
             <View style={[styles.roleCard, styles.facilitatorCard]}>
               <View style={styles.cardIcon}>
-                <Users size={40} color={colors.success[500]} />
+                <Users size={40} color={theme.colors.success} />
               </View>
               <Text variant="headlineSmall" style={styles.cardTitle}>
                 Facilitator Mode
@@ -92,106 +95,114 @@ export default function HomePage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing['2xl'],
+    paddingHorizontal: 24,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing['6xl'],
+    marginBottom: 64,
   },
   welcomeSection: {
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: 16,
   },
   iconContainer: {
-    backgroundColor: colors.primary[100],
-    borderRadius: borderRadius['3xl'],
-    padding: spacing['4xl'],
-    marginBottom: spacing['4xl'],
-    ...shadows.md,
+    backgroundColor: theme.colors.primaryContainer,
+    borderRadius: 24,
+    padding: 40,
+    marginBottom: 40,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   title: {
-    fontWeight: typography.fontWeight.extrabold,
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    fontWeight: '800',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
     textAlign: 'center',
     fontFamily: 'Inter-Bold',
   },
   subtitle: {
-    color: colors.primary[600],
+    color: theme.colors.primary,
     textAlign: 'center',
-    fontWeight: typography.fontWeight.semibold,
-    marginBottom: spacing.lg,
+    fontWeight: '600',
+    marginBottom: 16,
     fontFamily: 'Inter-SemiBold',
   },
   description: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: spacing['2xl'],
+    paddingHorizontal: 24,
     fontFamily: 'Inter-Regular',
   },
   roleCards: {
-    gap: spacing['4xl'],
-    marginBottom: spacing['6xl'],
+    gap: 40,
+    marginBottom: 64,
   },
   roleCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius['2xl'],
-    padding: spacing['4xl'],
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    padding: 40,
     alignItems: 'center',
-    ...shadows.md,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   citizenCard: {
     borderWidth: 2,
-    borderColor: colors.primary[200],
+    borderColor: theme.colors.primaryContainer,
   },
   facilitatorCard: {
     borderWidth: 2,
-    borderColor: colors.success[200],
+    borderColor: theme.colors.secondaryContainer,
   },
   cardIcon: {
-    backgroundColor: colors.neutral[50],
-    borderRadius: borderRadius['3xl'],
-    padding: spacing['3xl'],
-    marginBottom: spacing['3xl'],
+    backgroundColor: theme.colors.surfaceVariant,
+    borderRadius: 24,
+    padding: 32,
+    marginBottom: 32,
   },
   cardTitle: {
-    color: colors.neutral[800],
-    fontWeight: typography.fontWeight.bold,
+    color: theme.colors.onSurface,
+    fontWeight: '700',
     textAlign: 'center',
-    marginBottom: spacing['2xl'],
+    marginBottom: 24,
     fontFamily: 'Inter-Bold',
   },
   cardDescription: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: spacing['3xl'],
+    marginBottom: 32,
     fontFamily: 'Inter-Regular',
   },
   features: {
     alignItems: 'flex-start',
-    gap: spacing.lg,
+    gap: 16,
   },
   feature: {
-    color: colors.neutral[600],
+    color: theme.colors.onSurfaceVariant,
     fontSize: 14,
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   footer: {
     alignItems: 'center',
   },
   footerText: {
-    color: colors.neutral[400],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },

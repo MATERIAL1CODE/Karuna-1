@@ -1,9 +1,9 @@
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
-import { colors, typography, borderRadius } from './design-tokens';
+import { typography, borderRadius } from './design-tokens';
 
-// Extended color palette for dark theme
+// True Black Dark Theme Colors
 const darkColors = {
-  // Primary colors (maintain brand identity)
+  // Primary colors (enhanced for dark mode)
   primary: {
     50: '#EEF2FF',
     100: '#E0E7FF',
@@ -11,20 +11,20 @@ const darkColors = {
     300: '#A5B4FC',
     400: '#818CF8',
     500: '#6366F1',
-    600: '#4F46E5', // Primary - slightly brighter for dark mode
+    600: '#5B5FE8', // Slightly brighter for dark mode
     700: '#4338CA',
     800: '#3730A3',
     900: '#312E81',
   },
   
-  // Success/Green (adjusted for dark mode)
+  // Success/Green (enhanced for dark mode)
   success: {
     50: '#ECFDF5',
     100: '#D1FAE5',
     200: '#A7F3D0',
     300: '#6EE7B7',
     400: '#34D399',
-    500: '#10B981', // Success
+    500: '#10B981',
     600: '#059669',
     700: '#047857',
     800: '#065F46',
@@ -38,78 +38,181 @@ const darkColors = {
     200: '#FDE68A',
     300: '#FCD34D',
     400: '#FBBF24',
-    500: '#F59E0B', // Warning
+    500: '#F59E0B',
     600: '#D97706',
     700: '#B45309',
     800: '#92400E',
     900: '#78350F',
   },
   
-  // Error/Red (optimized for dark backgrounds)
+  // Error/Red (enhanced for dark mode)
   error: {
     50: '#FEF2F2',
     100: '#FEE2E2',
     200: '#FECACA',
     300: '#FCA5A5',
     400: '#F87171',
-    500: '#EF4444', // Error
+    500: '#EF4444',
     600: '#DC2626',
     700: '#B91C1C',
     800: '#991B1B',
     900: '#7F1D1D',
   },
   
-  // Info/Blue (enhanced contrast)
+  // Info/Blue (enhanced for dark mode)
   info: {
     50: '#EFF6FF',
     100: '#DBEAFE',
     200: '#BFDBFE',
     300: '#93C5FD',
     400: '#60A5FA',
-    500: '#3B82F6', // Info
+    500: '#3B82F6',
     600: '#2563EB',
     700: '#1D4ED8',
     800: '#1E40AF',
     900: '#1E3A8A',
   },
   
-  // Purple/Violet (maintained vibrancy)
+  // Purple/Violet (enhanced for dark mode)
   purple: {
     50: '#F5F3FF',
     100: '#EDE9FE',
     200: '#DDD6FE',
     300: '#C4B5FD',
     400: '#A78BFA',
-    500: '#8B5CF6', // Purple
+    500: '#8B5CF6',
     600: '#7C3AED',
     700: '#6D28D9',
     800: '#5B21B6',
     900: '#4C1D95',
   },
   
-  // Dark theme specific neutrals
+  // True Black Dark Theme Neutrals
   neutral: {
-    50: '#F9FAFB',  // Light text on dark
-    100: '#F3F4F6', // Secondary light text
-    200: '#E5E7EB', // Borders on dark
-    300: '#D1D5DB', // Disabled elements
-    400: '#9CA3AF', // Secondary text
-    500: '#6B7280', // Tertiary text
-    600: '#4B5563', // Surface variants
-    700: '#374151', // Card backgrounds
-    800: '#1F2937', // Primary surface
-    900: '#111827', // Background
+    50: '#FFFFFF',   // Pure white for highest contrast text
+    100: '#F8F9FA',  // Near white for secondary text
+    200: '#E9ECEF',  // Light gray for borders
+    300: '#DEE2E6',  // Medium light gray
+    400: '#CED4DA',  // Medium gray for disabled elements
+    500: '#ADB5BD',  // Medium gray for secondary text
+    600: '#6C757D',  // Dark gray for tertiary text
+    700: '#495057',  // Darker gray for surfaces
+    800: '#343A40',  // Very dark gray for elevated surfaces
+    900: '#000000',  // True black background
   },
   
   // Semantic colors for dark theme
-  background: '#111827',
-  surface: '#1F2937',
-  surfaceVariant: '#374151',
-  onBackground: '#F9FAFB',
-  onSurface: '#F9FAFB',
-  onSurfaceVariant: '#9CA3AF',
-  outline: '#4B5563',
-  outlineVariant: '#374151',
+  background: '#000000',      // True black as requested
+  surface: '#1A1A1A',        // Very dark gray for cards
+  surfaceVariant: '#2D2D2D', // Slightly lighter for elevated elements
+  onBackground: '#FFFFFF',    // Pure white text on black
+  onSurface: '#FFFFFF',      // Pure white text on surfaces
+  onSurfaceVariant: '#B0B0B0', // Light gray for secondary text
+  outline: '#404040',         // Dark gray for borders
+  outlineVariant: '#2D2D2D',  // Darker gray for subtle borders
+};
+
+// Light Theme Colors (keeping original palette)
+const lightColors = {
+  primary: {
+    50: '#EEF2FF',
+    100: '#E0E7FF',
+    200: '#C7D2FE',
+    300: '#A5B4FC',
+    400: '#818CF8',
+    500: '#6366F1',
+    600: '#4F46E5',
+    700: '#4338CA',
+    800: '#3730A3',
+    900: '#312E81',
+  },
+  
+  success: {
+    50: '#ECFDF5',
+    100: '#D1FAE5',
+    200: '#A7F3D0',
+    300: '#6EE7B7',
+    400: '#34D399',
+    500: '#10B981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065F46',
+    900: '#064E3B',
+  },
+  
+  warning: {
+    50: '#FFFBEB',
+    100: '#FEF3C7',
+    200: '#FDE68A',
+    300: '#FCD34D',
+    400: '#FBBF24',
+    500: '#F59E0B',
+    600: '#D97706',
+    700: '#B45309',
+    800: '#92400E',
+    900: '#78350F',
+  },
+  
+  error: {
+    50: '#FEF2F2',
+    100: '#FEE2E2',
+    200: '#FECACA',
+    300: '#FCA5A5',
+    400: '#F87171',
+    500: '#EF4444',
+    600: '#DC2626',
+    700: '#B91C1C',
+    800: '#991B1B',
+    900: '#7F1D1D',
+  },
+  
+  info: {
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    300: '#93C5FD',
+    400: '#60A5FA',
+    500: '#3B82F6',
+    600: '#2563EB',
+    700: '#1D4ED8',
+    800: '#1E40AF',
+    900: '#1E3A8A',
+  },
+  
+  purple: {
+    50: '#F5F3FF',
+    100: '#EDE9FE',
+    200: '#DDD6FE',
+    300: '#C4B5FD',
+    400: '#A78BFA',
+    500: '#8B5CF6',
+    600: '#7C3AED',
+    700: '#6D28D9',
+    800: '#5B21B6',
+    900: '#4C1D95',
+  },
+  
+  neutral: {
+    50: '#F9FAFB',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#6B7280',
+    600: '#475569',
+    700: '#334155',
+    800: '#1F2937',
+    900: '#0F172A',
+  },
+  
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceVariant: '#F8F9FA',
+  onBackground: '#1F2937',
+  onSurface: '#1F2937',
+  onSurfaceVariant: '#6B7280',
+  outline: '#E2E8F0',
+  outlineVariant: '#CBD5E1',
 };
 
 // Light Theme
@@ -118,149 +221,149 @@ export const lightTheme = {
   colors: {
     ...MD3LightTheme.colors,
     // Primary colors
-    primary: colors.primary[600],
-    primaryContainer: colors.primary[100],
+    primary: lightColors.primary[600],
+    primaryContainer: lightColors.primary[100],
     onPrimary: '#FFFFFF',
-    onPrimaryContainer: colors.primary[900],
+    onPrimaryContainer: lightColors.primary[900],
     
     // Secondary colors
-    secondary: colors.success[500],
-    secondaryContainer: colors.success[100],
+    secondary: lightColors.success[500],
+    secondaryContainer: lightColors.success[100],
     onSecondary: '#FFFFFF',
-    onSecondaryContainer: colors.success[900],
+    onSecondaryContainer: lightColors.success[900],
     
     // Tertiary colors
-    tertiary: colors.purple[500],
-    tertiaryContainer: colors.purple[100],
+    tertiary: lightColors.purple[500],
+    tertiaryContainer: lightColors.purple[100],
     onTertiary: '#FFFFFF',
-    onTertiaryContainer: colors.purple[900],
+    onTertiaryContainer: lightColors.purple[900],
     
     // Surface colors
-    surface: colors.surface,
-    surfaceVariant: colors.surfaceVariant,
-    onSurface: colors.onSurface,
-    onSurfaceVariant: colors.onSurfaceVariant,
+    surface: lightColors.surface,
+    surfaceVariant: lightColors.surfaceVariant,
+    onSurface: lightColors.onSurface,
+    onSurfaceVariant: lightColors.onSurfaceVariant,
     
     // Background colors
-    background: colors.background,
-    onBackground: colors.onBackground,
+    background: lightColors.background,
+    onBackground: lightColors.onBackground,
     
     // Error colors
-    error: colors.error[500],
-    errorContainer: colors.error[100],
+    error: lightColors.error[500],
+    errorContainer: lightColors.error[100],
     onError: '#FFFFFF',
-    onErrorContainer: colors.error[900],
+    onErrorContainer: lightColors.error[900],
     
     // Outline colors
-    outline: colors.outline,
-    outlineVariant: colors.outlineVariant,
+    outline: lightColors.outline,
+    outlineVariant: lightColors.outlineVariant,
     
     // Custom semantic colors
-    success: colors.success[500],
-    warning: colors.warning[500],
-    info: colors.info[500],
-    purple: colors.purple[500],
+    success: lightColors.success[500],
+    warning: lightColors.warning[500],
+    info: lightColors.info[500],
+    purple: lightColors.purple[500],
     
     // Neutral shades for consistent theming
-    neutral: colors.neutral,
+    neutral: lightColors.neutral,
   },
   fonts: {
     ...MD3LightTheme.fonts,
     displayLarge: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['7xl'],
-      lineHeight: typography.lineHeight['7xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 48,
+      lineHeight: 52,
+      fontWeight: '800',
     },
     displayMedium: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['6xl'],
-      lineHeight: typography.lineHeight['6xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 40,
+      lineHeight: 44,
+      fontWeight: '800',
     },
     displaySmall: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['5xl'],
-      lineHeight: typography.lineHeight['5xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 32,
+      lineHeight: 36,
+      fontWeight: '800',
     },
     headlineLarge: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['4xl'],
-      lineHeight: typography.lineHeight['4xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 28,
+      lineHeight: 32,
+      fontWeight: '600',
     },
     headlineMedium: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['3xl'],
-      lineHeight: typography.lineHeight['3xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 24,
+      lineHeight: 28,
+      fontWeight: '600',
     },
     headlineSmall: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['2xl'],
-      lineHeight: typography.lineHeight['2xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 20,
+      lineHeight: 24,
+      fontWeight: '600',
     },
     titleLarge: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.xl,
-      lineHeight: typography.lineHeight.xl,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: '500',
     },
     titleMedium: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.lg,
-      lineHeight: typography.lineHeight.lg,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 16,
+      lineHeight: 22,
+      fontWeight: '500',
     },
     titleSmall: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '500',
     },
     bodyLarge: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.lg,
-      lineHeight: typography.lineHeight.lg,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: '400',
     },
     bodyMedium: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '400',
     },
     bodySmall: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.sm,
-      lineHeight: typography.lineHeight.sm,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '400',
     },
     labelLarge: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '500',
     },
     labelMedium: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.sm,
-      lineHeight: typography.lineHeight.sm,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '500',
     },
     labelSmall: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.xs,
-      lineHeight: typography.lineHeight.xs,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 10,
+      lineHeight: 14,
+      fontWeight: '500',
     },
   },
   roundness: borderRadius.xl,
 };
 
-// Dark Theme
+// Dark Theme with True Black Background
 export const darkTheme = {
   ...MD3DarkTheme,
   colors: {
@@ -283,13 +386,13 @@ export const darkTheme = {
     onTertiary: '#FFFFFF',
     onTertiaryContainer: darkColors.purple[100],
     
-    // Surface colors
+    // Surface colors - True Black Theme
     surface: darkColors.surface,
     surfaceVariant: darkColors.surfaceVariant,
     onSurface: darkColors.onSurface,
     onSurfaceVariant: darkColors.onSurfaceVariant,
     
-    // Background colors
+    // Background colors - True Black
     background: darkColors.background,
     onBackground: darkColors.onBackground,
     
@@ -316,93 +419,93 @@ export const darkTheme = {
     ...MD3DarkTheme.fonts,
     displayLarge: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['7xl'],
-      lineHeight: typography.lineHeight['7xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 48,
+      lineHeight: 52,
+      fontWeight: '800',
     },
     displayMedium: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['6xl'],
-      lineHeight: typography.lineHeight['6xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 40,
+      lineHeight: 44,
+      fontWeight: '800',
     },
     displaySmall: {
       fontFamily: 'Inter-Bold',
-      fontSize: typography.fontSize['5xl'],
-      lineHeight: typography.lineHeight['5xl'],
-      fontWeight: typography.fontWeight.extrabold,
+      fontSize: 32,
+      lineHeight: 36,
+      fontWeight: '800',
     },
     headlineLarge: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['4xl'],
-      lineHeight: typography.lineHeight['4xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 28,
+      lineHeight: 32,
+      fontWeight: '600',
     },
     headlineMedium: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['3xl'],
-      lineHeight: typography.lineHeight['3xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 24,
+      lineHeight: 28,
+      fontWeight: '600',
     },
     headlineSmall: {
       fontFamily: 'Inter-SemiBold',
-      fontSize: typography.fontSize['2xl'],
-      lineHeight: typography.lineHeight['2xl'],
-      fontWeight: typography.fontWeight.semibold,
+      fontSize: 20,
+      lineHeight: 24,
+      fontWeight: '600',
     },
     titleLarge: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.xl,
-      lineHeight: typography.lineHeight.xl,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: '500',
     },
     titleMedium: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.lg,
-      lineHeight: typography.lineHeight.lg,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 16,
+      lineHeight: 22,
+      fontWeight: '500',
     },
     titleSmall: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '500',
     },
     bodyLarge: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.lg,
-      lineHeight: typography.lineHeight.lg,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: '400',
     },
     bodyMedium: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '400',
     },
     bodySmall: {
       fontFamily: 'Inter-Regular',
-      fontSize: typography.fontSize.sm,
-      lineHeight: typography.lineHeight.sm,
-      fontWeight: typography.fontWeight.regular,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '400',
     },
     labelLarge: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.base,
-      lineHeight: typography.lineHeight.base,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '500',
     },
     labelMedium: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.sm,
-      lineHeight: typography.lineHeight.sm,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '500',
     },
     labelSmall: {
       fontFamily: 'Inter-Medium',
-      fontSize: typography.fontSize.xs,
-      lineHeight: typography.lineHeight.xs,
-      fontWeight: typography.fontWeight.medium,
+      fontSize: 10,
+      lineHeight: 14,
+      fontWeight: '500',
     },
   },
   roundness: borderRadius.xl,
@@ -451,23 +554,23 @@ export const createExtendedTheme = (baseTheme: typeof lightTheme) => ({
       elevation: 2,
     },
     md: {
-      shadowColor: '#1F2937',
+      shadowColor: '#000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.05,
+      shadowOpacity: 0.1,
       shadowRadius: 10,
       elevation: 4,
     },
     lg: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.15,
       shadowRadius: 15,
       elevation: 8,
     },
     xl: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 20 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.2,
       shadowRadius: 25,
       elevation: 12,
     },

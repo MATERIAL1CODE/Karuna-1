@@ -11,10 +11,10 @@ import {
   Appbar,
   Card,
   Chip,
+  useTheme,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MapPin, Gift, ArrowLeft, Eye } from 'lucide-react-native';
-import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
 interface ActivityItem {
   id: string;
@@ -78,14 +78,16 @@ interface ActivityItemCardProps {
 }
 
 function ActivityItemCard({ item }: ActivityItemCardProps) {
+  const theme = useTheme();
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return colors.success[500];
+        return theme.colors.success;
       case 'in_progress':
-        return colors.warning[500];
+        return theme.colors.warning;
       default:
-        return colors.neutral[500];
+        return theme.colors.onSurfaceVariant;
     }
   };
 
@@ -101,8 +103,8 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
   };
 
   const IconComponent = item.type === 'report' ? MapPin : Gift;
-  const iconColor = item.type === 'report' ? colors.primary[600] : colors.success[500];
-  const iconBgColor = item.type === 'report' ? colors.primary[100] : colors.success[100];
+  const iconColor = item.type === 'report' ? theme.colors.primary : theme.colors.success;
+  const iconBgColor = item.type === 'report' ? theme.colors.primaryContainer : theme.colors.secondaryContainer;
 
   const getHelpedText = () => {
     if (item.status === 'completed' && item.peopleHelped) {
@@ -119,6 +121,8 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
       router.push(`/(citizen)/live-mission-view/${item.id}`);
     }
   };
+
+  const styles = createStyles(theme);
 
   return (
     <Pressable onPress={handlePress} disabled={item.status !== 'in_progress'}>
@@ -145,7 +149,7 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
                   </Chip>
                   {item.status === 'in_progress' && (
                     <View style={styles.liveIndicator}>
-                      <Eye size={16} color={colors.primary[600]} />
+                      <Eye size={16} color={theme.colors.primary} />
                       <Text variant="bodySmall" style={styles.liveText}>
                         Track Live
                       </Text>
@@ -182,6 +186,9 @@ function ActivityItemCard({ item }: ActivityItemCardProps) {
 }
 
 export default function ActivityScreen() {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   const renderActivity = ({ item }: { item: ActivityItem }) => (
     <ActivityItemCard item={item} />
   );
@@ -194,7 +201,7 @@ export default function ActivityScreen() {
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
+          icon={() => <ArrowLeft size={24} color={theme.colors.onSurfaceVariant} />} 
           onPress={() => router.back()} 
         />
         <Appbar.Content title="My Activity" titleStyle={styles.headerTitle} />
@@ -218,7 +225,7 @@ export default function ActivityScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MapPin size={48} color={colors.neutral[500]} />
+              <MapPin size={48} color={theme.colors.onSurfaceVariant} />
               <Text variant="titleMedium" style={styles.emptyTitle}>
                 No activity yet
               </Text>
@@ -233,61 +240,69 @@ export default function ActivityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
     elevation: 0,
   },
   headerTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
+    fontWeight: '700',
+    color: theme.colors.onSurface,
     fontFamily: 'Inter-Bold',
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing['2xl'],
+    paddingHorizontal: 24,
   },
   summaryCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    padding: spacing['3xl'],
-    marginBottom: spacing['2xl'],
-    ...shadows.md,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    padding: 32,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   summaryTitle: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.neutral[800],
-    marginBottom: spacing.lg,
+    fontWeight: '700',
+    color: theme.colors.onSurface,
+    marginBottom: 16,
     fontFamily: 'Inter-Bold',
   },
   summaryText: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },
   listContent: {
-    paddingBottom: spacing['4xl'],
+    paddingBottom: 40,
   },
   activityCard: {
-    marginBottom: spacing['2xl'],
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    ...shadows.md,
+    marginBottom: 24,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   cardContent: {
-    padding: spacing['3xl'],
+    padding: 32,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing['2xl'],
+    gap: 24,
   },
   iconContainer: {
-    borderRadius: borderRadius.lg,
-    padding: spacing['2xl'],
+    borderRadius: 12,
+    padding: 24,
   },
   activityInfo: {
     flex: 1,
@@ -296,30 +311,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.lg,
+    marginBottom: 16,
   },
   activityTitle: {
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.neutral[800],
+    fontWeight: '600',
+    color: theme.colors.onSurface,
     flex: 1,
-    marginRight: spacing.lg,
+    marginRight: 16,
     fontFamily: 'Inter-SemiBold',
   },
   statusContainer: {
     alignItems: 'flex-end',
-    gap: spacing.lg,
+    gap: 16,
   },
   activitySubtitle: {
-    color: colors.neutral[500],
-    marginBottom: spacing.lg,
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 16,
     fontFamily: 'Inter-Regular',
   },
   bottomRow: {
     flexDirection: 'column',
-    gap: spacing.lg,
+    gap: 16,
   },
   activityDate: {
-    color: colors.neutral[400],
+    color: theme.colors.onSurfaceVariant,
     fontFamily: 'Inter-Regular',
   },
   helpedContainer: {
@@ -328,21 +343,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   helpedText: {
-    color: colors.success[500],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.success,
+    fontWeight: '600',
     flex: 1,
     fontFamily: 'Inter-SemiBold',
   },
   viewStoryButton: {
-    backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
+    backgroundColor: theme.colors.primaryContainer,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   viewStoryText: {
-    color: colors.primary[600],
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
+    color: theme.colors.primary,
+    fontSize: 12,
+    fontWeight: '500',
     fontFamily: 'Inter-Medium',
   },
   statusChip: {
@@ -351,37 +366,37 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   liveIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
+    gap: 12,
+    backgroundColor: theme.colors.primaryContainer,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   liveText: {
-    color: colors.primary[600],
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.primary,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing['8xl'],
+    paddingVertical: 96,
   },
   emptyTitle: {
-    color: colors.neutral[800],
-    marginTop: spacing['2xl'],
-    marginBottom: spacing.lg,
-    fontWeight: typography.fontWeight.semibold,
+    color: theme.colors.onSurface,
+    marginTop: 24,
+    marginBottom: 16,
+    fontWeight: '600',
     fontFamily: 'Inter-SemiBold',
   },
   emptySubtitle: {
-    color: colors.neutral[500],
+    color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
     fontFamily: 'Inter-Regular',
   },
