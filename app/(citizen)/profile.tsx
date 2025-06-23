@@ -128,7 +128,7 @@ export default function ProfileScreen() {
 
         <Button
           mode="outlined"
-          onPress={() => router.replace('/(home)')}
+          onPress={() => router.replace('/(facilitator)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
           textColor="#4F46E5"

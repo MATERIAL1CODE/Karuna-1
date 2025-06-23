@@ -57,7 +57,6 @@ export default function MakeDonationModal({ visible, onDismiss }: MakeDonationMo
 
     setLoading(true);
     try {
-      // Simulate donation submission
       console.log('Submitting donation:', {
         resourceType,
         quantity,

@@ -9,10 +9,8 @@ import {
 import {
   Text,
   Appbar,
-  Card,
 } from 'react-native-paper';
 import { Bell, MapPin, Gift } from 'lucide-react-native';
-import { useAuth } from '@/contexts/AuthContext';
 import ReportNeedModal from '@/components/ReportNeedModal';
 import MakeDonationModal from '@/components/MakeDonationModal';
 import Animated, { 
@@ -21,10 +19,9 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-const AnimatedCard = Animated.createAnimatedComponent(Card);
+const AnimatedCard = Animated.createAnimatedComponent(Pressable);
 
 export default function HomeScreen() {
-  const { profile } = useAuth();
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [donationModalVisible, setDonationModalVisible] = useState(false);
 
@@ -54,12 +51,6 @@ export default function HomeScreen() {
   };
 
   const getUserName = () => {
-    if (profile?.full_name) {
-      return profile.full_name.split(' ')[0];
-    }
-    if (profile?.email) {
-      return profile.email.split('@')[0];
-    }
     return 'Friend';
   };
 
@@ -88,37 +79,33 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.actionCards}>
-          <Pressable onPress={handleReportPress}>
-            <AnimatedCard style={[styles.actionCard, styles.reportCard, reportCardAnimatedStyle]} mode="elevated">
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.iconContainer}>
-                  <MapPin size={40} color="#FFFFFF" />
-                </View>
-                <Text variant="headlineSmall" style={styles.cardTitle}>
-                  Report a Need
-                </Text>
-                <Text variant="bodyMedium" style={styles.cardDescription}>
-                  See someone who needs help? Let us know their location.
-                </Text>
-              </Card.Content>
-            </AnimatedCard>
-          </Pressable>
+          <AnimatedCard onPress={handleReportPress} style={[styles.actionCard, styles.reportCard, reportCardAnimatedStyle]}>
+            <View style={styles.cardContent}>
+              <View style={styles.iconContainer}>
+                <MapPin size={40} color="#FFFFFF" />
+              </View>
+              <Text variant="headlineSmall" style={styles.cardTitle}>
+                Report a Need
+              </Text>
+              <Text variant="bodyMedium" style={styles.cardDescription}>
+                See someone who needs help? Let us know their location.
+              </Text>
+            </View>
+          </AnimatedCard>
 
-          <Pressable onPress={handleDonationPress}>
-            <AnimatedCard style={[styles.actionCard, styles.donationCard, donationCardAnimatedStyle]} mode="elevated">
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.iconContainer}>
-                  <Gift size={40} color="#FFFFFF" />
-                </View>
-                <Text variant="headlineSmall" style={styles.cardTitle}>
-                  Make a Donation
-                </Text>
-                <Text variant="bodyMedium" style={styles.cardDescription}>
-                  Have surplus food or resources? Connect with those who need it.
-                </Text>
-              </Card.Content>
-            </AnimatedCard>
-          </Pressable>
+          <AnimatedCard onPress={handleDonationPress} style={[styles.actionCard, styles.donationCard, donationCardAnimatedStyle]}>
+            <View style={styles.cardContent}>
+              <View style={styles.iconContainer}>
+                <Gift size={40} color="#FFFFFF" />
+              </View>
+              <Text variant="headlineSmall" style={styles.cardTitle}>
+                Make a Donation
+              </Text>
+              <Text variant="bodyMedium" style={styles.cardDescription}>
+                Have surplus food or resources? Connect with those who need it.
+              </Text>
+            </View>
+          </AnimatedCard>
         </View>
 
         <View style={styles.statsSection}>
@@ -127,27 +114,27 @@ export default function HomeScreen() {
           </Text>
           
           <View style={styles.statsGrid}>
-            <Card style={styles.statCard} mode="contained">
-              <Card.Content style={styles.statContent}>
+            <View style={styles.statCard}>
+              <View style={styles.statContent}>
                 <Text variant="headlineMedium" style={styles.statNumber}>
                   1,247
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
                   People Helped
                 </Text>
-              </Card.Content>
-            </Card>
+              </View>
+            </View>
 
-            <Card style={styles.statCard} mode="contained">
-              <Card.Content style={styles.statContent}>
+            <View style={styles.statCard}>
+              <View style={styles.statContent}>
                 <Text variant="headlineMedium" style={styles.statNumber}>
                   89
                 </Text>
                 <Text variant="bodySmall" style={styles.statLabel}>
                   Active Volunteers
                 </Text>
-              </Card.Content>
-            </Card>
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -258,6 +245,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   statContent: {
     alignItems: 'center',

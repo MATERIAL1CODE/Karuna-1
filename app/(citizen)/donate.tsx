@@ -43,7 +43,6 @@ export default function DonateScreen() {
 
     setLoading(true);
     try {
-      // Here you would submit to Supabase
       console.log('Submitting donation:', {
         resourceType,
         quantity,

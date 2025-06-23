@@ -109,7 +109,6 @@ export default function ReportNeedModal({ visible, onDismiss }: ReportNeedModalP
 
     setLoading(true);
     try {
-      // Here you would submit to your backend
       console.log('Submitting report:', {
         location: markerCoordinate,
         peopleCount: Number(peopleCount),

@@ -78,7 +78,6 @@ export default function ReportScreen() {
 
     setLoading(true);
     try {
-      // Here you would submit to Supabase
       console.log('Submitting report:', {
         location: markerCoordinate,
         peopleCount,

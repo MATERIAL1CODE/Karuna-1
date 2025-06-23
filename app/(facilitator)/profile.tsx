@@ -155,7 +155,7 @@ export default function FacilitatorProfileScreen() {
 
         <Button
           mode="outlined"
-          onPress={() => router.replace('/(home)')}
+          onPress={() => router.replace('/(citizen)')}
           style={styles.switchRoleButton}
           contentStyle={styles.buttonContent}
           textColor="#4F46E5"
