@@ -10,34 +10,49 @@ import {
   Text,
   Appbar,
 } from 'react-native-paper';
-import { Bell, MapPin, Gift, ArrowLeft } from 'lucide-react-native';
+import { Bell, MapPin, Gift, ArrowLeft, Share2 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { SkeletonLoader, StatsCardSkeleton } from '@/components/SkeletonLoader';
+import { AnalyticsService } from '@/components/AnalyticsService';
+import { ShareService } from '@/components/ShareService';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const { communityImpactFeed, isLoadingData, fetchData, getTotalPeopleHelped } = useData();
 
   useEffect(() => {
+    // Track screen view
+    AnalyticsService.trackScreenView('citizen_dashboard');
+    
     // Fetch data when component mounts
     fetchData();
   }, []);
 
   const handleReportPress = () => {
+    AnalyticsService.trackUserAction('report_button_pressed');
     router.push('/(citizen)/(tabs)/home/report');
   };
 
   const handleDonationPress = () => {
+    AnalyticsService.trackUserAction('donation_button_pressed');
     router.push('/(citizen)/(tabs)/home/donate');
+  };
+
+  const handleSharePress = async () => {
+    AnalyticsService.trackUserAction('share_app_pressed');
+    await ShareService.shareAppInvitation();
   };
 
   const totalPeopleHelped = getTotalPeopleHelped();
 
   return (
     <SafeAreaView style={styles.container}>
+      <OfflineIndicator />
+      
       <Appbar.Header style={styles.header} elevated={false}>
         <Appbar.Action 
           icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
@@ -48,6 +63,10 @@ export default function CitizenDashboard() {
             Hello, {user?.name || 'Friend'}! 👋
           </Text>
         </View>
+        <Appbar.Action 
+          icon={() => <Share2 size={24} color={colors.neutral[600]} />} 
+          onPress={handleSharePress} 
+        />
         <Appbar.Action 
           icon={() => <Bell size={24} color={colors.neutral[600]} />} 
           onPress={() => {}} 
@@ -77,6 +96,11 @@ export default function CitizenDashboard() {
                 <Text variant="bodyMedium" style={styles.cardDescription}>
                   See someone who needs help? Let us know their location and we'll coordinate assistance.
                 </Text>
+                <View style={styles.cardFeatures}>
+                  <Text style={styles.cardFeature}>• Quick location reporting</Text>
+                  <Text style={styles.cardFeature}>• Video context support</Text>
+                  <Text style={styles.cardFeature}>• Real-time tracking</Text>
+                </View>
               </View>
             </View>
           </Pressable>
@@ -93,6 +117,11 @@ export default function CitizenDashboard() {
                 <Text variant="bodyMedium" style={styles.cardDescription}>
                   Have surplus food or resources? Connect with those who need it most.
                 </Text>
+                <View style={styles.cardFeatures}>
+                  <Text style={styles.cardFeature}>• Easy pickup scheduling</Text>
+                  <Text style={styles.cardFeature}>• Impact tracking</Text>
+                  <Text style={styles.cardFeature}>• Thank you letters</Text>
+                </View>
               </View>
             </View>
           </Pressable>
@@ -136,6 +165,32 @@ export default function CitizenDashboard() {
                     </Text>
                   </View>
                 </View>
+              </View>
+
+              <View style={styles.recentImpactSection}>
+                <Text variant="titleMedium" style={styles.recentImpactTitle}>
+                  Recent Community Impact
+                </Text>
+                {communityImpactFeed.slice(0, 3).map((item) => (
+                  <View key={item.id} style={styles.impactItem}>
+                    <View style={styles.impactItemContent}>
+                      <Text variant="titleSmall" style={styles.impactItemTitle}>
+                        {item.title}
+                      </Text>
+                      <Text variant="bodySmall" style={styles.impactItemDescription}>
+                        {item.description}
+                      </Text>
+                      <View style={styles.impactItemFooter}>
+                        <Text variant="bodySmall" style={styles.impactItemDate}>
+                          {item.date}
+                        </Text>
+                        <Text variant="bodySmall" style={styles.impactItemPeople}>
+                          {item.peopleHelped} people helped
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
               </View>
             </>
           )}
@@ -197,7 +252,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: spacing['3xl'],
     gap: spacing['2xl'],
   },
@@ -223,7 +278,17 @@ const styles = StyleSheet.create({
   cardDescription: {
     color: colors.neutral[500],
     lineHeight: 20,
+    marginBottom: spacing['2xl'],
     fontFamily: 'Inter-Regular',
+  },
+  cardFeatures: {
+    gap: spacing.md,
+  },
+  cardFeature: {
+    color: colors.neutral[600],
+    fontSize: 14,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: 'Inter-Medium',
   },
   communityImpactSection: {
     backgroundColor: colors.surface,
@@ -248,6 +313,7 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     gap: spacing['2xl'],
+    marginBottom: spacing['4xl'],
   },
   statCard: {
     flex: 1,
@@ -269,5 +335,48 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: typography.fontWeight.medium,
     fontFamily: 'Inter-Medium',
+  },
+  recentImpactSection: {
+    gap: spacing['2xl'],
+  },
+  recentImpactTitle: {
+    fontWeight: typography.fontWeight.bold,
+    color: colors.neutral[800],
+    marginBottom: spacing['2xl'],
+    fontFamily: 'Inter-Bold',
+  },
+  impactItem: {
+    backgroundColor: colors.neutral[50],
+    borderRadius: borderRadius.lg,
+    padding: spacing['2xl'],
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary[600],
+  },
+  impactItemContent: {
+    gap: spacing.lg,
+  },
+  impactItemTitle: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neutral[800],
+    fontFamily: 'Inter-SemiBold',
+  },
+  impactItemDescription: {
+    color: colors.neutral[600],
+    lineHeight: 18,
+    fontFamily: 'Inter-Regular',
+  },
+  impactItemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  impactItemDate: {
+    color: colors.neutral[500],
+    fontFamily: 'Inter-Regular',
+  },
+  impactItemPeople: {
+    color: colors.success[600],
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: 'Inter-SemiBold',
   },
 });

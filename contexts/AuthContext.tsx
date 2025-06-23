@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { AnalyticsService } from '@/components/AnalyticsService';
 
 interface User {
   name: string;
   role: 'citizen' | 'facilitator';
   email?: string;
   phone?: string;
+  id?: string;
+  joinedDate?: string;
 }
 
 interface AuthContextType {
@@ -34,25 +37,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const newUser: User = {
+      id: `user_${Date.now()}`,
       name: userData?.name || (role === 'citizen' ? 'Community Member' : 'Community Volunteer'),
       role,
       email: userData?.email || (role === 'citizen' ? 'member@example.com' : 'volunteer@example.com'),
       phone: userData?.phone || (role === 'citizen' ? '+91 98765 43210' : '+91 87654 32109'),
+      joinedDate: new Date().toISOString(),
     };
     
     setUser(newUser);
     setIsAuthenticated(true);
     setIsLoading(false);
+
+    // Update analytics with user information
+    AnalyticsService.updateUserProperties({
+      userId: newUser.id,
+      userType: newUser.role,
+    });
+
+    // Track login event
+    AnalyticsService.trackUserAction('user_login', {
+      userRole: newUser.role,
+      loginMethod: 'role_selection',
+    });
   };
 
   const logout = () => {
+    if (user) {
+      AnalyticsService.trackUserAction('user_logout', {
+        userRole: user.role,
+        sessionDuration: Date.now() - new Date(user.joinedDate || '').getTime(),
+      });
+    }
+
     setUser(null);
     setIsAuthenticated(false);
+    AnalyticsService.clearData();
   };
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
-      setUser({ ...user, ...userData });
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      
+      // Track profile update
+      AnalyticsService.trackUserAction('profile_updated', {
+        updatedFields: Object.keys(userData),
+      });
     }
   };
 

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { AnalyticsService } from '@/components/AnalyticsService';
+import { NotificationService } from '@/components/NotificationService';
 
 export interface ActivityItem {
   id: string;
@@ -94,10 +96,13 @@ export function DataProvider({ children }: DataProviderProps) {
   const fetchData = async () => {
     setIsLoadingData(true);
     
+    // Track data fetch event
+    AnalyticsService.trackUserAction('data_fetch_started');
+    
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Mock activities data
+    // Mock activities data with enhanced stories
     const mockActivities: ActivityItem[] = [
       {
         id: '1',
@@ -158,14 +163,47 @@ The Sahayata Team`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       },
+      {
+        id: '4',
+        type: 'donation',
+        title: 'Clothing Donation',
+        subtitle: 'Item: Winter Clothes for 8 People',
+        status: 'pending',
+        date: '3 hours ago',
+        peopleHelped: 8,
+      },
+      {
+        id: '5',
+        type: 'report',
+        title: 'Elderly Couple Reported',
+        subtitle: 'Location: Saket District Centre',
+        status: 'completed',
+        date: '1 week ago',
+        peopleHelped: 2,
+        aiGeneratedLetterSnippet: '...knowing someone cared enough to report their situation gave them hope.',
+        fullAiGeneratedLetter: `Dear Kind Soul,
+
+Your report about the elderly couple near Saket District Centre touched our hearts, and we wanted you to know the beautiful outcome of your compassion.
+
+The couple, married for 45 years, had been struggling after the husband's recent illness left them unable to work. Your alert led our team to connect them with medical assistance and ongoing support from our partner healthcare clinic.
+
+Today, they are receiving regular medical care, nutritious meals, and most importantly, they know they are not forgotten. The wife mentioned that knowing someone cared enough to report their situation gave them hope when they had almost lost it.
+
+Your awareness and action reminded them—and us—that humanity's greatest strength lies in how we care for one another.
+
+With sincere gratitude,
+The Sahayata Team`,
+        blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
+        ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      },
     ];
 
-    // Mock community impact feed
+    // Enhanced community impact feed
     const mockCommunityImpact: CommunityImpactItem[] = [
       {
         id: '1',
         title: 'Emergency Food Distribution',
-        description: 'Community volunteers distributed 500 meals to families in need',
+        description: 'Community volunteers distributed 500 meals to families affected by recent flooding',
         peopleHelped: 500,
         date: '3 hours ago',
         type: 'mission',
@@ -173,7 +211,7 @@ The Sahayata Team`,
       {
         id: '2',
         title: 'Winter Clothing Drive',
-        description: 'Warm clothes provided to homeless individuals',
+        description: 'Warm clothes and blankets provided to homeless individuals during cold wave',
         peopleHelped: 75,
         date: '1 day ago',
         type: 'donation',
@@ -181,22 +219,38 @@ The Sahayata Team`,
       {
         id: '3',
         title: 'Medical Aid Response',
-        description: 'Quick response team provided medical assistance',
+        description: 'Quick response team provided medical assistance to elderly residents',
         peopleHelped: 12,
         date: '2 days ago',
         type: 'report',
       },
+      {
+        id: '4',
+        title: 'School Supply Distribution',
+        description: 'Educational materials distributed to underprivileged children',
+        peopleHelped: 150,
+        date: '3 days ago',
+        type: 'donation',
+      },
+      {
+        id: '5',
+        title: 'Community Kitchen Setup',
+        description: 'Temporary kitchen established to serve daily meals',
+        peopleHelped: 200,
+        date: '1 week ago',
+        type: 'mission',
+      },
     ];
 
-    // Mock missions for facilitators
+    // Enhanced missions for facilitators
     const mockMissions: Mission[] = [
       {
         id: '1',
         title: 'Food for 4 People',
         pickupLocation: "Anna's Cafe, Saket District Centre",
         deliveryLocation: 'Underneath Lajpat Nagar Flyover',
-        pickupContact: 'Sarah Miller',
-        deliveryContact: 'Local Coordinator',
+        pickupContact: 'Sarah Miller (+91 98765 43210)',
+        deliveryContact: 'Local Coordinator (+91 87654 32109)',
         pickupTime: '2:00 PM',
         deliveryTime: '3:00 PM',
         type: 'Food',
@@ -210,8 +264,8 @@ The Sahayata Team`,
         title: 'Clothing for Family',
         pickupLocation: 'Green Valley Mall, Sector 18',
         deliveryLocation: 'Near Railway Station Platform 2',
-        pickupContact: 'Mike Johnson',
-        deliveryContact: 'Community Volunteer',
+        pickupContact: 'Mike Johnson (+91 98765 43211)',
+        deliveryContact: 'Community Volunteer (+91 87654 32110)',
         pickupTime: '4:00 PM',
         deliveryTime: '5:00 PM',
         type: 'Clothing',
@@ -220,9 +274,24 @@ The Sahayata Team`,
         eta: '60 mins',
         status: 'available',
       },
+      {
+        id: '3',
+        title: 'Emergency Medicine Delivery',
+        pickupLocation: 'City Hospital Pharmacy',
+        deliveryLocation: 'Community Health Center',
+        pickupContact: 'Dr. Patel (+91 98765 43212)',
+        deliveryContact: 'Nurse Station (+91 87654 32111)',
+        pickupTime: '1:00 PM',
+        deliveryTime: '1:30 PM',
+        type: 'Medicine',
+        urgency: 'high',
+        distance: '2.8 km',
+        eta: '30 mins',
+        status: 'available',
+      },
     ];
 
-    // Mock completed missions
+    // Enhanced completed missions
     const mockCompletedMissions: Mission[] = [
       {
         id: 'c1',
@@ -239,6 +308,21 @@ The Sahayata Team`,
         eta: '30 mins',
         status: 'completed',
       },
+      {
+        id: 'c2',
+        title: 'Medicine Distribution',
+        pickupLocation: 'Medical Store',
+        deliveryLocation: 'Elder Care Home',
+        pickupContact: 'Pharmacist',
+        deliveryContact: 'Care Manager',
+        pickupTime: '10:00 AM',
+        deliveryTime: '11:00 AM',
+        type: 'Medicine',
+        urgency: 'medium',
+        distance: '4.2 km',
+        eta: '45 mins',
+        status: 'completed',
+      },
     ];
 
     setActivities(mockActivities);
@@ -246,6 +330,13 @@ The Sahayata Team`,
     setMissions(mockMissions);
     setCompletedMissions(mockCompletedMissions);
     setIsLoadingData(false);
+
+    // Track successful data fetch
+    AnalyticsService.trackUserAction('data_fetch_completed', {
+      activitiesCount: mockActivities.length,
+      missionsCount: mockMissions.length,
+      impactItemsCount: mockCommunityImpact.length,
+    });
   };
 
   const addActivity = (newActivity: Omit<ActivityItem, 'id' | 'date'>) => {
@@ -256,6 +347,13 @@ The Sahayata Team`,
     };
     
     setActivities(prev => [activity, ...prev]);
+    
+    // Track activity creation
+    AnalyticsService.trackUserAction('activity_created', {
+      activityType: newActivity.type,
+      status: newActivity.status,
+      peopleHelped: newActivity.peopleHelped,
+    });
     
     // Also add to community impact feed
     const impactItem: CommunityImpactItem = {
@@ -268,26 +366,70 @@ The Sahayata Team`,
     };
     
     setCommunityImpactFeed(prev => [impactItem, ...prev]);
+
+    // Send notification for activity creation
+    NotificationService.scheduleLocalNotification({
+      title: 'Activity Logged Successfully',
+      body: `Your ${newActivity.type} has been recorded and will be processed soon.`,
+      data: { activityId: activity.id, type: newActivity.type },
+    }, 2);
   };
 
   const updateActivityStatus = (id: string, status: ActivityItem['status'], additionalData?: Partial<ActivityItem>) => {
     setActivities(prev => 
-      prev.map(activity => 
-        activity.id === id 
-          ? { ...activity, status, ...additionalData }
-          : activity
-      )
+      prev.map(activity => {
+        if (activity.id === id) {
+          const updatedActivity = { ...activity, status, ...additionalData };
+          
+          // Track status update
+          AnalyticsService.trackUserAction('activity_status_updated', {
+            activityId: id,
+            activityType: activity.type,
+            oldStatus: activity.status,
+            newStatus: status,
+            peopleHelped: updatedActivity.peopleHelped,
+          });
+
+          // Send notification for completed activities
+          if (status === 'completed' && additionalData?.fullAiGeneratedLetter) {
+            NotificationService.sendImpactStoryNotification(
+              activity.type,
+              updatedActivity.peopleHelped || 1
+            );
+          }
+
+          return updatedActivity;
+        }
+        return activity;
+      })
     );
   };
 
   const acceptMission = (missionId: string) => {
-    setMissions(prev => 
-      prev.map(mission => 
-        mission.id === missionId 
-          ? { ...mission, status: 'accepted' }
-          : mission
-      )
-    );
+    const mission = missions.find(m => m.id === missionId);
+    if (mission) {
+      setMissions(prev => 
+        prev.map(m => 
+          m.id === missionId 
+            ? { ...m, status: 'accepted' }
+            : m
+        )
+      );
+
+      // Track mission acceptance
+      AnalyticsService.trackMissionEvent('mission_accepted', {
+        missionId,
+        missionType: mission.type,
+        distance: mission.distance,
+      });
+
+      // Send notification
+      NotificationService.sendMissionUpdateNotification(
+        mission.title,
+        'accepted',
+        'You'
+      );
+    }
   };
 
   const completeMission = (missionId: string) => {
@@ -296,6 +438,20 @@ The Sahayata Team`,
       const completedMission = { ...mission, status: 'completed' as const };
       setCompletedMissions(prev => [completedMission, ...prev]);
       setMissions(prev => prev.filter(m => m.id !== missionId));
+
+      // Track mission completion
+      AnalyticsService.trackMissionEvent('mission_completed', {
+        missionId,
+        missionType: mission.type,
+        distance: mission.distance,
+      });
+
+      // Send notification
+      NotificationService.sendMissionUpdateNotification(
+        mission.title,
+        'completed',
+        'You'
+      );
     }
   };
 

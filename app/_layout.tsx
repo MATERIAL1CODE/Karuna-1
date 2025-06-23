@@ -11,6 +11,9 @@ import { lightTheme, createExtendedTheme } from '@/lib/themes';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DataProvider } from '@/contexts/DataContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AnalyticsService } from '@/components/AnalyticsService';
+import { NotificationService } from '@/components/NotificationService';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -28,6 +31,23 @@ function AppContent() {
     'Merriweather-Bold': Merriweather_700Bold,
   });
 
+  // Initialize services
+  useEffect(() => {
+    const initializeServices = async () => {
+      // Request notification permissions
+      await NotificationService.requestPermissions();
+      
+      // Initialize analytics
+      AnalyticsService.initialize({
+        userType: 'citizen', // Default, will be updated on login
+      });
+    };
+
+    if (fontsLoaded || fontError) {
+      initializeServices();
+    }
+  }, [fontsLoaded, fontError]);
+
   // Hide splash screen once fonts are loaded
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -44,16 +64,18 @@ function AppContent() {
   const currentTheme = createExtendedTheme(lightTheme);
 
   return (
-    <PaperProvider theme={currentTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(home)" />
-        <Stack.Screen name="(citizen)" />
-        <Stack.Screen name="(facilitator)" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="dark" />
-    </PaperProvider>
+    <ErrorBoundary>
+      <PaperProvider theme={currentTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(home)" />
+          <Stack.Screen name="(citizen)" />
+          <Stack.Screen name="(facilitator)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="dark" />
+      </PaperProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -61,12 +83,14 @@ export default function RootLayout() {
   useFrameworkReady();
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <DataProvider>
-          <AppContent />
-        </DataProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <DataProvider>
+            <AppContent />
+          </DataProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

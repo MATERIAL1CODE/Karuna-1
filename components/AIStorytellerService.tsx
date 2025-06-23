@@ -8,15 +8,118 @@ export interface AIStorytellerResponse {
 }
 
 export class AIStorytellerService {
-  // Mock AI Storyteller function for reports
+  // Enhanced AI Storyteller function for reports using API route
   static async generateReportStory(
     peopleCount: number,
     location?: { latitude: number; longitude: number },
     description?: string,
     videoUri?: string
   ): Promise<AIStorytellerResponse> {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    try {
+      const response = await fetch('/api/ai-storyteller', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'report',
+          data: {
+            peopleCount,
+            location,
+            description,
+            videoUri,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate story');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error generating report story:', error);
+      // Fallback to mock data
+      return this.generateMockReportStory(peopleCount, location, description, videoUri);
+    }
+  }
+
+  // Enhanced AI Storyteller function for donations using API route
+  static async generateDonationStory(
+    resourceType: string,
+    quantity: string,
+    notes?: string
+  ): Promise<AIStorytellerResponse> {
+    try {
+      const response = await fetch('/api/ai-storyteller', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'donation',
+          data: {
+            resourceType,
+            quantity,
+            notes,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate story');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error generating donation story:', error);
+      // Fallback to mock data
+      return this.generateMockDonationStory(resourceType, quantity, notes);
+    }
+  }
+
+  // Generate story for completed missions using API route
+  static async generateMissionCompletionStory(
+    missionTitle: string,
+    peopleHelped: number,
+    missionType: string
+  ): Promise<AIStorytellerResponse> {
+    try {
+      const response = await fetch('/api/ai-storyteller', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'mission',
+          data: {
+            missionTitle,
+            peopleHelped,
+            missionType,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate story');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error generating mission story:', error);
+      // Fallback to mock data
+      return this.generateMockMissionStory(missionTitle, peopleHelped, missionType);
+    }
+  }
+
+  // Fallback mock functions for offline/error scenarios
+  private static async generateMockReportStory(
+    peopleCount: number,
+    location?: { latitude: number; longitude: number },
+    description?: string,
+    videoUri?: string
+  ): Promise<AIStorytellerResponse> {
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     const locationText = location 
       ? `the area near ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
@@ -49,14 +152,12 @@ The Sahayata Team`,
     };
   }
 
-  // Mock AI Storyteller function for donations
-  static async generateDonationStory(
+  private static async generateMockDonationStory(
     resourceType: string,
     quantity: string,
     notes?: string
   ): Promise<AIStorytellerResponse> {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     const estimatedPeopleHelped = resourceType.toLowerCase().includes('meal') 
       ? parseInt(quantity) || 1 
@@ -86,14 +187,12 @@ The Sahayata Team`,
     };
   }
 
-  // Generate story for completed missions (facilitator perspective)
-  static async generateMissionCompletionStory(
+  private static async generateMockMissionStory(
     missionTitle: string,
     peopleHelped: number,
     missionType: string
   ): Promise<AIStorytellerResponse> {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     return {
       letterText: `Dear Dedicated Facilitator,
