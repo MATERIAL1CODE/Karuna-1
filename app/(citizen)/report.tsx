@@ -18,7 +18,7 @@ import {
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { Video } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { MapPin, Video as VideoIcon, SkipForward, RotateCcw, Play, Pause, Trash2 } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 
@@ -73,11 +73,15 @@ export default function ReportScreen() {
   const [recordedVideoUri, setRecordedVideoUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const cameraRef = useRef<CameraView>(null);
-  const videoRef = useRef<Video>(null);
   const recordingTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Video player for preview
+  const player = useVideoPlayer(recordedVideoUri || '', (player) => {
+    player.loop = true;
+    player.muted = true;
+  });
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -386,18 +390,11 @@ export default function ReportScreen() {
 
     return (
       <View style={styles.videoPreviewContainer}>
-        <Video
-          ref={videoRef}
+        <VideoView
           style={styles.videoPreview}
-          source={{ uri: recordedVideoUri }}
-          useNativeControls
-          resizeMode="contain"
-          isLooping
-          onPlaybackStatusUpdate={(status: any) => {
-            if (status.isLoaded) {
-              setIsPlaying(status.isPlaying);
-            }
-          }}
+          player={player}
+          allowsFullscreen
+          allowsPictureInPicture
         />
         <View style={styles.videoPreviewOverlay}>
           <Text variant="bodySmall" style={styles.videoDuration}>

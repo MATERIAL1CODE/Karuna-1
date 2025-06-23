@@ -18,7 +18,7 @@ import {
   IconButton,
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Video } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { MapPin, User, Clock, Phone, TriangleAlert as AlertTriangle, Video as VideoIcon, X, Play } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import ReportIssueModal from '@/components/ReportIssueModal';
@@ -39,6 +39,12 @@ export default function MissionDetailScreen() {
   const [missionState, setMissionState] = useState<MissionState>('accepted');
   const [reportIssueVisible, setReportIssueVisible] = useState(false);
   const [videoModalVisible, setVideoModalVisible] = useState(false);
+
+  // Video player for modal
+  const player = useVideoPlayer(mockMissionData.videoUri || '', (player) => {
+    player.loop = true;
+    player.muted = false;
+  });
 
   const getPrimaryActionText = () => {
     switch (missionState) {
@@ -142,12 +148,11 @@ export default function MissionDetailScreen() {
               </Text>
             </View>
           ) : (
-            <Video
+            <VideoView
               style={styles.videoPlayer}
-              source={{ uri: mockMissionData.videoUri || '' }}
-              useNativeControls
-              resizeMode="contain"
-              shouldPlay={false}
+              player={player}
+              allowsFullscreen
+              allowsPictureInPicture
             />
           )}
           
