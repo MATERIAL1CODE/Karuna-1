@@ -23,7 +23,6 @@ import {
   User, 
   Award, 
   Settings, 
-  ArrowLeft, 
   CircleHelp as HelpCircle, 
   Info, 
   Star, 
@@ -72,7 +71,13 @@ export default function FacilitatorProfileScreen() {
           text: 'Sign Out',
           style: 'destructive',
           onPress: async () => {
-            await signOut();
+            try {
+              await signOut();
+              // Navigation will be handled automatically by auth state change
+            } catch (error) {
+              console.error('Error signing out:', error);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
           },
         },
       ]
@@ -84,10 +89,6 @@ export default function FacilitatorProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
-        <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={theme.colors.onSurface} />} 
-          onPress={() => router.replace('/(home)')} 
-        />
         <Appbar.Content title="Profile" titleStyle={styles.headerTitle} />
         <Appbar.Action 
           icon={() => <Save size={24} color={theme.colors.primary} />} 

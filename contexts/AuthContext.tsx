@@ -21,7 +21,6 @@ interface AuthContextType {
   signIn: (email: string, password: string, selectedRole: 'citizen' | 'facilitator') => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<Pick<User, 'name' | 'email' | 'phone'>>) => void;
-  login: (role: 'citizen' | 'facilitator') => Promise<void>; // Keep for compatibility
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -205,19 +204,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Keep login function for compatibility with existing code
-  const login = async (role: 'citizen' | 'facilitator'): Promise<void> => {
-    // Mock login for demo purposes - in real app this would be removed
-    const mockUser: User = {
-      id: 'mock-user-id',
-      email: 'user@example.com',
-      name: 'Demo User',
-      role: role,
-      created_at: new Date().toISOString(),
-    };
-    setUser(mockUser);
-  };
-
   const value: AuthContextType = {
     user,
     session,
@@ -227,7 +213,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     updateUser,
-    login,
   };
 
   return (

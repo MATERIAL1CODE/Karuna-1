@@ -21,20 +21,15 @@ export default function IndexScreen() {
     return <Redirect href="/auth" />;
   }
 
-  // Redirect based on user role
+  // Redirect based on user role - DIRECT navigation without intermediate screens
   if (user.role === 'citizen') {
     return <Redirect href="/(citizen)/(tabs)/home" />;
   } else if (user.role === 'facilitator') {
     return <Redirect href="/(facilitator)" />;
   }
 
-  // Fallback for users without a defined role
-  return (
-    <View style={styles.errorContainer}>
-      <Text variant="titleLarge">Error: User role not defined</Text>
-      <Text variant="bodyMedium">Please contact support for assistance.</Text>
-    </View>
-  );
+  // Fallback - redirect to auth if role is undefined
+  return <Redirect href="/auth" />;
 }
 
 const styles = StyleSheet.create({
@@ -43,12 +38,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 24,
   },
 });
