@@ -8,9 +8,10 @@
     "build:web": "expo export --platform web",
     "lint": "expo lint",
     "check:env": "node scripts/check-env.js",
-    "setup:db": "node scripts/check-env.js && node scripts/setup-database.js",
+    "setup:db": "node scripts/setup-database.js",
     "db:verify": "echo 'Please run the verification SQL in your Supabase dashboard SQL Editor'",
-    "db:reset": "echo 'WARNING: This will reset your database. Use with caution.'"
+    "db:reset": "echo 'WARNING: This will reset your database. Use with caution.'",
+    "deploy:functions": "echo 'Deploy Edge Functions manually in Supabase dashboard'"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",

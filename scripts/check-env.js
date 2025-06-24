@@ -7,6 +7,9 @@
  * and provides helpful guidance for setting them up.
  */
 
+// Load environment variables first
+require('dotenv').config();
+
 const requiredVars = [
   'EXPO_PUBLIC_SUPABASE_URL',
   'EXPO_PUBLIC_SUPABASE_ANON_KEY',
@@ -18,8 +21,6 @@ const optionalVars = [
 ];
 
 function checkEnvironmentVariables() {
-  console.log('🔍 Checking environment variables...\n');
-  
   const missing = [];
   const present = [];
   
@@ -35,27 +36,30 @@ function checkEnvironmentVariables() {
   });
   
   // Check optional variables
-  console.log('\nOptional variables:');
-  optionalVars.forEach(varName => {
-    if (process.env[varName]) {
-      console.log(`✅ ${varName}: Set`);
-    } else {
-      console.log(`⚠️  ${varName}: Not set (optional)`);
-    }
-  });
+  if (optionalVars.length > 0) {
+    console.log('\nOptional variables:');
+    optionalVars.forEach(varName => {
+      if (process.env[varName]) {
+        console.log(`✅ ${varName}: Set`);
+      } else {
+        console.log(`⚠️  ${varName}: Not set (optional)`);
+      }
+    });
+  }
   
   if (missing.length > 0) {
     console.log('\n❌ Missing required environment variables!');
     console.log('\n📋 Setup Instructions:');
-    console.log('1. Copy .env.example to .env:');
+    console.log('1. Make sure .env file exists in your project root');
+    console.log('2. Copy from .env.example if needed:');
     console.log('   cp .env.example .env');
-    console.log('\n2. Get your Supabase credentials:');
+    console.log('\n3. Get your Supabase credentials:');
     console.log('   • Go to https://supabase.com/dashboard');
     console.log('   • Select your project');
     console.log('   • Go to Settings > API');
     console.log('   • Copy the Project URL and anon/service_role keys');
-    console.log('\n3. Update your .env file with the actual values');
-    console.log('\n4. Run this script again to verify');
+    console.log('\n4. Update your .env file with the actual values');
+    console.log('5. Run this script again to verify');
     
     return false;
   }
@@ -65,6 +69,7 @@ function checkEnvironmentVariables() {
 }
 
 if (require.main === module) {
+  console.log('🔍 Checking environment variables...\n');
   const success = checkEnvironmentVariables();
   process.exit(success ? 0 : 1);
 }
