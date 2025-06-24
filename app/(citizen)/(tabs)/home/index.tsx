@@ -10,7 +10,7 @@ import {
   Text,
   Appbar,
 } from 'react-native-paper';
-import { Bell, MapPin, Gift, ArrowLeft, Share2 } from 'lucide-react-native';
+import { Bell, MapPin, Gift, Share2 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,10 +54,6 @@ export default function CitizenDashboard() {
       <OfflineIndicator />
       
       <Appbar.Header style={styles.header} elevated={false}>
-        <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
-          onPress={() => router.replace('/(home)')} 
-        />
         <View style={styles.headerContent}>
           <Text variant="headlineSmall" style={styles.welcomeText}>
             Hello, {user?.name || 'Friend'}! 👋

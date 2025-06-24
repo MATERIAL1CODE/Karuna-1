@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Text, Appbar } from 'react-native-paper';
 import { router } from 'expo-router';
-import { ArrowLeft, List, Map, MapPin } from 'lucide-react-native';
+import { List, Map, MapPin } from 'lucide-react-native';
 import { colors, spacing, borderRadius, shadows, typography } from '@/lib/design-tokens';
 import { useData, Mission } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,10 +56,6 @@ export default function FacilitatorDashboard() {
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header} elevated={false}>
-        <Appbar.Action 
-          icon={() => <ArrowLeft size={24} color={colors.neutral[600]} />} 
-          onPress={() => router.replace('/(home)')} 
-        />
         <Appbar.Content title="Available Missions" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 

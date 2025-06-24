@@ -37,6 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session ? 'Found session' : 'No session');
       setSession(session);
       if (session?.user) {
         loadUserProfile(session.user);
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session ? 'Session exists' : 'No session');
         setSession(session);
         
         if (session?.user) {
@@ -71,6 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const loadUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
+      console.log('Loading profile for user:', supabaseUser.id);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -84,6 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (profile) {
+        console.log('Profile loaded:', profile.role);
         const userData: User = {
           id: profile.id,
           email: supabaseUser.email || '',
@@ -114,6 +118,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     role: 'citizen' | 'facilitator'
   ): Promise<{ error?: string }> => {
     try {
+      console.log('Signing up user with role:', role);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -126,9 +131,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (error) {
+        console.error('Sign up error:', error);
         return { error: error.message };
       }
 
+      console.log('Sign up successful');
       // Track successful sign up
       AnalyticsService.trackUserAction('user_signed_up', {
         userRole: role,
@@ -137,6 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return {};
     } catch (error) {
+      console.error('Sign up exception:', error);
       return { error: 'An unexpected error occurred during sign up' };
     }
   };
@@ -147,16 +155,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     selectedRole: 'citizen' | 'facilitator'
   ): Promise<{ error?: string }> => {
     try {
+      console.log('Signing in user with selected role:', selectedRole);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Sign in error:', error);
         return { error: error.message };
       }
 
       if (data.user) {
+        console.log('Sign in successful, checking profile...');
         // Check the user's actual role from the profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -165,11 +176,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           .single();
 
         if (profileError) {
+          console.error('Profile check error:', profileError);
           // Sign out the user since we can't verify their role
           await supabase.auth.signOut();
           return { error: 'Unable to verify account details. Please try again.' };
         }
 
+        console.log('User actual role:', profile.role, 'Selected role:', selectedRole);
         if (profile.role !== selectedRole) {
           // Sign out the user since role doesn't match
           await supabase.auth.signOut();
@@ -179,20 +192,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
             error: `This account is registered as a ${correctRole}. Please sign in as a ${correctRole} or create a new account for ${attemptedRole}.` 
           };
         }
+
+        console.log('Role validation successful');
       }
 
       return {};
     } catch (error) {
+      console.error('Sign in exception:', error);
       return { error: 'An unexpected error occurred during sign in' };
     }
   };
 
   const signOut = async (): Promise<void> => {
     try {
+      console.log('Signing out user');
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       AnalyticsService.clearData();
+      console.log('Sign out successful');
     } catch (error) {
       console.error('Error signing out:', error);
     }
