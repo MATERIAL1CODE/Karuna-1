@@ -167,7 +167,7 @@ Thank you for trusting me to deliver your kindness. It's moments like these that
 
 With heartfelt gratitude,
 Priya Sharma
-Sahayata Facilitator`,
+Karuna Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         completedAt: '2024-01-15T14:30:00Z',
@@ -200,7 +200,7 @@ Sometimes the smallest acts of awareness create the biggest changes. Thank you f
 
 With deep appreciation,
 Rajesh Kumar
-Sahayata Facilitator`,
+Karuna Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         completedAt: '2024-01-14T16:45:00Z',
@@ -244,7 +244,7 @@ Thank you for seeing them when the world seemed to look away.
 
 With sincere gratitude,
 Anita Verma
-Sahayata Facilitator`,
+Karuna Facilitator`,
         blockchainTransactionLink: 'https://polygonscan.com/tx/0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba',
         ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         completedAt: '2024-01-08T11:20:00Z',

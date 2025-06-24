@@ -39,7 +39,7 @@ export default function LoadingScreen() {
         <Heart size={48} color={theme.colors.primary} />
       </Animated.View>
       <Text variant="headlineSmall" style={styles.title}>
-        Sahayata
+        Karuna
       </Text>
       <Text variant="bodyMedium" style={styles.subtitle}>
         Loading your experience...

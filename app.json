@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "bolt-expo-nativewind",
-    "slug": "bolt-expo-nativewind",
+    "name": "Karuna",
+    "slug": "karuna-community-aid",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "karuna",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -23,7 +23,7 @@
       [
         "expo-router",
         {
-          "origin": "https://sahayata-app.com/"
+          "origin": "https://karuna-app.com/"
         }
       ]
     ],

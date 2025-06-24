@@ -136,7 +136,7 @@ export default function LetterOfThanksScreen() {
                 )}
                 <View style={styles.logoTextContainer}>
                   <Text variant="titleMedium" style={styles.organizationName}>
-                    Sahayata
+                    Karuna
                   </Text>
                   <Text variant="bodySmall" style={styles.organizationTagline}>
                     Making a Difference Together
@@ -153,7 +153,7 @@ export default function LetterOfThanksScreen() {
                   {letterData.facilitatorName}
                 </Text>
                 <Text variant="bodySmall" style={styles.facilitatorTitle}>
-                  Sahayata Facilitator
+                  Karuna Facilitator
                 </Text>
               </View>
 

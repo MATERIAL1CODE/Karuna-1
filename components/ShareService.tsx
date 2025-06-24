@@ -20,7 +20,7 @@ export class ShareService {
     missionTitle: string,
     peopleHelped: number
   ): Promise<boolean> {
-    const shareText = `🎉 Just completed "${missionTitle}" and helped ${peopleHelped} people through Sahayata! Every small act of kindness makes a big difference. #Sahayata #CommunitySupport #MakingADifference`;
+    const shareText = `🎉 Just completed "${missionTitle}" and helped ${peopleHelped} people through Karuna! Every small act of kindness makes a big difference. #Karuna #CommunitySupport #MakingADifference`;
     
     if (Platform.OS === 'web') {
       return this.shareOnWeb(shareText);
@@ -32,7 +32,7 @@ export class ShareService {
 
   // Share app invitation
   static async shareAppInvitation(): Promise<boolean> {
-    const shareText = `Join me on Sahayata - an app that connects people in need with those who can help. Together, we can make our community stronger! 🤝 Download: https://sahayata-app.com #Sahayata #CommunitySupport`;
+    const shareText = `Join me on Karuna - an app that connects people in need with those who can help. Together, we can make our community stronger! 🤝 Download: https://karuna-app.com #Karuna #CommunitySupport`;
     
     if (Platform.OS === 'web') {
       return this.shareOnWeb(shareText);
@@ -45,14 +45,14 @@ export class ShareService {
   // Generate share text for activities
   private static generateShareText(activity: ActivityItem): string {
     const baseText = activity.type === 'donation' 
-      ? `💝 Just made a donation through Sahayata and helped ${activity.peopleHelped} people!`
-      : `📍 Reported people in need through Sahayata and helped connect ${activity.peopleHelped} people with support!`;
+      ? `💝 Just made a donation through Karuna and helped ${activity.peopleHelped} people!`
+      : `📍 Reported people in need through Karuna and helped connect ${activity.peopleHelped} people with support!`;
     
     const impactText = activity.aiGeneratedLetterSnippet 
       ? ` ${activity.aiGeneratedLetterSnippet}`
       : '';
     
-    return `${baseText}${impactText} Every act of kindness matters. #Sahayata #CommunitySupport #MakingADifference`;
+    return `${baseText}${impactText} Every act of kindness matters. #Karuna #CommunitySupport #MakingADifference`;
   }
 
   // Web sharing implementation
@@ -60,9 +60,9 @@ export class ShareService {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Sahayata - Making a Difference',
+          title: 'Karuna - Making a Difference',
           text: text,
-          url: 'https://sahayata-app.com',
+          url: 'https://karuna-app.com',
         });
         return true;
       } catch (error) {
@@ -121,12 +121,12 @@ export class ShareService {
   }
 
   static shareOnFacebook(text: string): void {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://sahayata-app.com')}&quote=${encodeURIComponent(text)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://karuna-app.com')}&quote=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   }
 
   static shareOnLinkedIn(text: string): void {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://sahayata-app.com')}&summary=${encodeURIComponent(text)}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://karuna-app.com')}&summary=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   }
 

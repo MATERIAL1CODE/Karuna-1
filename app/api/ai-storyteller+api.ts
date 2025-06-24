@@ -56,7 +56,7 @@ Sometimes the smallest acts of awareness create the biggest ripples of change. Y
 Thank you for seeing what others might have overlooked, and for caring enough to act.
 
 With deep appreciation,
-The Sahayata Team`,
+The Karuna Team`,
     peopleHelped: peopleCount,
     blockchainTransactionLink: `https://polygonscan.com/tx/0x${Math.random().toString(16).substr(2, 64)}`,
     ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -84,10 +84,10 @@ It was a simple act for you, but for them, it provided real comfort and dignity.
 
 When our facilitator arrived with your donation, the relief and gratitude was profound.${notesText} Your contribution didn't just provide essential resources—it restored faith that there are people who care, people who understand that we are all connected in this journey of life.
 
-From all of us at Sahayata, thank you for being the light in someone's day.
+From all of us at Karuna, thank you for being the light in someone's day.
 
 With heartfelt gratitude,
-The Sahayata Team`,
+The Karuna Team`,
     peopleHelped: estimatedPeopleHelped,
     blockchainTransactionLink: `https://polygonscan.com/tx/0x${Math.random().toString(16).substr(2, 64)}`,
     ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -102,14 +102,14 @@ async function generateMissionStory(data: any) {
 
 Your successful completion of "${missionTitle}" has made a real difference in our community. Through your efforts, ${peopleHelped} people received the ${missionType.toLowerCase()} they needed.
 
-Your commitment to serving others exemplifies the spirit of Sahayata. Every mile you traveled, every moment you dedicated, and every smile you brought to someone's face contributes to building a more compassionate community.
+Your commitment to serving others exemplifies the spirit of Karuna. Every mile you traveled, every moment you dedicated, and every smile you brought to someone's face contributes to building a more compassionate community.
 
 The families you helped today will remember your kindness. You didn't just deliver resources—you delivered hope, dignity, and the message that they are not forgotten.
 
 Thank you for being the bridge between generosity and need, for being the hands and feet of compassion in action.
 
 With sincere gratitude,
-The Sahayata Team`,
+The Karuna Team`,
     peopleHelped,
     blockchainTransactionLink: `https://polygonscan.com/tx/0x${Math.random().toString(16).substr(2, 64)}`,
     ngoLogoUrl: 'https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',

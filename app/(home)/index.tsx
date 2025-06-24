@@ -38,7 +38,7 @@ export default function HomePage() {
               <Heart size={48} color={theme.colors.primary} />
             </View>
             <Text variant="displayMedium" style={styles.title}>
-              Welcome to Sahayata
+              Welcome to Karuna
             </Text>
             <Text variant="headlineSmall" style={styles.subtitle}>
               Making a Difference Together

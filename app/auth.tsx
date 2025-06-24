@@ -105,7 +105,7 @@ export default function AuthScreen() {
               <Heart size={48} color={theme.colors.primary} />
             </View>
             <Text variant="displaySmall" style={styles.title}>
-              Welcome to Sahayata
+              Welcome to Karuna
             </Text>
             <Text variant="bodyLarge" style={styles.subtitle}>
               Making a difference together
