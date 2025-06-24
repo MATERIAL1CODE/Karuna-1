@@ -14,32 +14,61 @@ const path = require('path');
 // Load environment variables
 require('dotenv').config();
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Check environment variables first
+const { checkEnvironmentVariables } = require('./check-env');
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ Missing required environment variables:');
-  console.error('   EXPO_PUBLIC_SUPABASE_URL');
-  console.error('   SUPABASE_SERVICE_ROLE_KEY');
+if (!checkEnvironmentVariables()) {
   process.exit(1);
 }
 
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function runMigration(filePath) {
-  console.log(`📄 Running migration: ${path.basename(filePath)}`);
+async function runSQL(sql, description) {
+  console.log(`📄 ${description}`);
   
   try {
-    const sql = fs.readFileSync(filePath, 'utf8');
     const { error } = await supabase.rpc('exec_sql', { sql });
     
     if (error) {
       throw error;
     }
     
-    console.log(`✅ Migration completed: ${path.basename(filePath)}`);
+    console.log(`✅ ${description} - Completed`);
   } catch (error) {
-    console.error(`❌ Migration failed: ${path.basename(filePath)}`);
+    console.error(`❌ ${description} - Failed`);
+    console.error(error.message);
+    throw error;
+  }
+}
+
+async function runMigrationFile(filePath) {
+  const fileName = path.basename(filePath);
+  console.log(`📄 Running migration: ${fileName}`);
+  
+  try {
+    const sql = fs.readFileSync(filePath, 'utf8');
+    
+    // Split SQL into individual statements and execute them
+    const statements = sql
+      .split(';')
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+    
+    for (const statement of statements) {
+      if (statement.trim()) {
+        const { error } = await supabase.rpc('exec_sql', { sql: statement + ';' });
+        if (error) {
+          throw error;
+        }
+      }
+    }
+    
+    console.log(`✅ Migration completed: ${fileName}`);
+  } catch (error) {
+    console.error(`❌ Migration failed: ${fileName}`);
     console.error(error.message);
     throw error;
   }
@@ -68,28 +97,34 @@ async function verifySetup() {
     
     console.log('✅ All required tables exist');
     
-    // Check PostGIS
-    const { data: postgisVersion, error: postgisError } = await supabase
-      .rpc('postgis_version');
-    
-    if (postgisError) {
-      console.log('⚠️  PostGIS not available - some features may not work');
-    } else {
-      console.log('✅ PostGIS is available');
+    // Check PostGIS (optional)
+    try {
+      const { error: postgisError } = await supabase.rpc('postgis_version');
+      if (postgisError) {
+        console.log('⚠️  PostGIS not available - some features may not work');
+      } else {
+        console.log('✅ PostGIS is available');
+      }
+    } catch (error) {
+      console.log('⚠️  PostGIS check failed - this may be normal');
     }
     
     // Check storage bucket
-    const { data: buckets, error: bucketsError } = await supabase
-      .storage
-      .listBuckets();
-    
-    if (bucketsError) throw bucketsError;
-    
-    const missionVideosBucket = buckets.find(b => b.id === 'mission_videos');
-    if (!missionVideosBucket) {
-      console.log('⚠️  mission_videos bucket not found - video uploads may not work');
-    } else {
-      console.log('✅ Storage bucket configured');
+    try {
+      const { data: buckets, error: bucketsError } = await supabase
+        .storage
+        .listBuckets();
+      
+      if (bucketsError) throw bucketsError;
+      
+      const missionVideosBucket = buckets.find(b => b.id === 'mission_videos');
+      if (!missionVideosBucket) {
+        console.log('⚠️  mission_videos bucket not found - video uploads may not work');
+      } else {
+        console.log('✅ Storage bucket configured');
+      }
+    } catch (error) {
+      console.log('⚠️  Storage check failed - this may be normal');
     }
     
     console.log('\n🎉 Database setup verification completed!');
@@ -106,28 +141,16 @@ async function main() {
   
   const migrationsDir = path.join(__dirname, '..', 'supabase', 'migrations');
   
-  // Migration files in order
-  const migrationFiles = [
-    '20250624060000_enable_extensions.sql',
-    '20250624060001_update_profiles_add_columns.sql', 
-    '20250624060002_create_reports_table.sql',
-    '20250624060003_create_donations_table.sql',
-    '20250624060004_create_missions_table.sql',
-    '20250624060005_create_database_functions.sql',
-    '20250624060006_create_storage_policies.sql'
-  ];
+  // Get all migration files and sort them
+  const migrationFiles = fs.readdirSync(migrationsDir)
+    .filter(file => file.endsWith('.sql'))
+    .sort();
   
   try {
     // Run migrations in order
     for (const fileName of migrationFiles) {
       const filePath = path.join(migrationsDir, fileName);
-      
-      if (!fs.existsSync(filePath)) {
-        console.log(`⚠️  Migration file not found: ${fileName}`);
-        continue;
-      }
-      
-      await runMigration(filePath);
+      await runMigrationFile(filePath);
     }
     
     // Verify setup
@@ -135,12 +158,16 @@ async function main() {
     
     console.log('\n✨ Database setup completed successfully!');
     console.log('\nNext steps:');
-    console.log('1. Deploy Edge Functions: supabase functions deploy');
-    console.log('2. Set up environment variables');
-    console.log('3. Test the application');
+    console.log('1. Deploy Edge Functions to Supabase');
+    console.log('2. Test the application');
+    console.log('3. Set up production environment variables');
     
   } catch (error) {
     console.error('\n💥 Setup failed:', error.message);
+    console.log('\n🔧 Troubleshooting:');
+    console.log('1. Check your Supabase credentials in .env');
+    console.log('2. Ensure your Supabase project is active');
+    console.log('3. Try running migrations manually in Supabase dashboard');
     process.exit(1);
   }
 }
@@ -149,4 +176,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { runMigration, verifySetup };
+module.exports = { runMigrationFile, verifySetup };
