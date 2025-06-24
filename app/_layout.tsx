@@ -68,7 +68,7 @@ function AppContent() {
       <PaperProvider theme={currentTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="(home)" />
+          <Stack.Screen name="auth" />
           <Stack.Screen name="(citizen)" />
           <Stack.Screen name="(facilitator)" />
           <Stack.Screen name="+not-found" />

@@ -1,22 +1,25 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { supabase, Profile } from '@/lib/supabase';
 import { AnalyticsService } from '@/components/AnalyticsService';
 
 interface User {
-  name: string;
+  id: string;
+  email: string;
+  full_name: string;
   role: 'citizen' | 'facilitator';
-  email?: string;
-  phone?: string;
-  id?: string;
-  joinedDate?: string;
+  created_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (role: 'citizen' | 'facilitator', userData?: Partial<User>) => Promise<void>;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
+  signUp: (email: string, password: string, fullName: string, role: 'citizen' | 'facilitator') => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Pick<User, 'full_name'>>) => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,73 +30,180 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (role: 'citizen' | 'facilitator', userData?: Partial<User>) => {
-    setIsLoading(true);
-    
-    // Simulate login process with delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const newUser: User = {
-      id: `user_${Date.now()}`,
-      name: userData?.name || (role === 'citizen' ? 'Community Member' : 'Community Volunteer'),
-      role,
-      email: userData?.email || (role === 'citizen' ? 'member@example.com' : 'volunteer@example.com'),
-      phone: userData?.phone || (role === 'citizen' ? '+91 98765 43210' : '+91 87654 32109'),
-      joinedDate: new Date().toISOString(),
-    };
-    
-    setUser(newUser);
-    setIsAuthenticated(true);
-    setIsLoading(false);
-
-    // Update analytics with user information
-    AnalyticsService.updateUserProperties({
-      userId: newUser.id,
-      userType: newUser.role,
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        loadUserProfile(session.user);
+      } else {
+        setIsLoading(false);
+      }
     });
 
-    // Track login event
-    AnalyticsService.trackUserAction('user_login', {
-      userRole: newUser.role,
-      loginMethod: 'role_selection',
-    });
-  };
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          await loadUserProfile(session.user);
+        } else {
+          setUser(null);
+          setIsLoading(false);
+        }
 
-  const logout = () => {
-    if (user) {
-      AnalyticsService.trackUserAction('user_logout', {
-        userRole: user.role,
-        sessionDuration: Date.now() - new Date(user.joinedDate || '').getTime(),
-      });
+        // Track auth events
+        if (event === 'SIGNED_IN') {
+          AnalyticsService.trackUserAction('user_signed_in');
+        } else if (event === 'SIGNED_OUT') {
+          AnalyticsService.trackUserAction('user_signed_out');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (profile) {
+        const userData: User = {
+          id: profile.id,
+          email: supabaseUser.email || '',
+          full_name: profile.full_name,
+          role: profile.role,
+          created_at: profile.created_at,
+        };
+        
+        setUser(userData);
+        
+        // Update analytics with user info
+        AnalyticsService.updateUserProperties({
+          userId: userData.id,
+          userType: userData.role,
+        });
+      }
+    } catch (error) {
+      console.error('Error in loadUserProfile:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(null);
-    setIsAuthenticated(false);
-    AnalyticsService.clearData();
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
+  const signUp = async (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: 'citizen' | 'facilitator'
+  ): Promise<{ error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          },
+        },
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      // Track successful sign up
+      AnalyticsService.trackUserAction('user_signed_up', {
+        userRole: role,
+        signUpMethod: 'email',
+      });
+
+      return {};
+    } catch (error) {
+      return { error: 'An unexpected error occurred during sign up' };
+    }
+  };
+
+  const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      return {};
+    } catch (error) {
+      return { error: 'An unexpected error occurred during sign in' };
+    }
+  };
+
+  const signOut = async (): Promise<void> => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      AnalyticsService.clearData();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<Pick<User, 'full_name'>>): Promise<{ error?: string }> => {
+    if (!user) return { error: 'No user logged in' };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      // Update local user state
+      setUser(prev => prev ? { ...prev, ...updates } : null);
       
       // Track profile update
       AnalyticsService.trackUserAction('profile_updated', {
-        updatedFields: Object.keys(userData),
+        updatedFields: Object.keys(updates),
       });
+
+      return {};
+    } catch (error) {
+      return { error: 'An unexpected error occurred while updating profile' };
     }
   };
 
   const value: AuthContextType = {
     user,
-    isAuthenticated,
+    session,
+    isAuthenticated: !!user,
     isLoading,
-    login,
-    logout,
-    updateUser,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
   };
 
   return (
