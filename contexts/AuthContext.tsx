@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { Alert } from 'react-native';
 import { supabase, Profile } from '@/lib/supabase';
 import { AnalyticsService } from '@/components/AnalyticsService';
 import { router } from 'expo-router';
@@ -182,7 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Check the user's actual role from the profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, full_name')
           .eq('id', data.user.id)
           .single();
 
@@ -197,14 +198,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (profile.role !== selectedRole) {
           // Sign out the user since role doesn't match
           await supabase.auth.signOut();
+          
           const correctRole = profile.role === 'citizen' ? 'Citizen' : 'Facilitator';
           const attemptedRole = selectedRole === 'citizen' ? 'Citizen' : 'Facilitator';
+          
+          // Show a helpful alert with detailed information
+          Alert.alert(
+            '🚫 Role Mismatch',
+            `Hi ${profile.full_name}!\n\nYour account is registered as a ${correctRole}, but you're trying to sign in as a ${attemptedRole}.\n\nPlease:\n• Select "${correctRole}" to access your account\n• Or create a new account if you want to join as a ${attemptedRole}`,
+            [
+              {
+                text: 'Got it!',
+                style: 'default',
+              }
+            ],
+            { cancelable: true }
+          );
+          
+          // Track role mismatch for analytics
+          AnalyticsService.trackUserAction('role_mismatch_attempt', {
+            actualRole: profile.role,
+            attemptedRole: selectedRole,
+            userEmail: data.user.email,
+          });
+          
           return { 
-            error: `This account is registered as a ${correctRole}. Please sign in as a ${correctRole} or create a new account for ${attemptedRole}.` 
+            error: `Account registered as ${correctRole}. Please select "${correctRole}" to sign in.` 
           };
         }
 
         console.log('Role validation successful');
+        // Track successful role validation
+        AnalyticsService.trackUserAction('role_validation_success', {
+          userRole: profile.role,
+          selectedRole: selectedRole,
+        });
+        
         // Navigation will be handled by the auth state change listener
       }
 
