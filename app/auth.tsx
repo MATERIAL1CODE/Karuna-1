@@ -61,7 +61,8 @@ export default function AuthScreen() {
           return;
         }
       } else {
-        result = await signIn(email, password);
+        // For sign-in, pass the selected role for validation
+        result = await signIn(email, password, selectedRole);
         if (!result.error) {
           // Navigation will be handled automatically by the auth state change
           return;
@@ -185,61 +186,59 @@ export default function AuthScreen() {
               />
             </View>
 
-            {/* Role Selection (Sign Up Only) */}
-            {mode === 'signup' && (
-              <View style={styles.inputContainer}>
-                <Text variant="labelLarge" style={styles.inputLabel}>
-                  I want to join as *
-                </Text>
-                <View style={styles.roleSelector}>
-                  <Pressable
-                    style={[
-                      styles.roleOption,
-                      selectedRole === 'citizen' && styles.roleOptionSelected
-                    ]}
-                    onPress={() => setSelectedRole('citizen')}
-                  >
-                    <View style={styles.roleIconContainer}>
-                      <User size={24} color={selectedRole === 'citizen' ? theme.colors.primary : theme.colors.onSurfaceVariant} />
-                    </View>
-                    <View style={styles.roleTextContainer}>
-                      <Text variant="titleMedium" style={[
-                        styles.roleTitle,
-                        selectedRole === 'citizen' && styles.roleTitleSelected
-                      ]}>
-                        Citizen
-                      </Text>
-                      <Text variant="bodySmall" style={styles.roleDescription}>
-                        Report needs and donate resources
-                      </Text>
-                    </View>
-                  </Pressable>
+            {/* Role Selection (Both Sign Up and Sign In) */}
+            <View style={styles.inputContainer}>
+              <Text variant="labelLarge" style={styles.inputLabel}>
+                {mode === 'signup' ? 'I want to join as *' : 'I am signing in as *'}
+              </Text>
+              <View style={styles.roleSelector}>
+                <Pressable
+                  style={[
+                    styles.roleOption,
+                    selectedRole === 'citizen' && styles.roleOptionSelected
+                  ]}
+                  onPress={() => setSelectedRole('citizen')}
+                >
+                  <View style={styles.roleIconContainer}>
+                    <User size={24} color={selectedRole === 'citizen' ? theme.colors.primary : theme.colors.onSurfaceVariant} />
+                  </View>
+                  <View style={styles.roleTextContainer}>
+                    <Text variant="titleMedium" style={[
+                      styles.roleTitle,
+                      selectedRole === 'citizen' && styles.roleTitleSelected
+                    ]}>
+                      Citizen
+                    </Text>
+                    <Text variant="bodySmall" style={styles.roleDescription}>
+                      Report needs and donate resources
+                    </Text>
+                  </View>
+                </Pressable>
 
-                  <Pressable
-                    style={[
-                      styles.roleOption,
-                      selectedRole === 'facilitator' && styles.roleOptionSelected
-                    ]}
-                    onPress={() => setSelectedRole('facilitator')}
-                  >
-                    <View style={styles.roleIconContainer}>
-                      <Users size={24} color={selectedRole === 'facilitator' ? theme.colors.primary : theme.colors.onSurfaceVariant} />
-                    </View>
-                    <View style={styles.roleTextContainer}>
-                      <Text variant="titleMedium" style={[
-                        styles.roleTitle,
-                        selectedRole === 'facilitator' && styles.roleTitleSelected
-                      ]}>
-                        Facilitator
-                      </Text>
-                      <Text variant="bodySmall" style={styles.roleDescription}>
-                        Accept missions and coordinate aid
-                      </Text>
-                    </View>
-                  </Pressable>
-                </View>
+                <Pressable
+                  style={[
+                    styles.roleOption,
+                    selectedRole === 'facilitator' && styles.roleOptionSelected
+                  ]}
+                  onPress={() => setSelectedRole('facilitator')}
+                >
+                  <View style={styles.roleIconContainer}>
+                    <Users size={24} color={selectedRole === 'facilitator' ? theme.colors.primary : theme.colors.onSurfaceVariant} />
+                  </View>
+                  <View style={styles.roleTextContainer}>
+                    <Text variant="titleMedium" style={[
+                      styles.roleTitle,
+                      selectedRole === 'facilitator' && styles.roleTitleSelected
+                    ]}>
+                      Facilitator
+                    </Text>
+                    <Text variant="bodySmall" style={styles.roleDescription}>
+                      Accept missions and coordinate aid
+                    </Text>
+                  </View>
+                </Pressable>
               </View>
-            )}
+            </View>
 
             {/* Submit Button */}
             <Button

@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   ScrollView,
   Switch,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -34,11 +35,14 @@ import {
   Mail,
   MapPin,
   Save,
-  Truck
+  Truck,
+  LogOut
 } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FacilitatorProfileScreen() {
   const theme = useTheme();
+  const { signOut } = useAuth();
   
   // Profile settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -53,6 +57,26 @@ export default function FacilitatorProfileScreen() {
     // Handle save logic here
     console.log('Settings saved');
     // Show success feedback or navigate back
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+          },
+        },
+      ]
+    );
   };
 
   const styles = createStyles(theme);
@@ -390,16 +414,6 @@ export default function FacilitatorProfileScreen() {
           </List.Section>
         </Card>
 
-        <Button
-          mode="outlined"
-          onPress={() => router.replace('/(citizen)')}
-          style={styles.switchRoleButton}
-          contentStyle={styles.buttonContent}
-          textColor={theme.colors.primary}
-        >
-          Switch to Citizen Mode
-        </Button>
-
         {/* Save Button */}
         <Button
           mode="contained"
@@ -408,6 +422,18 @@ export default function FacilitatorProfileScreen() {
           contentStyle={styles.saveButtonContent}
         >
           Save Changes
+        </Button>
+
+        {/* Sign Out Button */}
+        <Button
+          mode="outlined"
+          onPress={handleSignOut}
+          style={styles.signOutButton}
+          contentStyle={styles.signOutButtonContent}
+          textColor={theme.colors.error}
+          icon={() => <LogOut size={20} color={theme.colors.error} />}
+        >
+          Sign Out
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -661,20 +687,20 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Regular',
   },
-  switchRoleButton: {
-    borderColor: theme.colors.primary,
-    borderRadius: 12,
-    marginBottom: 24,
-  },
-  buttonContent: {
-    paddingVertical: 16,
-  },
   saveButton: {
     backgroundColor: theme.colors.primary,
     borderRadius: 12,
-    marginTop: 24,
+    marginBottom: 16,
   },
   saveButtonContent: {
+    paddingVertical: 16,
+  },
+  signOutButton: {
+    borderColor: theme.colors.error,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  signOutButtonContent: {
     paddingVertical: 16,
   },
 });

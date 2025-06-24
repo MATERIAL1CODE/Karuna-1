@@ -6,8 +6,9 @@ import { AnalyticsService } from '@/components/AnalyticsService';
 interface User {
   id: string;
   email: string;
-  full_name: string;
+  name: string;
   role: 'citizen' | 'facilitator';
+  phone?: string;
   created_at: string;
 }
 
@@ -17,9 +18,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string, fullName: string, role: 'citizen' | 'facilitator') => Promise<{ error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string, selectedRole: 'citizen' | 'facilitator') => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<Pick<User, 'full_name'>>) => Promise<{ error?: string }>;
+  updateUser: (updates: Partial<Pick<User, 'name' | 'email' | 'phone'>>) => void;
+  login: (role: 'citizen' | 'facilitator') => Promise<void>; // Keep for compatibility
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const userData: User = {
           id: profile.id,
           email: supabaseUser.email || '',
-          full_name: profile.full_name,
+          name: profile.full_name,
           role: profile.role,
           created_at: profile.created_at,
         };
@@ -140,7 +142,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signIn = async (email: string, password: string): Promise<{ error?: string }> => {
+  const signIn = async (
+    email: string, 
+    password: string, 
+    selectedRole: 'citizen' | 'facilitator'
+  ): Promise<{ error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -149,6 +155,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         return { error: error.message };
+      }
+
+      if (data.user) {
+        // Check the user's actual role from the profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          // Sign out the user since we can't verify their role
+          await supabase.auth.signOut();
+          return { error: 'Unable to verify account details. Please try again.' };
+        }
+
+        if (profile.role !== selectedRole) {
+          // Sign out the user since role doesn't match
+          await supabase.auth.signOut();
+          const correctRole = profile.role === 'citizen' ? 'Citizen' : 'Facilitator';
+          const attemptedRole = selectedRole === 'citizen' ? 'Citizen' : 'Facilitator';
+          return { 
+            error: `This account is registered as a ${correctRole}. Please sign in as a ${correctRole} or create a new account for ${attemptedRole}.` 
+          };
+        }
       }
 
       return {};
@@ -168,31 +199,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const updateProfile = async (updates: Partial<Pick<User, 'full_name'>>): Promise<{ error?: string }> => {
-    if (!user) return { error: 'No user logged in' };
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-
-      if (error) {
-        return { error: error.message };
-      }
-
-      // Update local user state
+  const updateUser = (updates: Partial<Pick<User, 'name' | 'email' | 'phone'>>) => {
+    if (user) {
       setUser(prev => prev ? { ...prev, ...updates } : null);
-      
-      // Track profile update
-      AnalyticsService.trackUserAction('profile_updated', {
-        updatedFields: Object.keys(updates),
-      });
-
-      return {};
-    } catch (error) {
-      return { error: 'An unexpected error occurred while updating profile' };
     }
+  };
+
+  // Keep login function for compatibility with existing code
+  const login = async (role: 'citizen' | 'facilitator'): Promise<void> => {
+    // Mock login for demo purposes - in real app this would be removed
+    const mockUser: User = {
+      id: 'mock-user-id',
+      email: 'user@example.com',
+      name: 'Demo User',
+      role: role,
+      created_at: new Date().toISOString(),
+    };
+    setUser(mockUser);
   };
 
   const value: AuthContextType = {
@@ -203,7 +226,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signIn,
     signOut,
-    updateProfile,
+    updateUser,
+    login,
   };
 
   return (
