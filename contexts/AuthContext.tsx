@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/lib/supabase';
 import { AnalyticsService } from '@/components/AnalyticsService';
+import { router } from 'expo-router';
 
 interface User {
   id: string;
@@ -57,6 +58,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           setUser(null);
           setIsLoading(false);
+          // Redirect to auth screen when signed out
+          router.replace('/auth');
         }
 
         // Track auth events
@@ -103,6 +106,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           userId: userData.id,
           userType: userData.role,
         });
+
+        // Navigate to appropriate dashboard based on role
+        console.log('Navigating to dashboard for role:', userData.role);
+        if (userData.role === 'citizen') {
+          router.replace('/(citizen)/(tabs)/home');
+        } else if (userData.role === 'facilitator') {
+          router.replace('/(facilitator)');
+        }
       }
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
@@ -194,6 +205,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         console.log('Role validation successful');
+        // Navigation will be handled by the auth state change listener
       }
 
       return {};
@@ -211,6 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(null);
       AnalyticsService.clearData();
       console.log('Sign out successful');
+      // Navigation will be handled by auth state change listener
     } catch (error) {
       console.error('Error signing out:', error);
     }
