@@ -2,13 +2,14 @@
   # Create storage policies for mission videos
 
   1. Storage Setup
-    - Create mission_videos bucket (if not exists)
-    - Set up RLS policies for secure video access
+    - Create mission_videos bucket (private)
+    - Set up RLS policies for secure access
 
-  2. Security
+  2. Policies
     - Users can upload videos for their own reports
-    - Only assigned facilitators can view videos
-    - Videos are private by default
+    - Users can view their own uploaded videos
+    - Facilitators can view videos for assigned missions
+    - Service role can manage all videos
 */
 
 -- Create storage bucket for mission videos (if it doesn't exist)
@@ -16,7 +17,7 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('mission_videos', 'mission_videos', false)
 ON CONFLICT (id) DO NOTHING;
 
--- Policy: Users can upload videos for their own reports
+-- Policy: Users can upload videos for reports
 CREATE POLICY "Users can upload videos for reports"
 ON storage.objects FOR INSERT
 TO authenticated

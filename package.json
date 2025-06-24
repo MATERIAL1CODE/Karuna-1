@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "expo start",
     "build:web": "expo export --platform web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "setup:db": "node scripts/setup-database.js",
+    "deploy:functions": "supabase functions deploy submit-report && supabase functions deploy log-donation && supabase functions deploy match-engine && supabase functions deploy facilitator-api && supabase functions deploy generate-thank-you-letter"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",
@@ -51,6 +53,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "dotenv": "^16.3.1"
   }
 }

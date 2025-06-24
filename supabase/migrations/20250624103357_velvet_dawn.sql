@@ -4,7 +4,12 @@
   1. Functions
     - calculate_distance: Calculate distance between two geography points
     - extract_coordinates: Extract lat/lng from geography point
-    - find_nearby_points: Find points within a certain distance
+    - find_nearby_points: Find points within a distance
+    - get_mission_statistics: Get mission statistics
+
+  2. Utilities
+    - Geospatial helper functions
+    - Statistics and reporting functions
 */
 
 -- Function to calculate distance between two geography points
@@ -67,6 +72,44 @@ BEGIN
     ), 0)
   ) INTO result
   FROM missions;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to get user impact statistics
+CREATE OR REPLACE FUNCTION get_user_impact_stats(user_id uuid)
+RETURNS json AS $$
+DECLARE
+  result json;
+BEGIN
+  SELECT json_build_object(
+    'total_reports', (
+      SELECT COUNT(*) FROM reports WHERE reporter_id = user_id
+    ),
+    'total_donations', (
+      SELECT COUNT(*) FROM donations WHERE donor_id = user_id
+    ),
+    'total_people_helped', (
+      SELECT COALESCE(SUM(r.people_in_need), 0)
+      FROM reports r
+      JOIN missions m ON m.report_id = r.id
+      WHERE r.reporter_id = user_id AND m.status = 'completed'
+    ) + (
+      SELECT COALESCE(SUM(r.people_in_need), 0)
+      FROM donations d
+      JOIN missions m ON m.donation_id = d.id
+      JOIN reports r ON r.id = m.report_id
+      WHERE d.donor_id = user_id AND m.status = 'completed'
+    ),
+    'completed_missions', (
+      SELECT COUNT(DISTINCT m.id)
+      FROM missions m
+      LEFT JOIN reports r ON r.id = m.report_id
+      LEFT JOIN donations d ON d.id = m.donation_id
+      WHERE (r.reporter_id = user_id OR d.donor_id = user_id) AND m.status = 'completed'
+    )
+  ) INTO result;
   
   RETURN result;
 END;

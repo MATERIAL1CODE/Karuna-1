@@ -1,17 +1,18 @@
 /*
-  # Update profiles table to add FCM token for push notifications
+  # Update profiles table with additional columns
 
-  1. Changes
-    - Add `fcm_token` column for push notifications
-    - Add `phone` column for contact information
-    - Add `location` column for facilitator location tracking
-    - Add `is_active` column for facilitator availability
+  1. New Columns
+    - `fcm_token` (text, nullable) - For push notifications
+    - `phone` (text, nullable) - Contact information
+    - `location` (geography, nullable) - For facilitator location tracking
+    - `is_active` (boolean) - For facilitator availability
 
-  2. Security
-    - Update existing policies to handle new columns
+  2. Indexes
+    - Spatial index on location
+    - Composite index on role and is_active
 */
 
--- Add new columns to profiles table
+-- Add new columns to profiles table if they don't exist
 DO $$
 BEGIN
   -- Add fcm_token column if it doesn't exist

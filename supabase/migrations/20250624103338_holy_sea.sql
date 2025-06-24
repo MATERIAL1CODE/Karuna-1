@@ -8,22 +8,23 @@
       - `resource_type` (text)
       - `quantity` (text)
       - `pickup_location` (geography(Point, 4326))
-      - `pickup_address` (text) - Human readable address
-      - `pickup_contact` (text) - Contact information
-      - `pickup_time_preference` (text) - Preferred pickup time
+      - `pickup_address` (text)
+      - `pickup_contact` (text)
+      - `pickup_time_preference` (text)
       - `status` (text) - 'available', 'assigned', 'completed', 'failed'
-      - `notes` (text, nullable) - Additional notes from donor
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
+      - `notes` (text, nullable)
+      - `created_at` (timestamptz)
+      - `updated_at` (timestamptz)
 
   2. Security
     - Enable RLS on `donations` table
-    - Add policies for users to read and edit their own donations
-    - Add policy for facilitators to read assigned donations
+    - Add policies for users to read and update their own donations
 
   3. Indexes
-    - Add spatial index on pickup_location for efficient geospatial queries
-    - Add index on status for filtering
+    - Spatial index for efficient location queries
+    - Status index for filtering
+    - Donor ID index for user queries
+    - Resource type index for matching
 */
 
 -- Create donations table
@@ -56,6 +57,9 @@ CREATE INDEX IF NOT EXISTS donations_donor_id_idx ON donations (donor_id);
 
 -- Create index on resource_type for matching
 CREATE INDEX IF NOT EXISTS donations_resource_type_idx ON donations (resource_type);
+
+-- Create index on created_at for ordering
+CREATE INDEX IF NOT EXISTS donations_created_at_idx ON donations (created_at DESC);
 
 -- Create policies
 CREATE POLICY "Users can read own donations"

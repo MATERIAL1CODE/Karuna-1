@@ -10,17 +10,17 @@
       - `people_in_need` (integer)
       - `video_url` (text, nullable) - Secure URL to the video in Storage
       - `status` (text) - 'pending_match', 'assigned', 'completed', 'failed'
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
+      - `created_at` (timestamptz)
+      - `updated_at` (timestamptz)
 
   2. Security
     - Enable RLS on `reports` table
-    - Add policies for users to read and edit their own reports
-    - Add policy for facilitators to read assigned reports
+    - Add policies for users to read and update their own reports
 
   3. Indexes
-    - Add spatial index on location for efficient geospatial queries
-    - Add index on status for filtering
+    - Spatial index for efficient location queries
+    - Status index for filtering
+    - Reporter ID index for user queries
 */
 
 -- Create reports table
@@ -47,6 +47,9 @@ CREATE INDEX IF NOT EXISTS reports_status_idx ON reports (status);
 
 -- Create index on reporter_id for user queries
 CREATE INDEX IF NOT EXISTS reports_reporter_id_idx ON reports (reporter_id);
+
+-- Create index on created_at for ordering
+CREATE INDEX IF NOT EXISTS reports_created_at_idx ON reports (created_at DESC);
 
 -- Create policies
 CREATE POLICY "Users can read own reports"

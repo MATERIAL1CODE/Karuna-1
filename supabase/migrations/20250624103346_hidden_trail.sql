@@ -9,20 +9,22 @@
       - `facilitator_id` (uuid, foreign key to profiles.id, nullable)
       - `status` (text) - Mission lifecycle states
       - `letter_of_thanks` (text, nullable) - AI-generated story
-      - `estimated_distance` (numeric) - Distance in kilometers
-      - `estimated_duration` (integer) - Duration in minutes
-      - `pickup_completed_at` (timestamp, nullable)
-      - `delivery_completed_at` (timestamp, nullable)
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
+      - `estimated_distance` (numeric)
+      - `estimated_duration` (integer)
+      - `pickup_completed_at` (timestamptz)
+      - `delivery_completed_at` (timestamptz)
+      - `created_at` (timestamptz)
+      - `updated_at` (timestamptz)
 
   2. Security
     - Enable RLS on `missions` table
-    - Add policies for facilitators to read assigned missions
-    - Add policy for citizens to read missions related to their reports/donations
+    - Add policies for facilitators and citizens
 
   3. Indexes
-    - Add indexes for efficient querying
+    - Status index for filtering
+    - Facilitator ID index
+    - Report and donation ID indexes
+    - Created at index for ordering
 */
 
 -- Create missions table
@@ -49,7 +51,7 @@ CREATE INDEX IF NOT EXISTS missions_status_idx ON missions (status);
 CREATE INDEX IF NOT EXISTS missions_facilitator_id_idx ON missions (facilitator_id);
 CREATE INDEX IF NOT EXISTS missions_report_id_idx ON missions (report_id);
 CREATE INDEX IF NOT EXISTS missions_donation_id_idx ON missions (donation_id);
-CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at);
+CREATE INDEX IF NOT EXISTS missions_created_at_idx ON missions (created_at DESC);
 
 -- Create policies
 CREATE POLICY "Facilitators can read assigned missions"
