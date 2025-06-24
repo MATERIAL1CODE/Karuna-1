@@ -11,6 +11,7 @@ import { lightTheme, createExtendedTheme } from '@/lib/themes';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DataProvider } from '@/contexts/DataContext';
+import { BackendProvider } from '@/components/BackendIntegration';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AnalyticsService } from '@/components/AnalyticsService';
 import { NotificationService } from '@/components/NotificationService';
@@ -87,7 +88,9 @@ export default function RootLayout() {
       <ThemeProvider>
         <AuthProvider>
           <DataProvider>
-            <AppContent />
+            <BackendProvider>
+              <AppContent />
+            </BackendProvider>
           </DataProvider>
         </AuthProvider>
       </ThemeProvider>
